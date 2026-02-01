@@ -18,6 +18,7 @@ joblib>=1.3.0
 # Visualization
 matplotlib>=3.7.0
 networkx>=3.1
+pyvis>=0.3.2
 
 # BigQuery (optional - for real data)
 google-cloud-bigquery>=3.11.0

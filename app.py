@@ -6,10 +6,17 @@ on the Lens Protocol network.
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from utils.predictor import SybilPredictor
 from utils.data_fetcher import bq_fetcher, mock_bq_fetcher
-from utils.visualizer import visualize_prediction_graph
+from utils.visualizer import (
+    render_static_graph,
+    render_interactive_graph,
+    create_legend_html,
+    get_debug_messages,
+    PYVIS_AVAILABLE
+)
 
 
 # Page configuration
@@ -140,6 +147,104 @@ def get_risk_class(risk_level: str) -> str:
     }.get(risk_level, "")
 
 
+def render_graph_section(
+    result: dict,
+    new_edges,
+    new_types: list,
+    new_dirs: list,
+    df_ref,
+    viz_mode: str,
+    ref_labels=None
+) -> None:
+    """
+    Render the network visualization based on selected mode.
+    
+    Args:
+        result: Prediction result dictionary
+        new_edges: Edge tensor
+        new_types: Edge type list
+        new_dirs: Edge direction list ('outgoing', 'incoming', 'undirected')
+        df_ref: Reference DataFrame
+        viz_mode: Visualization mode ("Interactive" or "Static")
+        ref_labels: Labels for reference nodes (from processed_sybil_data.y)
+    """
+    st.markdown('<p class="metric-label">Network Analysis</p>', unsafe_allow_html=True)
+    
+    if new_edges.numel() == 0:
+        st.info("No connections found in reference graph.")
+        return
+    
+    use_interactive = viz_mode == "Interactive (PyVis)"
+    fallback_used = False
+    
+    if use_interactive:
+        # Try interactive mode first
+        error_message = None
+        try:
+            html_path = render_interactive_graph(
+                result["node_info"],
+                new_edges,
+                new_types,
+                new_dirs,
+                df_ref,
+                result,
+                ref_labels=ref_labels
+            )
+            
+            if html_path is not None:
+                # Read and render the HTML
+                with open(html_path, 'r', encoding='utf-8') as f:
+                    graph_html = f.read()
+                
+                if len(graph_html) > 0:
+                    components.html(graph_html, height=570, scrolling=False)
+                    
+                    # Render legend
+                    st.markdown(create_legend_html(), unsafe_allow_html=True)
+                    return
+                else:
+                    error_message = "Generated HTML file is empty"
+                    fallback_used = True
+            else:
+                error_message = "render_interactive_graph returned None (check logs for details)"
+                fallback_used = True
+        except Exception as e:
+            error_message = str(e)
+            fallback_used = True
+        
+        if fallback_used:
+            warning_msg = "Switched to static mode due to rendering issue."
+            if error_message:
+                warning_msg += f" Error: {error_message}"
+            st.warning(warning_msg)
+            
+            # Show debug messages in expander
+            debug_msgs = get_debug_messages()
+            if debug_msgs:
+                with st.expander("Debug Information", expanded=False):
+                    for msg in debug_msgs:
+                        if "[ERROR]" in msg:
+                            st.error(msg)
+                        else:
+                            st.text(msg)
+    
+    # Static mode (or fallback)
+    fig = render_static_graph(
+        result["node_info"],
+        new_edges,
+        new_types,
+        new_dirs,
+        df_ref,
+        result,
+        ref_labels=ref_labels
+    )
+    
+    if fig is not None:
+        st.pyplot(fig, use_container_width=True)
+    else:
+        st.info("Node is isolated - no connections found in reference graph.")
+
+
 def main():
     """Main application entry point."""
     
@@ -152,6 +257,23 @@ def main():
             options=["Mock Data", "Real Data (BigQuery)"],
             index=0,
             help="Select data source for profile lookup"
+        )
+        
+        st.divider()
+        
+        # Visualization settings
+        st.markdown('<p class="sidebar-title">Visualization</p>', unsafe_allow_html=True)
+        
+        viz_options = ["Interactive (PyVis)", "Static (Matplotlib)"]
+        if not PYVIS_AVAILABLE:
+            viz_options = ["Static (Matplotlib)"]
+            st.caption("PyVis not available")
+        
+        viz_mode = st.radio(
+            "Graph Mode",
+            options=viz_options,
+            index=0,
+            help="Interactive mode allows zooming and panning"
         )
         
         st.divider()
@@ -201,7 +323,7 @@ def main():
         # Run prediction
         with st.spinner("Analyzing profile..."):
             try:
-                result, new_edges, new_types = predictor.predict(profile_id, fetcher)
+                result, new_edges, new_types, new_dirs = predictor.predict(profile_id, fetcher)
             except Exception as e:
                 st.error(f"Analysis failed: {str(e)}")
                 return
@@ -220,11 +342,11 @@ def main():
             # Left column - Verdict and metrics
             with col_metrics:
                 # Profile info
+                st.markdown('<p class="metric-label">Profile ID</p>', unsafe_allow_html=True)
+                st.markdown(f'<code class="profile-id">{result["profile_id"]}</code>', unsafe_allow_html=True)
+
                 st.markdown('<p class="metric-label">Handle</p>', unsafe_allow_html=True)
                 st.markdown(f'<p class="metric-value-secondary">@{result["handle"]}</p>', unsafe_allow_html=True)
-                
-                st.markdown('<p class="metric-label">Profile ID</p>', unsafe_allow_html=True)
-                st.markdown(f'<code class="profile-id">{result["profile_id"][:20]}...</code>', unsafe_allow_html=True)
                 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
@@ -260,33 +382,25 @@ def main():
                     unsafe_allow_html=True
                 )
                 
-                # Co-owner flag
-                if result["analysis"]["has_co_owner"]:
-                    st.markdown('<p class="metric-label">Co-owner Detected</p>', unsafe_allow_html=True)
-                    st.markdown(
-                        '<p class="metric-value-secondary risk-high">Yes</p>', 
-                        unsafe_allow_html=True
-                    )
+                # # Co-owner flag
+                # if result["analysis"]["has_co_owner"]:
+                #     st.markdown('<p class="metric-label">Co-owner Detected</p>', unsafe_allow_html=True)
+                #     st.markdown(
+                #         '<p class="metric-value-secondary risk-high">Yes</p>', 
+                #         unsafe_allow_html=True
+                #     )
             
             # Right column - Network visualization
             with col_graph:
-                st.markdown('<p class="metric-label">Network Analysis</p>', unsafe_allow_html=True)
-                
-                if new_edges.numel() > 0:
-                    fig = visualize_prediction_graph(
-                        result["node_info"],
-                        new_edges,
-                        new_types,
-                        predictor.df_ref,
-                        result
-                    )
-                    
-                    if fig is not None:
-                        st.pyplot(fig, use_container_width=True)
-                    else:
-                        st.info("Node is isolated - no connections found in reference graph.")
-                else:
-                    st.info("No connections found in reference graph.")
+                render_graph_section(
+                    result,
+                    new_edges,
+                    new_types,
+                    new_dirs,
+                    predictor.df_ref,
+                    viz_mode,
+                    ref_labels=predictor.ref_data.y
+                )
     
     elif analyze_clicked and not profile_id:
         st.warning("Please enter a Profile ID to analyze.")

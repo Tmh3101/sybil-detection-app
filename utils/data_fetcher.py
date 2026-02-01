@@ -2,7 +2,7 @@
 
 import os
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from config import DATASET_ID
 
@@ -15,12 +15,6 @@ except ImportError:
 
 
 def _get_bigquery_client() -> Optional[Any]:
-    """
-    Initialize and return a BigQuery client.
-    
-    Returns:
-        BigQuery client instance or None if credentials not available.
-    """
     if not BIGQUERY_AVAILABLE:
         return None
     
@@ -41,16 +35,6 @@ def _get_bigquery_client() -> Optional[Any]:
 
 
 def bq_fetcher(profile_id: str) -> Optional[Dict[str, Any]]:
-    """
-    Fetch real data from BigQuery for a given profile ID.
-    
-    Args:
-        profile_id: The Lens Protocol profile ID (hex format).
-        
-    Returns:
-        Dictionary containing 'info', 'stats', and 'interactions',
-        or None if profile not found or query fails.
-    """
     client = _get_bigquery_client()
     if client is None:
         raise RuntimeError(
@@ -58,7 +42,13 @@ def bq_fetcher(profile_id: str) -> Optional[Dict[str, Any]]:
             "Please ensure google-cloud-bigquery is installed and credentials are configured."
         )
     
-    # Query 1: Basic info and stats
+    job_config = bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter("profile_id", "STRING", profile_id)
+        ]
+    )
+    
+    # QUERY 1: Basic info and stats
     query_info = f"""
     SELECT
         `{DATASET_ID}.app.FORMAT_HEX`(meta.account) as profile_id,
@@ -92,53 +82,137 @@ def bq_fetcher(profile_id: str) -> Optional[Dict[str, Any]]:
     GROUP BY 1
     """
 
-    job_config = bigquery.QueryJobConfig(
-        query_parameters=[
-            bigquery.ScalarQueryParameter("profile_id", "STRING", profile_id)
-        ]
-    )
-
     df_info = client.query(query_info, job_config=job_config).to_dataframe()
 
     if df_info.empty:
         return None
 
-    # Query 2: Interactions
+    # QUERY 2: Interactions with source, target, and type
+    # Includes both OUTGOING (profile_id is source) and INCOMING (profile_id is target)
     query_interactions = f"""
-    SELECT DISTINCT target_id FROM (
-        SELECT `{DATASET_ID}.app.FORMAT_HEX`(account_following) as target_id
-        FROM `{DATASET_ID}.account.follower`
-        WHERE `{DATASET_ID}.app.FORMAT_HEX`(account_follower) = @profile_id
+    -- OUTGOING INTERACTIONS (profile_id is the source)
+    
+    -- FOLLOW: profile_id follows someone
+    SELECT 
+        @profile_id as source_id,
+        `{DATASET_ID}.app.FORMAT_HEX`(account_following) as target_id,
+        'FOLLOW' as interaction_type
+    FROM `{DATASET_ID}.account.follower`
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(account_follower) = @profile_id
 
-        UNION ALL
+    UNION ALL
 
-        SELECT `{DATASET_ID}.app.FORMAT_HEX`(parent.account) as target_id
-        FROM `{DATASET_ID}.post.record` as p
-        JOIN `{DATASET_ID}.post.record` as parent
-            ON (p.parent_post = parent.id OR p.quoted_post = parent.id)
-        WHERE `{DATASET_ID}.app.FORMAT_HEX`(p.account) = @profile_id
-          AND p.account != parent.account
+    -- COMMENT & QUOTE: profile_id comments/quotes on someone's post
+    SELECT 
+        @profile_id as source_id,
+        `{DATASET_ID}.app.FORMAT_HEX`(parent.account) as target_id,
+        CASE
+            WHEN p.parent_post IS NOT NULL THEN 'COMMENT'
+            ELSE 'QUOTE'
+        END as interaction_type
+    FROM `{DATASET_ID}.post.record` as p
+    JOIN `{DATASET_ID}.post.record` as parent
+        ON (p.parent_post = parent.id OR p.quoted_post = parent.id)
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(p.account) = @profile_id
+      AND p.account != parent.account
 
-        UNION ALL
+    UNION ALL
 
-        SELECT `{DATASET_ID}.app.FORMAT_HEX`(p.account) as target_id
-        FROM `{DATASET_ID}.post.reaction` as r
-        JOIN `{DATASET_ID}.post.record` as p ON r.post = p.id
-        WHERE `{DATASET_ID}.app.FORMAT_HEX`(r.account) = @profile_id
-          AND r.account != p.account
+    -- UPVOTE: profile_id reacts to someone's post
+    SELECT 
+        @profile_id as source_id,
+        `{DATASET_ID}.app.FORMAT_HEX`(p.account) as target_id,
+        'UPVOTE' as interaction_type
+    FROM `{DATASET_ID}.post.reaction` as r
+    JOIN `{DATASET_ID}.post.record` as p ON r.post = p.id
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(r.account) = @profile_id
+      AND r.account != p.account
 
-        UNION ALL
+    UNION ALL
 
-        SELECT `{DATASET_ID}.app.FORMAT_HEX`(p.account) as target_id
-        FROM `{DATASET_ID}.post.action_executed` as a
-        JOIN `{DATASET_ID}.post.record` as p ON a.post_id = p.id
-        WHERE `{DATASET_ID}.app.FORMAT_HEX`(a.account) = @profile_id
-          AND a.account != p.account
-    )
+    -- TIP & COLLECT: profile_id tips/collects someone's post
+    SELECT 
+        @profile_id as source_id,
+        `{DATASET_ID}.app.FORMAT_HEX`(p.account) as target_id,
+        CASE 
+            WHEN a.type = 'TippingPostAction' THEN 'TIP'
+            WHEN a.type = 'SimpleCollectAction' THEN 'COLLECT'
+            ELSE 'UNKNOWN'
+        END as interaction_type
+    FROM `{DATASET_ID}.post.action_executed` as a
+    JOIN `{DATASET_ID}.post.record` as p ON a.post_id = p.id
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(a.account) = @profile_id
+      AND a.account != p.account
+
+    UNION ALL
+
+    -- INCOMING INTERACTIONS (profile_id is the target)
+    
+    -- FOLLOW: someone follows profile_id
+    SELECT 
+        `{DATASET_ID}.app.FORMAT_HEX`(account_follower) as source_id,
+        @profile_id as target_id,
+        'FOLLOW' as interaction_type
+    FROM `{DATASET_ID}.account.follower`
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(account_following) = @profile_id
+
+    UNION ALL
+
+    -- COMMENT & QUOTE: someone comments/quotes on profile_id's post
+    SELECT 
+        `{DATASET_ID}.app.FORMAT_HEX`(p.account) as source_id,
+        @profile_id as target_id,
+        CASE
+            WHEN p.parent_post IS NOT NULL THEN 'COMMENT'
+            ELSE 'QUOTE'
+        END as interaction_type
+    FROM `{DATASET_ID}.post.record` as p
+    JOIN `{DATASET_ID}.post.record` as my_post
+        ON (p.parent_post = my_post.id OR p.quoted_post = my_post.id)
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(my_post.account) = @profile_id
+      AND p.account != my_post.account
+
+    UNION ALL
+
+    -- UPVOTE: someone reacts to profile_id's post
+    SELECT 
+        `{DATASET_ID}.app.FORMAT_HEX`(r.account) as source_id,
+        @profile_id as target_id,
+        'UPVOTE' as interaction_type
+    FROM `{DATASET_ID}.post.reaction` as r
+    JOIN `{DATASET_ID}.post.record` as p ON r.post = p.id
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(p.account) = @profile_id
+      AND r.account != p.account
+
+    UNION ALL
+
+    -- TIP & COLLECT: someone tips/collects profile_id's post
+    SELECT 
+        `{DATASET_ID}.app.FORMAT_HEX`(a.account) as source_id,
+        @profile_id as target_id,
+        CASE 
+            WHEN a.type = 'TippingPostAction' THEN 'TIP'
+            WHEN a.type = 'SimpleCollectAction' THEN 'COLLECT'
+            ELSE 'UNKNOWN'
+        END as interaction_type
+    FROM `{DATASET_ID}.post.action_executed` as a
+    JOIN `{DATASET_ID}.post.record` as p ON a.post_id = p.id
+    WHERE `{DATASET_ID}.app.FORMAT_HEX`(p.account) = @profile_id
+      AND a.account != p.account
     """
 
     df_interactions = client.query(query_interactions, job_config=job_config).to_dataframe()
-    interaction_list = df_interactions['target_id'].tolist() if not df_interactions.empty else []
+    
+    # Convert to list of dicts with source, target, and type
+    interactions: List[Dict[str, str]] = []
+    if not df_interactions.empty:
+        for _, row in df_interactions.iterrows():
+            if row['source_id'] and row['target_id'] and row['interaction_type'] != 'UNKNOWN':
+                interactions.append({
+                    'source': row['source_id'],
+                    'target': row['target_id'],
+                    'type': row['interaction_type']
+                })
 
     # Parse result
     row = df_info.iloc[0]
@@ -149,48 +223,41 @@ def bq_fetcher(profile_id: str) -> Optional[Dict[str, Any]]:
         if row['metadata_json']:
             meta_obj = json.loads(row['metadata_json'])
             lens_data = meta_obj.get('lens', {})
-            bio = lens_data.get('bio', "")
-            picture_url = lens_data.get('picture', "")
-            if isinstance(picture_url, dict):
-                picture_url = picture_url.get('url', "")
+            bio = lens_data.get('bio', "") or ""
+            picture = lens_data.get('picture', "")
+            if isinstance(picture, dict):
+                picture_url = picture.get('item', '') or picture.get('url', '')
+            else:
+                picture_url = picture or ""
     except Exception:
         pass
 
     return {
         'info': {
             'handle': row['handle'] if row['handle'] else "unknown",
-            'display_name': row['display_name'],
+            'display_name': row['display_name'] or "",
             'bio': bio,
             'picture_url': picture_url,
             'owned_by': row['owned_by'],
             'created_on': str(row['created_on'])
         },
         'stats': [
-            float(row['total_tips']),
-            float(row['total_posts']),
-            float(row['total_quotes']),
-            float(row['total_reacted']),
-            float(row['total_reactions']),
-            float(row['total_reposts']),
-            float(row['total_collects']),
-            float(row['total_comments']),
-            float(row['total_followers']),
-            float(row['total_following'])
+            float(row['total_tips'] or 0),
+            float(row['total_posts'] or 0),
+            float(row['total_quotes'] or 0),
+            float(row['total_reacted'] or 0),
+            float(row['total_reactions'] or 0),
+            float(row['total_reposts'] or 0),
+            float(row['total_collects'] or 0),
+            float(row['total_comments'] or 0),
+            float(row['total_followers'] or 0),
+            float(row['total_following'] or 0)
         ],
-        'interactions': interaction_list
+        'interactions': interactions
     }
 
 
 def mock_bq_fetcher(profile_id: str) -> Dict[str, Any]:
-    """
-    Return mock data for testing without BigQuery access.
-    
-    Args:
-        profile_id: The profile ID (used for display purposes).
-        
-    Returns:
-        Dictionary containing mock 'info', 'stats', and 'interactions'.
-    """
     return {
         'info': {
             'handle': 'orb_test_user',
@@ -201,5 +268,12 @@ def mock_bq_fetcher(profile_id: str) -> Dict[str, Any]:
             'created_on': '2025-12-08 10:00:00'
         },
         'stats': [0, 5, 0, 0, 10, 2, 0, 1, 15, 10],
-        'interactions': ['0x9259f5b38699acdc3f94714e683f38a511450904']
+        'interactions': [
+            {'source': profile_id, 'target': '0x9259f5b38699acdc3f94714e683f38a511450904', 'type': 'FOLLOW'},
+            {'source': profile_id, 'target': '0x1234567890abcdef1234567890abcdef12345678', 'type': 'COMMENT'},
+            {'source': profile_id, 'target': '0xabcdef1234567890abcdef1234567890abcdef12', 'type': 'UPVOTE'},
+            {'source': '0x9259f5b38699acdc3f94714e683f38a511450904', 'target': profile_id, 'type': 'FOLLOW'},
+            {'source': '0xfedcba0987654321fedcba0987654321fedcba09', 'target': profile_id, 'type': 'COMMENT'},
+            {'source': '0x1111222233334444555566667777888899990000', 'target': profile_id, 'type': 'TIP'},
+        ]
     }
