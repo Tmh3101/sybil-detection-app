@@ -1,0 +1,24 @@
+# Core framework
+streamlit>=1.32.0
+
+# Deep learning
+torch>=2.0.0
+torch-geometric>=2.4.0
+
+# NLP
+sentence-transformers>=2.2.0
+rapidfuzz>=3.0.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+
+# Visualization
+matplotlib>=3.7.0
+networkx>=3.1
+
+# BigQuery (optional - for real data)
+google-cloud-bigquery>=3.11.0
+db-dtypes>=1.1.0
