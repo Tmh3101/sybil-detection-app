@@ -1,409 +1,224 @@
 """
-Lens Protocol Sybil Detector
+Lens Protocol Sybil Detection App
 
-A GNN-based identity verification system for detecting Sybil accounts 
-on the Lens Protocol network.
+Home page with navigation cards to different modules.
 """
 
 import streamlit as st
-import streamlit.components.v1 as components
-
-from utils.predictor import SybilPredictor
-from utils.data_fetcher import bq_fetcher, mock_bq_fetcher
-from utils.visualizer import (
-    render_static_graph,
-    render_interactive_graph,
-    create_legend_html,
-    get_debug_messages,
-    PYVIS_AVAILABLE
-)
-
 
 # Page configuration
 st.set_page_config(
-    page_title="Lens Protocol Sybil Detector",
+    page_title="Lens Sybil Detection App",
     page_icon=None,
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
-# Custom CSS for minimal, professional styling
+# Custom CSS
 st.markdown("""
 <style>
     /* Typography */
-    .main-title {
+    .app-title {
+        font-size: 2.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .app-subtitle {
+        font-size: 1.125rem;
+        color: #9ca3af;
+        margin-bottom: 3rem;
+        max-width: 600px;
+    }
+    
+    /* Card styling */
+    .nav-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        min-height: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+    .nav-card:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    .card-icon {
         font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+    .card-title {
+        font-size: 1.5rem;
         font-weight: 700;
-        margin-bottom: 0.25rem;
-        letter-spacing: -0.025em;
+        color: #f1f5f9;
+        margin-bottom: 0.75rem;
     }
-    .subtitle {
-        font-size: 1rem;
-        color: #9ca3af;
-        margin-bottom: 2rem;
+    .card-description {
+        font-size: 0.95rem;
+        color: #94a3b8;
+        line-height: 1.6;
+        flex-grow: 1;
     }
-    
-    /* Verdict styling */
-    .verdict-sybil {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #dc2626 !important;
-        margin: 0;
-    }
-    .verdict-nonsybil {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #16a34a !important;
-        margin: 0;
-    }
-    .verdict-label {
+    .card-tag {
+        display: inline-block;
         font-size: 0.75rem;
-        font-weight: 500;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-    
-    /* Metric styling */
-    .metric-container {
-        margin-bottom: 1.5rem;
-    }
-    .metric-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-    .metric-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .metric-value-secondary {
-        font-size: 1.25rem;
         font-weight: 600;
-        line-height: 1.3;
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.15);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        margin-top: 1rem;
+    }
+    .card-tag-purple {
+        color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.15);
     }
     
-    /* Code/monospace for IDs */
-    .profile-id {
-        font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    /* Feature list */
+    .feature-list {
+        margin-top: 0.75rem;
+        padding-left: 0;
+    }
+    .feature-item {
         font-size: 0.875rem;
-        background-color: rgba(156, 163, 175, 0.2);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
+        color: #64748b;
+        margin-bottom: 0.375rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .feature-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #3b82f6;
+        flex-shrink: 0;
+    }
+    .feature-dot-purple {
+        background: #8b5cf6;
     }
     
-    /* Risk level colors */
-    .risk-high {
-        color: #dc2626 !important;
-        font-weight: 600;
-    }
-    .risk-medium {
-        color: #d97706 !important;
-        font-weight: 600;
-    }
-    .risk-low {
-        color: #16a34a !important;
-        font-weight: 600;
+    /* Footer */
+    .app-footer {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        text-align: center;
+        color: #64748b;
+        font-size: 0.875rem;
     }
     
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* Sidebar styling */
-    .sidebar-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(156, 163, 175, 0.3);
-    }
-    
-    /* Container adjustments */
-    .stContainer {
-        padding: 1rem;
+    /* Button override */
+    .stButton > button {
+        width: 100%;
+        margin-top: 1rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
 
-@st.cache_resource(show_spinner=False)
-def load_predictor():
-    """Load and cache the SybilPredictor instance."""
-    return SybilPredictor()
-
-
-def get_risk_class(risk_level: str) -> str:
-    """Return CSS class for risk level."""
-    return {
-        "High": "risk-high",
-        "Medium": "risk-medium",
-        "Low": "risk-low"
-    }.get(risk_level, "")
-
-
-def render_graph_section(
-    result: dict,
-    new_edges,
-    new_types: list,
-    new_dirs: list,
-    df_ref,
-    viz_mode: str,
-    ref_labels=None
+def render_card(
+    title: str,
+    description: str,
+    features: list,
+    tag: str,
+    tag_color: str = "blue",
+    icon: str = ""
 ) -> None:
-    """
-    Render the network visualization based on selected mode.
+    """Render a navigation card."""
+    tag_class = "card-tag-purple" if tag_color == "purple" else ""
+    dot_class = "feature-dot-purple" if tag_color == "purple" else ""
     
-    Args:
-        result: Prediction result dictionary
-        new_edges: Edge tensor
-        new_types: Edge type list
-        new_dirs: Edge direction list ('outgoing', 'incoming', 'undirected')
-        df_ref: Reference DataFrame
-        viz_mode: Visualization mode ("Interactive" or "Static")
-        ref_labels: Labels for reference nodes (from processed_sybil_data.y)
-    """
-    st.markdown('<p class="metric-label">Network Analysis</p>', unsafe_allow_html=True)
+    features_html = "".join([
+        f'<div class="feature-item"><div class="feature-dot {dot_class}"></div>{f}</div>'
+        for f in features
+    ])
     
-    if new_edges.numel() == 0:
-        st.info("No connections found in reference graph.")
-        return
-    
-    use_interactive = viz_mode == "Interactive (PyVis)"
-    fallback_used = False
-    
-    if use_interactive:
-        # Try interactive mode first
-        error_message = None
-        try:
-            html_path = render_interactive_graph(
-                result["node_info"],
-                new_edges,
-                new_types,
-                new_dirs,
-                df_ref,
-                result,
-                ref_labels=ref_labels
-            )
-            
-            if html_path is not None:
-                # Read and render the HTML
-                with open(html_path, 'r', encoding='utf-8') as f:
-                    graph_html = f.read()
-                
-                if len(graph_html) > 0:
-                    components.html(graph_html, height=570, scrolling=False)
-                    
-                    # Render legend
-                    st.markdown(create_legend_html(), unsafe_allow_html=True)
-                    return
-                else:
-                    error_message = "Generated HTML file is empty"
-                    fallback_used = True
-            else:
-                error_message = "render_interactive_graph returned None (check logs for details)"
-                fallback_used = True
-        except Exception as e:
-            error_message = str(e)
-            fallback_used = True
-        
-        if fallback_used:
-            warning_msg = "Switched to static mode due to rendering issue."
-            if error_message:
-                warning_msg += f" Error: {error_message}"
-            st.warning(warning_msg)
-            
-            # Show debug messages in expander
-            debug_msgs = get_debug_messages()
-            if debug_msgs:
-                with st.expander("Debug Information", expanded=False):
-                    for msg in debug_msgs:
-                        if "[ERROR]" in msg:
-                            st.error(msg)
-                        else:
-                            st.text(msg)
-    
-    # Static mode (or fallback)
-    fig = render_static_graph(
-        result["node_info"],
-        new_edges,
-        new_types,
-        new_dirs,
-        df_ref,
-        result,
-        ref_labels=ref_labels
-    )
-    
-    if fig is not None:
-        st.pyplot(fig, use_container_width=True)
-    else:
-        st.info("Node is isolated - no connections found in reference graph.")
+    st.markdown(f'''
+    <div class="nav-card">
+        <div class="card-icon">{icon}</div>
+        <div class="card-title">{title}</div>
+        <div class="card-description">{description}</div>
+        <div class="feature-list">{features_html}</div>
+        <span class="card-tag {tag_class}">{tag}</span>
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 def main():
     """Main application entry point."""
     
-    # Sidebar - Configuration
-    with st.sidebar:
-        st.markdown('<p class="sidebar-title">Configuration</p>', unsafe_allow_html=True)
-        
-        data_source = st.radio(
-            "Data Source",
-            options=["Mock Data", "Real Data (BigQuery)"],
-            index=0,
-            help="Select data source for profile lookup"
+    # Header
+    st.markdown('<h1 class="app-title">Lens Sybil Detection</h1>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="app-subtitle">'
+        'A comprehensive toolkit for detecting Sybil accounts on Lens Protocol '
+        'using Graph Neural Networks and multi-layer relationship analysis.'
+        '</p>',
+        unsafe_allow_html=True
+    )
+    
+    # Navigation cards
+    col1, col2 = st.columns(2, gap="large")
+    
+    with col1:
+        render_card(
+            title="Data Exploration",
+            description="Query raw data from BigQuery, construct the 4-layer graph on-the-fly, and visualize statistical insights.",
+            features=[
+                "Date range selection",
+                "4-layer graph construction",
+                "Interactive visualization",
+                "CSV data export"
+            ],
+            tag="ETL & Analytics",
+            tag_color="blue",
+            icon="📊"
         )
         
-        st.divider()
-        
-        # Visualization settings
-        st.markdown('<p class="sidebar-title">Visualization</p>', unsafe_allow_html=True)
-        
-        viz_options = ["Interactive (PyVis)", "Static (Matplotlib)"]
-        if not PYVIS_AVAILABLE:
-            viz_options = ["Static (Matplotlib)"]
-            st.caption("PyVis not available")
-        
-        viz_mode = st.radio(
-            "Graph Mode",
-            options=viz_options,
-            index=0,
-            help="Interactive mode allows zooming and panning"
+        if st.button("Open Data Exploration", key="btn_exploration", use_container_width=True):
+            st.switch_page("pages/1_Data_Exploration.py")
+    
+    with col2:
+        render_card(
+            title="Sybil Detector",
+            description="Analyze individual profiles using a trained GAT model to detect potential Sybil accounts in real-time.",
+            features=[
+                "Profile ID lookup",
+                "GNN-based prediction",
+                "Confidence scoring",
+                "Network visualization"
+            ],
+            tag="Model Inference",
+            tag_color="purple",
+            icon="🔍"
         )
         
-        st.divider()
-        
-        # System status
-        st.caption("System Status")
-        
-        # Load predictor
-        try:
-            with st.spinner("Loading model..."):
-                predictor = load_predictor()
-            st.caption("Model: Loaded")
-            st.caption("Scaler: Loaded")
-            st.caption(f"Reference nodes: {predictor.num_ref_nodes}")
-            model_loaded = True
-        except Exception as e:
-            st.caption("Model: Not loaded")
-            st.caption(f"Error: {str(e)[:50]}...")
-            model_loaded = False
+        if st.button("Open Sybil Detector", key="btn_detector", use_container_width=True):
+            st.switch_page("pages/2_Sybil_Detector.py")
     
-    # Main content area
-    st.markdown('<h1 class="main-title">Lens Sybil Detector</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">GNN-based identity verification system</p>', unsafe_allow_html=True)
-    
-    # Input section
-    col_input, col_button = st.columns([4, 1])
-    
-    with col_input:
-        profile_id = st.text_input(
-            "Target Profile ID",
-            placeholder="0x...",
-            label_visibility="collapsed"
-        )
-    
-    with col_button:
-        analyze_clicked = st.button("Analyze", type="primary", use_container_width=True)
-    
-    # Analysis section
-    if analyze_clicked and profile_id:
-        if not model_loaded:
-            st.error("Model not loaded. Please check the system status in the sidebar.")
-            return
-        
-        # Select data fetcher
-        fetcher = mock_bq_fetcher if data_source == "Mock Data" else bq_fetcher
-        
-        # Run prediction
-        with st.spinner("Analyzing profile..."):
-            try:
-                result, new_edges, new_types, new_dirs = predictor.predict(profile_id, fetcher)
-            except Exception as e:
-                st.error(f"Analysis failed: {str(e)}")
-                return
-        
-        # Check for errors
-        if "error" in result:
-            st.error(f"Profile not found: {profile_id}")
-            return
-        
-        st.divider()
-        
-        # Results container
-        with st.container(border=True):
-            col_metrics, col_graph = st.columns([1, 2])
-            
-            # Left column - Verdict and metrics
-            with col_metrics:
-                # Profile info
-                st.markdown('<p class="metric-label">Profile ID</p>', unsafe_allow_html=True)
-                st.markdown(f'<code class="profile-id">{result["profile_id"]}</code>', unsafe_allow_html=True)
-
-                st.markdown('<p class="metric-label">Handle</p>', unsafe_allow_html=True)
-                st.markdown(f'<p class="metric-value-secondary">@{result["handle"]}</p>', unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # Prediction verdict
-                st.markdown('<p class="verdict-label">Prediction</p>', unsafe_allow_html=True)
-                if result["prediction"] == "SYBIL":
-                    st.markdown('<p class="verdict-sybil">SYBIL</p>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<p class="verdict-nonsybil">NON-SYBIL</p>', unsafe_allow_html=True)
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # Confidence score
-                st.markdown('<p class="metric-label">Confidence Score</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value">{result["sybil_probability_formatted"]}</p>', 
-                    unsafe_allow_html=True
-                )
-                
-                # Risk level
-                risk_level = result["analysis"]["risk_level"]
-                risk_class = get_risk_class(risk_level)
-                st.markdown('<p class="metric-label">Risk Level</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value-secondary {risk_class}">{risk_level}</p>', 
-                    unsafe_allow_html=True
-                )
-                
-                # Edge analysis
-                st.markdown('<p class="metric-label">Edges Found</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value-secondary">{result["analysis"]["edges_found"]}</p>', 
-                    unsafe_allow_html=True
-                )
-                
-                # # Co-owner flag
-                # if result["analysis"]["has_co_owner"]:
-                #     st.markdown('<p class="metric-label">Co-owner Detected</p>', unsafe_allow_html=True)
-                #     st.markdown(
-                #         '<p class="metric-value-secondary risk-high">Yes</p>', 
-                #         unsafe_allow_html=True
-                #     )
-            
-            # Right column - Network visualization
-            with col_graph:
-                render_graph_section(
-                    result,
-                    new_edges,
-                    new_types,
-                    new_dirs,
-                    predictor.df_ref,
-                    viz_mode,
-                    ref_labels=predictor.ref_data.y
-                )
-    
-    elif analyze_clicked and not profile_id:
-        st.warning("Please enter a Profile ID to analyze.")
+    # Footer
+    st.markdown('''
+    <div class="app-footer">
+        <p>Built with Streamlit, PyTorch Geometric, and NetworkX</p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #475569;">
+            Lens Protocol Sybil Detection App v1.0
+        </p>
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
