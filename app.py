@@ -172,7 +172,7 @@ def main():
     )
     
     # Navigation cards
-    col1, col2 = st.columns(2, gap="large")
+    col1, col2, col3 = st.columns(3, gap="large")
     
     with col1:
         render_card(
@@ -194,6 +194,24 @@ def main():
     
     with col2:
         render_card(
+            title="Model Laboratory",
+            description="Scientific workbench for clustering, semi-supervised labeling, and GAT model training on custom data.",
+            features=[
+                "K-Means clustering",
+                "Rule-based labeling",
+                "GAT hyperparameter tuning",
+                "Live training metrics"
+            ],
+            tag="ML Training",
+            tag_color="blue",
+            icon="🧪"
+        )
+        
+        if st.button("Open Model Laboratory", key="btn_laboratory", use_container_width=True):
+            st.switch_page("pages/2_Model_Laboratory.py")
+    
+    with col3:
+        render_card(
             title="Sybil Detector",
             description="Analyze individual profiles using a trained GAT model to detect potential Sybil accounts in real-time.",
             features=[
@@ -208,7 +226,7 @@ def main():
         )
         
         if st.button("Open Sybil Detector", key="btn_detector", use_container_width=True):
-            st.switch_page("pages/2_Sybil_Detector.py")
+            st.switch_page("pages/3_Sybil_Detector.py")
     
     # Footer
     st.markdown('''

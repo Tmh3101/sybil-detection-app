@@ -302,10 +302,14 @@ def main():
         return
     
     data = st.session_state['exploration_data']
-    nodes_df = data['nodes_df']
+    nodes_df = data['nodes_df'].copy()
     features_df = data['features_df']
     edges_df = data['edges_df']
     warnings = data.get('warnings', [])
+    
+    # Merge nodes and features into a single dataframe
+    if not features_df.empty and 'profile_id' in features_df.columns:
+        nodes_df = nodes_df.merge(features_df, on='profile_id', how='left')
     
     # Show warnings
     for warning in warnings:
@@ -488,17 +492,12 @@ def main():
     # Section 3: Data Tables (Tabs)
     st.markdown('<p class="section-header">Data Tables</p>', unsafe_allow_html=True)
     
-    tab1, tab2, tab3 = st.tabs(["Nodes Metadata", "Node Features", "Edges List"])
+    tab1, tab2 = st.tabs(["Nodes", "Edges"])
     
     with tab1:
-        metadata_cols = ['profile_id', 'handle', 'display_name', 'bio', 'picture_url', 'owned_by', 'trust_score', 'created_on']
-        display_cols = [c for c in metadata_cols if c in nodes_df.columns]
-        st.dataframe(nodes_df[display_cols], use_container_width=True, height=400)
+        st.dataframe(nodes_df, use_container_width=True, height=400)
     
     with tab2:
-        st.dataframe(features_df, use_container_width=True, height=400)
-    
-    with tab3:
         st.dataframe(edges_df, use_container_width=True, height=400)
     
     st.divider()
@@ -521,37 +520,41 @@ def main():
     # Section 5: Download Data
     st.markdown('<p class="section-header">Download Data</p>', unsafe_allow_html=True)
     
-    col_dl1, col_dl2, col_dl3 = st.columns(3)
+    col_dl1, col_dl2 = st.columns(2)
     
     with col_dl1:
         nodes_csv = convert_df_to_csv(nodes_df)
         st.download_button(
             label="Download Nodes (CSV)",
             data=nodes_csv,
-            file_name="nodes_metadata.csv",
+            file_name="nodes.csv",
             mime="text/csv",
             use_container_width=True
         )
     
     with col_dl2:
-        features_csv = convert_df_to_csv(features_df)
-        st.download_button(
-            label="Download Features (CSV)",
-            data=features_csv,
-            file_name="node_features.csv",
-            mime="text/csv",
-            use_container_width=True
-        )
-    
-    with col_dl3:
         edges_csv = convert_df_to_csv(edges_df)
         st.download_button(
             label="Download Edges (CSV)",
             data=edges_csv,
-            file_name="edges_list.csv",
+            file_name="edges.csv",
             mime="text/csv",
             use_container_width=True
         )
+    
+    st.divider()
+    
+    # Section 6: Continue to Model Laboratory
+    st.markdown('<p class="section-header">Continue to Model Laboratory</p>', unsafe_allow_html=True)
+    
+    if st.button(
+        "Continue to Model Laboratory",
+        type="primary",
+        use_container_width=True
+    ):
+        st.switch_page("pages/2_Model_Laboratory.py")
+    
+    st.caption("Use this dataset to train the model")
 
 
 if __name__ == "__main__":
