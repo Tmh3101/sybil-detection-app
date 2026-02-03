@@ -29,10 +29,10 @@ def _parse_metadata(meta_str: str) -> Tuple[str, str]:
         return '', ''
 
 EDGE_WEIGHTS = {
-    # Layer 1: Follow
+    # Layer 1: Follow - có hướng
     'FOLLOW': 2,
 
-    # Layer 2: Interact
+    # Layer 2: Interact - có hướng
     'UPVOTE': 1,
     'REACTION': 1,
     'COMMENT': 2,
@@ -42,10 +42,10 @@ EDGE_WEIGHTS = {
     'TIP': 5,    # High value action
     'DEFAULT_INTERACT': 1, # Dự phòng nếu không rõ loại
 
-    # Layer 3: Co-owner
+    # Layer 3: Co-owner - vô hướng
     'CO-OWNER': 5,
 
-    # Layer 4: Similarity
+    # Layer 4: Similarity - vô hướng
     'SAME_AVATAR': 3,
     'FUZZY_HANDLE': 2,
     'SIM_BIO': 3,

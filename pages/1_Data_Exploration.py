@@ -491,7 +491,7 @@ def main():
     tab1, tab2, tab3 = st.tabs(["Nodes Metadata", "Node Features", "Edges List"])
     
     with tab1:
-        metadata_cols = ['profile_id', 'handle', 'display_name', 'bio', 'owned_by', 'trust_score', 'created_on']
+        metadata_cols = ['profile_id', 'handle', 'display_name', 'bio', 'picture_url', 'owned_by', 'trust_score', 'created_on']
         display_cols = [c for c in metadata_cols if c in nodes_df.columns]
         st.dataframe(nodes_df[display_cols], use_container_width=True, height=400)
     
