@@ -9,86 +9,25 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import networkx as nx
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
-from io import BytesIO
 
 from config import MAX_DAYS_RANGE, DATASET_ID
+from utils.ui import (
+    setup_page,
+    page_header,
+    section_header,
+    sidebar_header,
+    metric_card,
+    apply_plotly_theme,
+    Colors
+)
 from utils.visualizer import create_legend_html
 
-# Page configuration
-st.set_page_config(
-    page_title="Data Exploration - Lens Sybil Detector",
-    page_icon=None,
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
 
-# Custom CSS
-st.markdown("""
-<style>
-    /* Typography */
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-    }
-    .page-subtitle {
-        font-size: 1rem;
-        color: #9ca3af;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* Scorecard styling */
-    .scorecard {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border-radius: 12px;
-        padding: 1.25rem;
-        border: 1px solid rgba(148, 163, 184, 0.1);
-    }
-    .scorecard-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-    .scorecard-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #f1f5f9;
-        line-height: 1.2;
-    }
-    .scorecard-delta {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin-top: 0.25rem;
-    }
-    
-    /* Section headers */
-    .section-header {
-        font-size: 1.125rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-    }
-    
-    /* Sidebar */
-    .sidebar-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(156, 163, 175, 0.3);
-    }
-    
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-</style>
-""", unsafe_allow_html=True)
+# Page setup
+setup_page("Data Exploration")
 
 
 @st.cache_resource
@@ -96,18 +35,6 @@ def get_data_loader():
     """Cache the DataLoader instance."""
     from utils.data_loader import DataLoader
     return DataLoader()
-
-
-def render_scorecard(label: str, value: str, delta: str = "") -> None:
-    """Render a styled scorecard."""
-    delta_html = f'<p class="scorecard-delta">{delta}</p>' if delta else ''
-    st.markdown(f'''
-    <div class="scorecard">
-        <p class="scorecard-label">{label}</p>
-        <p class="scorecard-value">{value}</p>
-        {delta_html}
-    </div>
-    ''', unsafe_allow_html=True)
 
 
 def compute_graph_stats(nodes_df: pd.DataFrame, edges_df: pd.DataFrame) -> dict:
@@ -119,7 +46,6 @@ def compute_graph_stats(nodes_df: pd.DataFrame, edges_df: pd.DataFrame) -> dict:
             'avg_degree': 0
         }
     
-    # Create directed graph
     G = nx.DiGraph()
     G.add_nodes_from(nodes_df['profile_id'].tolist())
     
@@ -131,7 +57,6 @@ def compute_graph_stats(nodes_df: pd.DataFrame, edges_df: pd.DataFrame) -> dict:
     n_nodes = G.number_of_nodes()
     n_edges = G.number_of_edges()
     
-    # Combined average degree (in + out) / 2
     avg_in = sum(dict(G.in_degree()).values()) / n_nodes if n_nodes > 0 else 0
     avg_out = sum(dict(G.out_degree()).values()) / n_nodes if n_nodes > 0 else 0
     avg_degree = (avg_in + avg_out) / 2
@@ -144,47 +69,84 @@ def compute_graph_stats(nodes_df: pd.DataFrame, edges_df: pd.DataFrame) -> dict:
 
 
 def render_edge_distribution_chart(edges_df: pd.DataFrame) -> None:
-    """Render edge distribution bar chart."""
+    """Render edge distribution bar chart using Plotly."""
     if edges_df.empty:
         st.info("No edges to display.")
         return
     
-    # Count by layer
-    layer_counts = edges_df['layer'].value_counts().reset_index()
-    layer_counts.columns = ['Layer', 'Count']
-    
-    # Count by type
-    type_counts = edges_df['type'].value_counts().reset_index()
-    type_counts.columns = ['Type', 'Count']
-    
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("**By Layer**")
-        st.bar_chart(layer_counts.set_index('Layer'))
+        layer_counts = edges_df['layer'].value_counts().reset_index()
+        layer_counts.columns = ['Layer', 'Count']
+        
+        fig = px.bar(
+            layer_counts, 
+            x='Layer', 
+            y='Count',
+            color='Layer',
+            color_discrete_sequence=[Colors.BLUE, Colors.CYAN, Colors.RED, Colors.PURPLE]
+        )
+        apply_plotly_theme(fig)
+        fig.update_layout(
+            title="Edges by Layer",
+            showlegend=False,
+            height=300
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("**By Type**")
-        st.bar_chart(type_counts.set_index('Type'))
+        type_counts = edges_df['type'].value_counts().reset_index()
+        type_counts.columns = ['Type', 'Count']
+        
+        fig = px.bar(
+            type_counts.head(10),
+            x='Type',
+            y='Count',
+            color_discrete_sequence=[Colors.PRIMARY]
+        )
+        apply_plotly_theme(fig)
+        fig.update_layout(
+            title="Edges by Type (Top 10)",
+            showlegend=False,
+            height=300
+        )
+        fig.update_xaxes(tickangle=45)
+        st.plotly_chart(fig, use_container_width=True)
 
 
-def render_creation_heatmap(nodes_df: pd.DataFrame) -> None:
-    """Render account creation frequency chart."""
+def render_creation_chart(nodes_df: pd.DataFrame) -> None:
+    """Render account creation frequency chart using Plotly."""
     if nodes_df.empty or 'created_on' not in nodes_df.columns:
         st.info("No creation time data available.")
         return
     
-    # Extract hour from created_on
-    nodes_df = nodes_df.copy()
-    nodes_df['hour'] = pd.to_datetime(nodes_df['created_on']).dt.hour
+    df = nodes_df.copy()
+    df['hour'] = pd.to_datetime(df['created_on']).dt.hour
     
-    hourly_counts = nodes_df['hour'].value_counts().sort_index()
-    
-    # Fill missing hours with 0
+    hourly_counts = df['hour'].value_counts().sort_index()
     all_hours = pd.Series(0, index=range(24))
     hourly_counts = all_hours.add(hourly_counts, fill_value=0).astype(int)
     
-    st.area_chart(hourly_counts)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=hourly_counts.index,
+        y=hourly_counts.values,
+        fill='tozeroy',
+        line=dict(color=Colors.PRIMARY, width=2),
+        fillcolor='rgba(37, 99, 235, 0.1)'
+    ))
+    
+    apply_plotly_theme(fig)
+    fig.update_layout(
+        title="Account Creation by Hour (UTC)",
+        xaxis_title="Hour",
+        yaxis_title="Count",
+        height=300
+    )
+    fig.update_xaxes(dtick=2)
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 
 def convert_df_to_csv(df: pd.DataFrame) -> bytes:
@@ -195,24 +157,22 @@ def convert_df_to_csv(df: pd.DataFrame) -> bytes:
 def main():
     """Main application entry point."""
     
-    # Title
-    st.markdown('<h1 class="page-title">Data Exploration</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="page-subtitle">Query raw data from BigQuery and explore the 4-layer graph structure</p>',
-        unsafe_allow_html=True
+    # Header
+    page_header(
+        "Data Exploration",
+        "Query raw data from BigQuery and explore the 4-layer graph structure"
     )
     
-    # Sidebar - Configuration
+    # Sidebar
     with st.sidebar:
-        st.markdown('<p class="sidebar-title">Configuration</p>', unsafe_allow_html=True)
+        sidebar_header("Configuration")
         
         st.caption(f"Dataset: `{DATASET_ID}`")
-        st.caption(f"Max date range: {MAX_DAYS_RANGE} days")
+        st.caption(f"Max range: {MAX_DAYS_RANGE} days")
         
         st.divider()
         
-        # Date selection
-        st.markdown('<p class="sidebar-title">Date Range</p>', unsafe_allow_html=True)
+        sidebar_header("Date Range")
         
         today = datetime.now().date()
         default_end = today
@@ -232,19 +192,17 @@ def main():
             help="Select the end date for data query"
         )
         
-        # Validate date range
         date_valid = True
         if end_date < start_date:
-            st.error("End Date must be >= Start Date")
+            st.error("End date must be after start date")
             date_valid = False
         elif (end_date - start_date).days > MAX_DAYS_RANGE:
-            st.error(f"Date range exceeds {MAX_DAYS_RANGE} days limit")
+            st.error(f"Range exceeds {MAX_DAYS_RANGE} days limit")
             date_valid = False
         
         st.divider()
         
-        # Visualization mode
-        st.markdown('<p class="sidebar-title">Visualization</p>', unsafe_allow_html=True)
+        sidebar_header("Visualization")
         
         viz_mode = st.radio(
             "Graph Mode",
@@ -255,7 +213,6 @@ def main():
         
         st.divider()
         
-        # Load button (moved below Visualization)
         load_clicked = st.button(
             "Load Data",
             type="primary",
@@ -265,7 +222,6 @@ def main():
         
         st.divider()
         
-        # System info
         st.caption("System Status")
         try:
             loader = get_data_loader()
@@ -282,13 +238,11 @@ def main():
             loader = get_data_loader()
             
             with st.spinner("Fetching from BigQuery & Constructing Graph..."):
-                # Convert dates to datetime
                 start_dt = datetime.combine(start_date, datetime.min.time())
                 end_dt = datetime.combine(end_date, datetime.max.time())
                 
                 result = loader.fetch_and_process_data(start_dt, end_dt)
                 
-                # Store in session state
                 st.session_state['exploration_data'] = result
                 st.session_state['exploration_date_range'] = (start_date, end_date)
                 
@@ -296,7 +250,7 @@ def main():
             st.error(f"Failed to load data: {str(e)}")
             return
     
-    # Check if we have data to display
+    # Check for data
     if 'exploration_data' not in st.session_state:
         st.info("Select a date range and click 'Load Data' to begin exploration.")
         return
@@ -307,11 +261,9 @@ def main():
     edges_df = data['edges_df']
     warnings = data.get('warnings', [])
     
-    # Merge nodes and features into a single dataframe
     if not features_df.empty and 'profile_id' in features_df.columns:
         nodes_df = nodes_df.merge(features_df, on='profile_id', how='left')
     
-    # Show warnings
     for warning in warnings:
         st.warning(warning)
     
@@ -319,40 +271,36 @@ def main():
         st.info("No data found for the selected date range.")
         return
     
-    # Show date range
     if 'exploration_date_range' in st.session_state:
         s, e = st.session_state['exploration_date_range']
         st.caption(f"Data loaded: {s} to {e}")
     
     st.divider()
     
-    # Section 1: Global Stats (Scorecards)
-    st.markdown('<p class="section-header">Global Statistics</p>', unsafe_allow_html=True)
+    # Section 1: Global Stats
+    section_header("Global Statistics")
     
     stats = compute_graph_stats(nodes_df, edges_df)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        render_scorecard("Total Nodes", f"{stats['total_nodes']:,}")
+        metric_card("Total Nodes", f"{stats['total_nodes']:,}", compact=True)
     
     with col2:
-        render_scorecard("Total Edges", f"{stats['total_edges']:,}")
+        metric_card("Total Edges", f"{stats['total_edges']:,}", compact=True)
     
     with col3:
-        render_scorecard("Avg Degree", f"{stats['avg_degree']:.2f}")
+        metric_card("Avg Degree", f"{stats['avg_degree']:.2f}", compact=True)
     
     st.divider()
     
-    # Section 2: Graph Visualization
-    st.markdown('<p class="section-header">Network Graph</p>', unsafe_allow_html=True)
+    # Section 2: Network Graph
+    section_header("Network Graph")
     
-    # Build NetworkX graph for visualization
     if not edges_df.empty and len(nodes_df) <= 500:
-        # Create graph
         G = nx.DiGraph()
         
-        # Add nodes
         for _, row in nodes_df.iterrows():
             G.add_node(
                 row['profile_id'],
@@ -360,7 +308,6 @@ def main():
                 trust_score=row.get('trust_score', 0)
             )
         
-        # Add edges
         for _, row in edges_df.iterrows():
             if row['source'] in G.nodes() and row['target'] in G.nodes():
                 G.add_edge(
@@ -377,19 +324,18 @@ def main():
                 import os
                 import streamlit.components.v1 as components
                 
-                # Create PyVis network
                 nt = Network(
                     height="500px",
                     width="100%",
-                    bgcolor="#1a1a2e",
-                    font_color="white",
+                    bgcolor="#FFFFFF",
+                    font_color="#111827",
                     directed=True,
                     cdn_resources='remote'
                 )
                 
                 nt.set_options("""
                 {
-                    "nodes": {"borderWidth": 2, "font": {"size": 10}},
+                    "nodes": {"borderWidth": 2, "font": {"size": 10, "color": "#111827"}},
                     "edges": {"smooth": {"type": "curvedCW", "roundness": 0.1}},
                     "physics": {
                         "enabled": true,
@@ -399,11 +345,10 @@ def main():
                 }
                 """)
                 
-                # Add nodes
                 for node in G.nodes():
                     attrs = G.nodes[node]
                     score = attrs.get('trust_score', 0)
-                    color = '#16a34a' if score and score > 10 else '#dc2626'
+                    color = Colors.SAFE if score and score > 10 else Colors.DANGER
                     label = attrs.get('label', str(node)[:8])
                     
                     nt.add_node(
@@ -414,20 +359,18 @@ def main():
                         size=15
                     )
                 
-                # Add edges with colors by type
                 edge_colors = {
-                    'follow': '#3b82f6',
-                    'interact': '#06b6d4',
-                    'co_owner': '#dc2626',
-                    'similarity': '#7c3aed'
+                    'follow': Colors.BLUE,
+                    'interact': Colors.CYAN,
+                    'co_owner': Colors.DANGER,
+                    'similarity': Colors.PURPLE
                 }
                 
                 for u, v, data in G.edges(data=True):
                     etype = data.get('edge_type', 'follow')
-                    color = edge_colors.get(etype, '#6b7280')
+                    color = edge_colors.get(etype, Colors.NEUTRAL)
                     nt.add_edge(str(u), str(v), color=color, title=data.get('original_type', ''))
                 
-                # Save and display
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
                     nt.save_graph(f.name)
                     with open(f.name, 'r', encoding='utf-8') as html_file:
@@ -435,8 +378,6 @@ def main():
                     os.unlink(f.name)
                 
                 components.html(html_content, height=520, scrolling=False)
-                
-                # Add legend for interactive graph
                 st.markdown(create_legend_html(), unsafe_allow_html=True)
                 
             except Exception as e:
@@ -449,15 +390,13 @@ def main():
             fig, ax = plt.subplots(figsize=(12, 8), facecolor='white')
             ax.set_facecolor('white')
             
-            # Layout
             pos = nx.spring_layout(G, k=0.5, seed=42)
             
-            # Draw edges by type
             edge_colors_map = {
-                'follow': '#3b82f6',
-                'interact': '#06b6d4',
-                'co_owner': '#dc2626',
-                'similarity': '#7c3aed'
+                'follow': Colors.BLUE,
+                'interact': Colors.CYAN,
+                'co_owner': Colors.DANGER,
+                'similarity': Colors.PURPLE
             }
             
             for etype, color in edge_colors_map.items():
@@ -469,11 +408,9 @@ def main():
                         arrows=True, arrowsize=8
                     )
             
-            # Draw nodes
-            node_colors = ['#16a34a' if G.nodes[n].get('trust_score', 0) > 10 else '#dc2626' for n in G.nodes()]
+            node_colors = [Colors.SAFE if G.nodes[n].get('trust_score', 0) > 10 else Colors.DANGER for n in G.nodes()]
             nx.draw_networkx_nodes(G, pos, ax=ax, node_color=node_colors, node_size=100, alpha=0.8)
             
-            # Remove axes
             ax.set_xticks([])
             ax.set_yticks([])
             for spine in ax.spines.values():
@@ -489,36 +426,36 @@ def main():
     
     st.divider()
     
-    # Section 3: Data Tables (Tabs)
-    st.markdown('<p class="section-header">Data Tables</p>', unsafe_allow_html=True)
+    # Section 3: Data Tables
+    section_header("Data Tables")
     
     tab1, tab2 = st.tabs(["Nodes", "Edges"])
     
     with tab1:
-        st.dataframe(nodes_df, use_container_width=True, height=400)
+        st.dataframe(nodes_df, use_container_width=True, height=400, hide_index=True)
     
     with tab2:
-        st.dataframe(edges_df, use_container_width=True, height=400)
+        st.dataframe(edges_df, use_container_width=True, height=400, hide_index=True)
     
     st.divider()
     
-    # Section 4: Deep Insights (Charts)
-    st.markdown('<p class="section-header">Deep Insights</p>', unsafe_allow_html=True)
+    # Section 4: Deep Insights
+    section_header("Deep Insights")
     
     col_chart1, col_chart2 = st.columns(2)
     
     with col_chart1:
-        st.markdown("**Edge Distribution**")
-        render_edge_distribution_chart(edges_df)
+        with st.container(border=True):
+            render_edge_distribution_chart(edges_df)
     
     with col_chart2:
-        st.markdown("**Account Creation by Hour (UTC)**")
-        render_creation_heatmap(nodes_df)
+        with st.container(border=True):
+            render_creation_chart(nodes_df)
     
     st.divider()
     
-    # Section 5: Download Data
-    st.markdown('<p class="section-header">Download Data</p>', unsafe_allow_html=True)
+    # Section 5: Download
+    section_header("Download Data")
     
     col_dl1, col_dl2 = st.columns(2)
     
@@ -544,17 +481,19 @@ def main():
     
     st.divider()
     
-    # Section 6: Continue to Model Laboratory
-    st.markdown('<p class="section-header">Continue to Model Laboratory</p>', unsafe_allow_html=True)
+    # Section 6: Continue
+    section_header("Next Step")
     
-    if st.button(
-        "Continue to Model Laboratory",
-        type="primary",
-        use_container_width=True
-    ):
-        st.switch_page("pages/2_Model_Laboratory.py")
-    
-    st.caption("Use this dataset to train the model")
+    with st.container(border=True):
+        st.markdown("### Continue to Model Laboratory")
+        st.caption("Use this dataset to train a Sybil detection model")
+        
+        if st.button(
+            "Continue to Model Laboratory",
+            type="primary",
+            use_container_width=True
+        ):
+            st.switch_page("pages/2_Model_Laboratory.py")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,7 @@
+[theme]
+base = "light"
+primaryColor = "#2563EB"            # Lens Blue - Primary Action
+backgroundColor = "#FFFFFF"          # Laboratory White - Main background
+secondaryBackgroundColor = "#F8F9FA" # Vapor Gray - Sidebar, inputs
+textColor = "#111827"                # Ink Black - Primary text (Gray-900)
+font = "sans serif"

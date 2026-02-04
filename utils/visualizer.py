@@ -95,9 +95,9 @@ def _build_analysis_graph(
     target_idx = len(df_ref)
     target_label = node_info.get('handle', 'Target')
     
-    # Color based on prediction
+    # Color based on prediction (using design system colors)
     is_sybil = prediction_result['prediction'] == 'SYBIL'
-    target_color = '#dc2626' if is_sybil else '#16a34a'
+    target_color = '#DC2626' if is_sybil else '#059669'  # Alert Red / Scientific Teal
     
     # Add target node with attributes
     G.add_node(
@@ -135,7 +135,7 @@ def _build_analysis_graph(
                 if ref_labels is not None and node_idx < len(ref_labels):
                     ref_is_sybil = ref_labels[node_idx].item() == 1
                 
-                ref_color = '#dc2626' if ref_is_sybil else '#16a34a'
+                ref_color = '#DC2626' if ref_is_sybil else '#059669'  # Alert Red / Scientific Teal
                 
                 G.add_node(
                     node_idx,
@@ -315,19 +315,19 @@ def render_static_graph(
         bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0.2)
     )
     
-    # Create legend
+    # Create legend with design system colors
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', label='Target (Sybil)',
-               markerfacecolor='#dc2626', markersize=14, markeredgecolor='#fff', markeredgewidth=2),
+               markerfacecolor='#DC2626', markersize=14, markeredgecolor='#fff', markeredgewidth=2),
         Line2D([0], [0], marker='o', color='w', label='Target (Non-Sybil)',
-               markerfacecolor='#16a34a', markersize=14, markeredgecolor='#fff', markeredgewidth=2),
+               markerfacecolor='#059669', markersize=14, markeredgecolor='#fff', markeredgewidth=2),
         Line2D([0], [0], marker='o', color='w', label='Ref: Sybil',
-               markerfacecolor='#dc2626', markersize=9, markeredgecolor='#374151'),
+               markerfacecolor='#DC2626', markersize=9, markeredgecolor='#E5E7EB'),
         Line2D([0], [0], marker='o', color='w', label='Ref: Non-Sybil',
-               markerfacecolor='#16a34a', markersize=9, markeredgecolor='#374151'),
+               markerfacecolor='#059669', markersize=9, markeredgecolor='#E5E7EB'),
         Line2D([0], [0], color='#3b82f6', lw=2, marker='>', markersize=6, label='Follow'),
         Line2D([0], [0], color='#06b6d4', lw=1.5, marker='>', markersize=5, label='Interact'),
-        Line2D([0], [0], color='#dc2626', lw=2.5, linestyle='dashed', label='Co-owner'),
+        Line2D([0], [0], color='#DC2626', lw=2.5, linestyle='dashed', label='Co-owner'),
         Line2D([0], [0], color='#7c3aed', lw=1.5, linestyle='dotted', label='Similarity'),
     ]
     
@@ -379,12 +379,12 @@ def render_interactive_graph(
         return None
     
     try:
-        # Use directed graph for PyVis
+        # Use directed graph for PyVis with light theme
         nt = Network(
             height="550px",
             width="100%",
-            bgcolor="#1a1a2e",
-            font_color="white",
+            bgcolor="#FFFFFF",
+            font_color="#111827",
             directed=True,  # Enable directed edges
             cdn_resources='remote'
         )
@@ -394,7 +394,7 @@ def render_interactive_graph(
             "nodes": {
                 "borderWidth": 2,
                 "borderWidthSelected": 3,
-                "font": {"size": 14, "face": "arial"}
+                "font": {"size": 14, "face": "Inter, arial", "color": "#111827"}
             },
             "edges": {
                 "smooth": {"type": "curvedCW", "roundness": 0.15},
@@ -434,13 +434,13 @@ def render_interactive_graph(
             if node_type == 'target':
                 size = 45
                 border_width = 4
-                border_color = '#ffffff'
+                border_color = '#FFFFFF'
                 status = "SYBIL" if is_sybil else "NON-SYBIL"
                 title = f"TARGET: {label}\n{status}\nConfidence: {prediction_result['sybil_probability_formatted']}"
             else:
                 size = 22
                 border_width = 2
-                border_color = '#1a1a2e'
+                border_color = '#E5E7EB'
                 status = "Sybil" if is_sybil else "Non-Sybil"
                 title = f"{label}\nReference ({status})"
             
@@ -453,11 +453,11 @@ def render_interactive_graph(
                 color={
                     'background': color,
                     'border': border_color,
-                    'highlight': {'background': color, 'border': '#ffffff'}
+                    'highlight': {'background': color, 'border': '#2563EB'}
                 },
                 size=size,
                 borderWidth=border_width,
-                font={'color': 'white', 'size': 12 if node_type == 'target' else 10}
+                font={'color': '#111827', 'size': 12 if node_type == 'target' else 10}
             )
     except Exception as e:
         _log(f"Error adding nodes: {e}", "ERROR")
@@ -549,45 +549,46 @@ def create_legend_html() -> str:
         flex-wrap: wrap;
         gap: 16px;
         padding: 12px 16px;
-        background: rgba(26, 26, 46, 0.95);
+        background: #F8F9FA;
+        border: 1px solid #E5E7EB;
         border-radius: 8px;
-        margin-top: -8px;
+        margin-top: 8px;
         margin-bottom: 8px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-size: 12px;
-        color: #e5e7eb;
+        color: #111827;
     ">
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #dc2626; border: 3px solid #fff;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #DC2626; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
             <span>Target (Sybil)</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #16a34a; border: 3px solid #fff;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #059669; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
             <span>Target (Non-Sybil)</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; border-radius: 50%; background: #dc2626; border: 2px solid #1a1a2e;"></div>
-            <span>Ref: Sybil</span>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #DC2626; border: 2px solid #E5E7EB;"></div>
+            <span style="color: #6B7280;">Ref: Sybil</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; border-radius: 50%; background: #16a34a; border: 2px solid #1a1a2e;"></div>
-            <span>Ref: Non-Sybil</span>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #059669; border: 2px solid #E5E7EB;"></div>
+            <span style="color: #6B7280;">Ref: Non-Sybil</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
-            <span style="margin-left: -4px;">→ Follow</span>
+            <span style="color: #6B7280;">→ Follow</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
-            <span style="margin-left: -4px;">→ Interact</span>
+            <span style="color: #6B7280;">→ Interact</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 3px; background: #dc2626;"></div>
-            <span>Co-owner</span>
+            <div style="width: 20px; height: 3px; background: #DC2626;"></div>
+            <span style="color: #6B7280;">Co-owner</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
-            <span>Similarity</span>
+            <span style="color: #6B7280;">Similarity</span>
         </div>
     </div>
     """
