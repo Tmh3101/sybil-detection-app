@@ -250,7 +250,7 @@ code,
 hr {
     border: none;
     border-top: 1px solid var(--color-border);
-    margin: var(--spacing-lg) 0;
+    margin: var(--spacing-md) 0;
 }
 
 /* 14. Expander Styling */
@@ -345,8 +345,6 @@ hr {
     font-weight: 600;
     color: var(--color-text-primary);
     margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-sm);
-    border-bottom: 1px solid var(--color-border);
 }
 
 /* Sidebar Section Title (Light text for dark sidebar) */
@@ -356,7 +354,7 @@ hr {
     color: var(--color-sidebar-text) !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
 
 /* Custom Metric Card */
@@ -383,6 +381,7 @@ hr {
     color: var(--color-text-primary);
     font-family: 'JetBrains Mono', monospace;
     line-height: 1.2;
+    margin: 0;
 }
 
 .metric-card .delta {
@@ -454,15 +453,17 @@ hr {
 
 /* Verdict Styling (Sybil Detector) */
 .verdict-sybil {
-    font-size: 1.5rem;
+    font-size: 2rem !important;
     font-weight: 700;
     color: var(--color-danger);
+    margin: 0;
 }
 
 .verdict-nonsybil {
-    font-size: 1.5rem;
+    font-size: 2rem !important;
     font-weight: 700;
     color: var(--color-safe);
+    margin: 0;
 }
 
 /* Profile ID Badge */
@@ -504,6 +505,7 @@ hr {
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
 }
 
 /* Compact Card Grid Helper */

@@ -576,11 +576,11 @@ def create_legend_html() -> str:
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
-            <span style="color: #6B7280;">→ Follow</span>
+            <span style="color: #6B7280;">Follow</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
-            <span style="color: #6B7280;">→ Interact</span>
+            <span style="color: #6B7280;">Interact</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 3px; background: #DC2626;"></div>

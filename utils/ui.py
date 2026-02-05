@@ -111,11 +111,10 @@ def metric_card(
     status_class = f"status-{status}" if status else ""
     delta_html = f'<p class="delta">{delta}</p>' if delta else ""
     
-    padding = "0.75rem" if compact else "1rem"
     font_size = "1.125rem" if compact else "1.25rem"
     
     st.markdown(f'''
-    <div class="metric-card" style="padding: {padding}; margin: 1rem">
+    <div class="metric-card" style="margin: 1rem">
         <p class="label">{label}</p>
         <p class="value {status_class}" style="font-size: {font_size};">{value}</p>
         {delta_html}

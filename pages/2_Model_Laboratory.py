@@ -581,6 +581,7 @@ def main():
                                 ),
                                 row=1, col=1
                             )
+                            fig.update_xaxes(dtick=1, row=1, col=1)
                             
                             fig.add_trace(
                                 go.Scatter(
@@ -592,6 +593,7 @@ def main():
                                 ),
                                 row=1, col=2
                             )
+                            fig.update_xaxes(dtick=1, row=1, col=2)
                             
                             apply_plotly_theme(fig)
                             fig.update_layout(height=300, showlegend=False)

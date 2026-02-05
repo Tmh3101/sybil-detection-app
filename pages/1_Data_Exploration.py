@@ -257,12 +257,8 @@ def main():
     
     data = st.session_state['exploration_data']
     nodes_df = data['nodes_df'].copy()
-    features_df = data['features_df']
     edges_df = data['edges_df']
     warnings = data.get('warnings', [])
-    
-    if not features_df.empty and 'profile_id' in features_df.columns:
-        nodes_df = nodes_df.merge(features_df, on='profile_id', how='left')
     
     for warning in warnings:
         st.warning(warning)
@@ -438,23 +434,8 @@ def main():
         st.dataframe(edges_df, use_container_width=True, height=400, hide_index=True)
     
     st.divider()
-    
-    # Section 4: Deep Insights
-    section_header("Deep Insights")
-    
-    col_chart1, col_chart2 = st.columns(2)
-    
-    with col_chart1:
-        with st.container(border=True):
-            render_edge_distribution_chart(edges_df)
-    
-    with col_chart2:
-        with st.container(border=True):
-            render_creation_chart(nodes_df)
-    
-    st.divider()
-    
-    # Section 5: Download
+
+    # Section 4: Download
     section_header("Download Data")
     
     col_dl1, col_dl2 = st.columns(2)
@@ -462,9 +443,9 @@ def main():
     with col_dl1:
         nodes_csv = convert_df_to_csv(nodes_df)
         st.download_button(
-            label="Download Nodes (CSV)",
+            label="Download Nodes Data (.csv)",
             data=nodes_csv,
-            file_name="nodes.csv",
+            file_name=f"nodes_{start_date}-{end_date}.csv",
             mime="text/csv",
             use_container_width=True
         )
@@ -472,12 +453,27 @@ def main():
     with col_dl2:
         edges_csv = convert_df_to_csv(edges_df)
         st.download_button(
-            label="Download Edges (CSV)",
+            label="Download Edges Data (.csv)",
             data=edges_csv,
-            file_name="edges.csv",
+            file_name=f"edges_{start_date}-{end_date}.csv",
             mime="text/csv",
             use_container_width=True
         )
+    
+    st.divider()
+    
+    # Section 5: Deep Insights
+    section_header("Deep Insights")
+    
+    # col_chart1, col_chart2 = st.columns(2)
+    
+    # with col_chart1:
+    with st.container(border=True):
+        render_edge_distribution_chart(edges_df)
+    
+    # with col_chart2:
+    with st.container(border=True):
+        render_creation_chart(nodes_df)
     
     st.divider()
     
