@@ -46,16 +46,20 @@ def validate_dataframes(
     if 'profile_id' not in nodes_df.columns:
         errors.append("nodes.csv missing 'profile_id' column")
     
-    if 'source' not in edges_df.columns or 'target' not in edges_df.columns:
-        errors.append("edges.csv missing 'source' or 'target' columns")
+    # Check for either source/target OR source_id/target_id columns
+    has_source_target = 'source' in edges_df.columns and 'target' in edges_df.columns
+    has_source_id_target_id = 'source_id' in edges_df.columns and 'target_id' in edges_df.columns
+    
+    if not (has_source_target or has_source_id_target_id):
+        errors.append("edges.csv missing 'source'/'target' or 'source_id'/'target_id' columns")
     
     useful_cols = ['handle', 'trust_score', 'created_on', 'owned_by']
     missing_useful = [c for c in useful_cols if c not in nodes_df.columns]
     if missing_useful:
         warnings.append(f"Optional columns missing: {', '.join(missing_useful)}")
     
-    if 'type' not in edges_df.columns:
-        warnings.append("edges.csv missing 'type' column - will use default weights")
+    if 'type' not in edges_df.columns and 'layer' not in edges_df.columns:
+        warnings.append("edges.csv missing 'type' or 'layer' column - will use default weights")
     
     return errors, warnings
 
@@ -242,15 +246,31 @@ def main():
         st.session_state['training_result'] = None
     
     has_exploration_data = 'exploration_data' in st.session_state and st.session_state['exploration_data'] is not None
+    has_processed_data = st.session_state['lab_data'] is not None
+    
+    # Determine data source priority: processed lab_data > uploaded files > exploration_data
+    data_source_mode = None
+    if has_processed_data:
+        data_source_mode = "processed"
+    elif 'uploaded_files_active' in st.session_state and st.session_state['uploaded_files_active']:
+        data_source_mode = "uploaded"
+    elif has_exploration_data:
+        data_source_mode = "exploration"
+    else:
+        data_source_mode = "none"
     
     # Sidebar
     with st.sidebar:
         sidebar_header("Data Source")
         
-        if has_exploration_data:
-            st.caption("Data from Exploration page detected")
+        if data_source_mode == "processed":
+            st.caption("Processed data ready")
+        elif data_source_mode == "uploaded":
+            st.caption("Uploaded files detected")
+        elif data_source_mode == "exploration":
+            st.caption("Data from Exploration page")
         else:
-            st.caption("No exploration data - upload files")
+            st.caption("No data - upload files")
         
         st.divider()
         
@@ -278,25 +298,96 @@ def main():
     with tab_data:
         section_header("Data Ingestion & Preprocessing")
         
-        if has_exploration_data:
+        # Debug info (expandable)
+        with st.expander("🔍 Debug State Info", expanded=False):
+            st.write(f"**Data Source Mode:** `{data_source_mode}`")
+            st.write(f"**Has Exploration Data:** `{has_exploration_data}`")
+            st.write(f"**Has Processed Data:** `{has_processed_data}`")
+            st.write(f"**Uploaded Files Active:** `{'uploaded_files_active' in st.session_state and st.session_state['uploaded_files_active']}`")
+            if st.session_state.get('lab_data'):
+                data = st.session_state['lab_data']
+                st.write(f"**Lab Data:** {len(data['nodes_df'])} nodes, {len(data['edges_df'])} edges")
+        
+        # === CASE 1: PROCESSED DATA (Already processed, show results) ===
+        if data_source_mode == "processed":
+            data = st.session_state['lab_data']
+            nodes_df = data['nodes_df']
+            edges_df = data['edges_df']
+            removed_count = data.get('removed_nodes', 0)
+            
+            st.success(f"Data is ready for training ({len(nodes_df):,} nodes, {len(edges_df):,} edges)")
+            if removed_count > 0:
+                st.info(f"Previously removed {removed_count} isolated nodes")
+            
+            viz_mode = st.radio(
+                "Graph Visualization Mode",
+                options=["Static (Matplotlib)", "Interactive (PyVis)"],
+                index=0,
+                horizontal=True,
+                key="processed_viz_mode"
+            )
+            
+            st.divider()
+            
+            # Graph Visualization
+            with st.container(border=True):
+                st.markdown("### Network Graph")
+                render_data_graph(nodes_df, edges_df, viz_mode)
+            
+            st.divider()
+            
+            # Data Tables
+            with st.container(border=True):
+                st.markdown("### Data Tables")
+                tab_nodes, tab_edges = st.tabs(["Nodes", "Edges"])
+                
+                with tab_nodes:
+                    st.dataframe(nodes_df, use_container_width=True, height=250, hide_index=True)
+                
+                with tab_edges:
+                    st.dataframe(edges_df, use_container_width=True, height=250, hide_index=True)
+            
+            st.divider()
+            
+            # Statistics
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                metric_card("Total Nodes", f"{len(nodes_df):,}", compact=True)
+            with col2:
+                metric_card("Isolated Nodes", "0", compact=True)
+            with col3:
+                metric_card("Total Edges", f"{len(edges_df):,}", compact=True)
+            
+            st.divider()
+            
+            # Reset options
+            col_reset1, col_reset2 = st.columns(2)
+            with col_reset1:
+                if st.button("Reset to Raw Data", use_container_width=True):
+                    st.session_state['lab_data'] = None
+                    if 'uploaded_files_active' in st.session_state:
+                        del st.session_state['uploaded_files_active']
+                    st.rerun()
+            with col_reset2:
+                if st.button("🗑️ Clear All Data", use_container_width=True):
+                    for key in ['lab_data', 'exploration_data', 'uploaded_files_active']:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.rerun()
+        
+        # === CASE 2: EXPLORATION DATA (From Data Exploration page) ===
+        elif data_source_mode == "exploration":
             exp_data = st.session_state['exploration_data']
-            
-            if st.session_state['lab_data'] is not None:
-                nodes_df = st.session_state['lab_data']['nodes_df']
-                edges_df = st.session_state['lab_data']['edges_df']
-                is_processed = True
-            else:
-                nodes_df = exp_data['nodes_df']
-                edges_df = exp_data['edges_df']
-                is_processed = False
-            
+            nodes_df = exp_data['nodes_df']
+            edges_df = exp_data['edges_df']
             isolated_count = count_isolated_nodes(nodes_df, edges_df)
             
             viz_mode = st.radio(
                 "Graph Visualization Mode",
                 options=["Static (Matplotlib)", "Interactive (PyVis)"],
                 index=0,
-                horizontal=True
+                horizontal=True,
+                key="exploration_viz_mode"
             )
             
             st.divider()
@@ -332,9 +423,9 @@ def main():
             
             st.divider()
             
-            # Process button
-            if not is_processed and isolated_count > 0:
-                if st.button("Process Data", type="primary", use_container_width=True):
+            # Process button for exploration data
+            if isolated_count > 0:
+                if st.button("Process Data", type="primary", use_container_width=True, key="exploration_process"):
                     processed_nodes, processed_edges, removed = remove_isolated_nodes(
                         nodes_df.copy(), edges_df.copy()
                     )
@@ -346,25 +437,30 @@ def main():
                     }
                     
                     st.success(f"Processed! Removed {removed} isolated nodes. Remaining: {len(processed_nodes)} nodes.")
+                    time.sleep(0.5)
                     st.rerun()
                 
                 st.caption("Remove isolated nodes to prepare for training")
-            
-            elif is_processed:
-                st.success(f"Data is ready for training ({len(nodes_df):,} nodes, {len(edges_df):,} edges)")
-            
-            elif isolated_count == 0:
-                if st.session_state['lab_data'] is None:
+            else:
+                if st.button("Use This Data", type="primary", use_container_width=True, key="exploration_use"):
                     st.session_state['lab_data'] = {
                         'nodes_df': nodes_df.copy(),
                         'edges_df': edges_df.copy(),
                         'removed_nodes': 0
                     }
+                    st.success("Data is ready for training!")
+                    time.sleep(0.5)
                     st.rerun()
-                st.success("No isolated nodes found. Data is ready for training.")
+                
+                st.caption("No isolated nodes found. Data is ready for training.")
         
+        # === CASE 3: UPLOAD FILES MODE ===
         else:
-            st.info("No data from exploration page. Please upload CSV files.")
+            # Check if we're in uploaded files mode
+            if data_source_mode == "uploaded":
+                st.info("Files uploaded successfully. Please validate and process the data below.")
+            else:
+                st.info("No data available. Please upload CSV files to begin.")
             
             with st.container(border=True):
                 st.markdown("### Upload CSV Files")
@@ -386,8 +482,36 @@ def main():
                     )
             
             if nodes_file and edges_file:
+                # Set flag to indicate uploaded files are active
+                st.session_state['uploaded_files_active'] = True
+                
                 nodes_df = pd.read_csv(nodes_file)
                 edges_df = pd.read_csv(edges_file)
+                
+                # Fix Edge Columns - rename source/target to expected format if needed
+                if 'source' in edges_df.columns and 'source_id' not in edges_df.columns:
+                    edges_df = edges_df.rename(columns={'source': 'source_id'})
+                if 'target' in edges_df.columns and 'target_id' not in edges_df.columns:
+                    edges_df = edges_df.rename(columns={'target': 'target_id'})
+                
+                # Fix Node Columns - Remove merge artifacts (columns ending with _x)
+                nodes_df.columns = [c.replace('_x', '') if c.endswith('_x') else c for c in nodes_df.columns]
+                # Drop _y columns if they exist (merge artifacts)
+                nodes_df = nodes_df[[c for c in nodes_df.columns if not c.endswith('_y')]]
+                
+                # Ensure IDs are strings (consistent with PyG mapping logic)
+                if 'profile_id' in nodes_df.columns:
+                    nodes_df['profile_id'] = nodes_df['profile_id'].astype(str)
+                if 'source_id' in edges_df.columns:
+                    edges_df['source_id'] = edges_df['source_id'].astype(str)
+                if 'target_id' in edges_df.columns:
+                    edges_df['target_id'] = edges_df['target_id'].astype(str)
+                
+                # Handle legacy column names for validation
+                if 'source_id' in edges_df.columns and 'source' not in edges_df.columns:
+                    edges_df['source'] = edges_df['source_id']
+                if 'target_id' in edges_df.columns and 'target' not in edges_df.columns:
+                    edges_df['target'] = edges_df['target_id']
                 
                 errors, warnings = validate_dataframes(nodes_df, edges_df)
                 
@@ -398,6 +522,25 @@ def main():
                 
                 if not errors:
                     isolated_count = count_isolated_nodes(nodes_df, edges_df)
+                    
+                    # ===== DEBUG INFO =====
+                    with st.expander("🔍 Debug Info (Click to expand)", expanded=False):
+                        st.markdown("**Nodes DataFrame:**")
+                        st.write(f"Shape: {nodes_df.shape}")
+                        st.write(f"Columns: {list(nodes_df.columns)}")
+                        st.write(f"Data types: {dict(nodes_df.dtypes)}")
+                        
+                        st.markdown("**Edges DataFrame:**")
+                        st.write(f"Shape: {edges_df.shape}")
+                        st.write(f"Columns: {list(edges_df.columns)}")
+                        st.write(f"Data types: {dict(edges_df.dtypes)}")
+                        
+                        if len(nodes_df) <= 10:
+                            st.markdown("**Sample Nodes:**")
+                            st.dataframe(nodes_df.head())
+                        if len(edges_df) <= 10:
+                            st.markdown("**Sample Edges:**")
+                            st.dataframe(edges_df.head())
                     
                     viz_mode = st.radio(
                         "Graph Visualization Mode",
@@ -438,21 +581,50 @@ def main():
                     st.divider()
                     
                     if st.button("Process Data", type="primary", use_container_width=True, key="upload_process"):
-                        processed_nodes, processed_edges, removed = remove_isolated_nodes(
-                            nodes_df.copy(), edges_df.copy()
-                        )
-                        
-                        st.session_state['lab_data'] = {
-                            'nodes_df': processed_nodes,
-                            'edges_df': processed_edges,
-                            'removed_nodes': removed
-                        }
-                        
-                        if removed > 0:
-                            st.success(f"Processed! Removed {removed} isolated nodes. Remaining: {len(processed_nodes)} nodes.")
-                        else:
-                            st.success("No isolated nodes found. Data is ready for training.")
-                        st.rerun()
+                        with st.spinner("Processing uploaded data..."):
+                            try:
+                                # ===== FIX 3: ROBUST PROCESSING LOGIC =====
+                                import time
+                                
+                                # Ensure we have the correct column names for processing
+                                work_nodes_df = nodes_df.copy()
+                                work_edges_df = edges_df.copy()
+                                
+                                # Ensure edges have the expected source/target columns for remove_isolated_nodes
+                                if 'source_id' in work_edges_df.columns and 'source' not in work_edges_df.columns:
+                                    work_edges_df['source'] = work_edges_df['source_id']
+                                if 'target_id' in work_edges_df.columns and 'target' not in work_edges_df.columns:
+                                    work_edges_df['target'] = work_edges_df['target_id']
+                                
+                                # Process and remove isolated nodes
+                                processed_nodes, processed_edges, removed = remove_isolated_nodes(
+                                    work_nodes_df, work_edges_df
+                                )
+                                
+                                # ===== FIX 4: EXPLICIT STATE PERSISTENCE =====
+                                st.session_state['lab_data'] = {
+                                    'nodes_df': processed_nodes,
+                                    'edges_df': processed_edges,
+                                    'removed_nodes': removed
+                                }
+                                
+                                # Clear uploaded_files_active flag since data is now processed
+                                if 'uploaded_files_active' in st.session_state:
+                                    del st.session_state['uploaded_files_active']
+                                
+                                # Success feedback
+                                if removed > 0:
+                                    st.success(f"Processed! Removed {removed} isolated nodes. Remaining: {len(processed_nodes)} nodes.")
+                                else:
+                                    st.success("No isolated nodes found. Data is ready for training.")
+                                
+                                # Force UI update to show processed data mode
+                                time.sleep(1.0)  # Give user time to see success message
+                                st.rerun()
+                                
+                            except Exception as e:
+                                st.error(f"Error processing upload: {str(e)}")
+                                st.exception(e)  # Show full traceback for debugging
                     
                     st.caption("Remove isolated nodes to prepare for training")
     

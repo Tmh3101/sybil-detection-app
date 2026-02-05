@@ -221,7 +221,7 @@ class GraphBuilder:
         Build edge_index tensor from edges DataFrame.
         
         Args:
-            edges_df: DataFrame with 'source', 'target', 'type' columns
+            edges_df: DataFrame with 'source'/'target' OR 'source_id'/'target_id' columns
             node_ids: List of valid node IDs
             use_weights: If True, replicate edges based on EDGE_WEIGHTS
             
@@ -236,15 +236,16 @@ class GraphBuilder:
         dst_list = []
         
         for _, row in edges_df.iterrows():
-            src_id = row.get('source')
-            dst_id = row.get('target')
+            # Handle both column naming conventions
+            src_id = row.get('source') or row.get('source_id')
+            dst_id = row.get('target') or row.get('target_id')
             
             # Skip if nodes not in mapping
             if src_id not in self.id_to_idx or dst_id not in self.id_to_idx:
                 continue
             
-            src = self.id_to_idx[src_id]
-            dst = self.id_to_idx[dst_id]
+            src = self.id_to_idx[str(src_id)]  # Ensure string conversion
+            dst = self.id_to_idx[str(dst_id)]  # Ensure string conversion
             etype = row.get('type', 'FOLLOW')
             
             weight = EDGE_WEIGHTS.get(etype, 1) if use_weights else 1
@@ -411,7 +412,7 @@ class ClusteringEngine:
             Tuple of (ClusteringResult, OptimalKResult or None, PyG Data)
         """
         # Feature engineering
-        node_ids = nodes_df['profile_id'].tolist()
+        node_ids = nodes_df['profile_id'].astype(str).tolist()  # Ensure string conversion
         x = self.feature_engineer.process_nodes(nodes_df)
         
         # Build graph
