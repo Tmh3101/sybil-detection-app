@@ -432,7 +432,6 @@ class DataLoader:
         if nodes_df.empty:
             return {
                 'nodes_df': pd.DataFrame(),
-                'features_df': pd.DataFrame(),
                 'edges_df': pd.DataFrame(),
                 'warnings': ['No nodes found in the specified date range.']
             }
@@ -474,7 +473,6 @@ class DataLoader:
         
         return {
             'nodes_df': nodes_df,
-            'features_df': features_df,
             'edges_df': edges_df,
             'warnings': warnings
         }

@@ -17,129 +17,26 @@ from utils.visualizer import (
     get_debug_messages,
     PYVIS_AVAILABLE
 )
-
-
-# Page configuration
-st.set_page_config(
-    page_title="Sybil Detector - Lens Protocol",
-    page_icon=None,
-    layout="wide",
-    initial_sidebar_state="expanded",
+from utils.ui import (
+    setup_page,
+    page_header,
+    section_header,
+    sidebar_header,
+    metric_card,
+    profile_id_badge,
+    risk_badge,
+    Colors
 )
 
-# Custom CSS for minimal, professional styling
-st.markdown("""
-<style>
-    /* Typography */
-    .page-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.02em;
-    }
-    .page-subtitle {
-        font-size: 1rem;
-        color: #9ca3af;
-        margin-bottom: 1.5rem;
-    }
-    
-    /* Verdict styling */
-    .verdict-sybil {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #dc2626 !important;
-        margin: 0;
-    }
-    .verdict-nonsybil {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #16a34a !important;
-        margin: 0;
-    }
-    .verdict-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-    
-    /* Metric styling */
-    .metric-container {
-        margin-bottom: 1.5rem;
-    }
-    .metric-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #9ca3af;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
-    }
-    .metric-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .metric-value-secondary {
-        font-size: 1.25rem;
-        font-weight: 600;
-        line-height: 1.3;
-    }
-    
-    /* Code/monospace for IDs */
-    .profile-id {
-        font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-        font-size: 0.875rem;
-        background-color: rgba(156, 163, 175, 0.2);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-    }
-    
-    /* Risk level colors */
-    .risk-high {
-        color: #dc2626 !important;
-        font-weight: 600;
-    }
-    .risk-medium {
-        color: #d97706 !important;
-        font-weight: 600;
-    }
-    .risk-low {
-        color: #16a34a !important;
-        font-weight: 600;
-    }
-    
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    
-    /* Sidebar styling */
-    .sidebar-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(156, 163, 175, 0.3);
-    }
-</style>
-""", unsafe_allow_html=True)
+
+# Page setup
+setup_page("Sybil Detector")
 
 
 @st.cache_resource(show_spinner=False)
 def load_predictor():
     """Load and cache the SybilPredictor instance."""
     return SybilPredictor()
-
-
-def get_risk_class(risk_level: str) -> str:
-    """Return CSS class for risk level."""
-    return {
-        "High": "risk-high",
-        "Medium": "risk-medium",
-        "Low": "risk-low"
-    }.get(risk_level, "")
 
 
 def render_graph_section(
@@ -152,7 +49,7 @@ def render_graph_section(
     ref_labels=None
 ) -> None:
     """Render the network visualization based on selected mode."""
-    st.markdown('<p class="metric-label">Network Analysis</p>', unsafe_allow_html=True)
+    st.markdown("### Network Analysis")
     
     if new_edges.numel() == 0:
         st.info("No connections found in reference graph.")
@@ -227,9 +124,9 @@ def render_graph_section(
 def main():
     """Main application entry point."""
     
-    # Sidebar - Configuration
+    # Sidebar
     with st.sidebar:
-        st.markdown('<p class="sidebar-title">Configuration</p>', unsafe_allow_html=True)
+        sidebar_header("Configuration")
         
         data_source = st.radio(
             "Data Source",
@@ -240,8 +137,7 @@ def main():
         
         st.divider()
         
-        # Visualization settings
-        st.markdown('<p class="sidebar-title">Visualization</p>', unsafe_allow_html=True)
+        sidebar_header("Visualization")
         
         viz_options = ["Interactive (PyVis)", "Static (Matplotlib)"]
         if not PYVIS_AVAILABLE:
@@ -257,7 +153,6 @@ def main():
         
         st.divider()
         
-        # System status
         st.caption("System Status")
         
         try:
@@ -272,25 +167,27 @@ def main():
             st.caption(f"Error: {str(e)[:50]}...")
             model_loaded = False
     
-    # Main content area
-    st.markdown('<h1 class="page-title">Sybil Detector</h1>', unsafe_allow_html=True)
-    st.markdown(
-        '<p class="page-subtitle">GNN-based identity verification for Lens Protocol</p>',
-        unsafe_allow_html=True
+    # Header
+    page_header(
+        "Sybil Detector",
+        "GNN-based identity verification for Lens Protocol"
     )
     
     # Input section
-    col_input, col_button = st.columns([4, 1])
-    
-    with col_input:
-        profile_id = st.text_input(
-            "Target Profile ID",
-            placeholder="0x...",
-            label_visibility="collapsed"
-        )
-    
-    with col_button:
-        analyze_clicked = st.button("Analyze", type="primary", use_container_width=True)
+    with st.container(border=True):
+        st.markdown("### Profile Analysis")
+        
+        col_input, col_button = st.columns([4, 1])
+        
+        with col_input:
+            profile_id = st.text_input(
+                "Target Profile ID",
+                placeholder="Enter profile ID (e.g., 0x...)",
+                label_visibility="collapsed"
+            )
+        
+        with col_button:
+            analyze_clicked = st.button("Analyze", type="primary", use_container_width=True)
     
     # Analysis section
     if analyze_clicked and profile_id:
@@ -315,43 +212,60 @@ def main():
         
         # Results container
         with st.container(border=True):
+            st.markdown("### Analysis Results")
+            
             col_metrics, col_graph = st.columns([1, 2])
             
             with col_metrics:
-                st.markdown('<p class="metric-label">Profile ID</p>', unsafe_allow_html=True)
-                st.markdown(f'<code class="profile-id">{result["profile_id"]}</code>', unsafe_allow_html=True)
-
-                st.markdown('<p class="metric-label">Handle</p>', unsafe_allow_html=True)
-                st.markdown(f'<p class="metric-value-secondary">@{result["handle"]}</p>', unsafe_allow_html=True)
+                # Profile Info
+                st.markdown("##### Profile Information")
                 
-                st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown(f'<p class="small-label">Profile ID</p>', unsafe_allow_html=True)
+                profile_id_badge(result["profile_id"])
                 
-                st.markdown('<p class="verdict-label">Prediction</p>', unsafe_allow_html=True)
+                st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+                
+                st.markdown(f'<p class="small-label">Handle</p>', unsafe_allow_html=True)
+                st.markdown(f"**@{result['handle']}**")
+                
+                st.divider()
+                
+                # Verdict
+                st.markdown("##### Prediction")
+                
                 if result["prediction"] == "SYBIL":
-                    st.markdown('<p class="verdict-sybil">SYBIL</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p class="verdict-sybil">SYBIL</p>', unsafe_allow_html=True)
                 else:
-                    st.markdown('<p class="verdict-nonsybil">NON-SYBIL</p>', unsafe_allow_html=True)
+                    st.markdown(f'<p class="verdict-nonsybil">NON-SYBIL</p>', unsafe_allow_html=True)
                 
-                st.markdown("<br>", unsafe_allow_html=True)
+                st.divider()
                 
-                st.markdown('<p class="metric-label">Confidence Score</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value">{result["sybil_probability_formatted"]}</p>', 
-                    unsafe_allow_html=True
-                )
+                # Metrics
+                col_m1, col_m2 = st.columns(2)
                 
-                risk_level = result["analysis"]["risk_level"]
-                risk_class = get_risk_class(risk_level)
-                st.markdown('<p class="metric-label">Risk Level</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value-secondary {risk_class}">{risk_level}</p>', 
-                    unsafe_allow_html=True
-                )
+                with col_m1:
+                    metric_card(
+                        "Confidence",
+                        result["sybil_probability_formatted"],
+                        compact=True
+                    )
                 
-                st.markdown('<p class="metric-label">Edges Found</p>', unsafe_allow_html=True)
-                st.markdown(
-                    f'<p class="metric-value-secondary">{result["analysis"]["edges_found"]}</p>', 
-                    unsafe_allow_html=True
+                with col_m2:
+                    risk_level = result["analysis"]["risk_level"]
+                    risk_status = "danger" if risk_level == "High" else ("warning" if risk_level == "Medium" else "safe")
+                    metric_card(
+                        "Risk Level",
+                        risk_level,
+                        status=risk_status,
+                        compact=True
+                    )
+                
+                st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+                
+                metric_card(
+                    "Edges Found",
+                    str(result["analysis"]["edges_found"]),
+                    compact=True
                 )
             
             with col_graph:
@@ -367,6 +281,22 @@ def main():
     
     elif analyze_clicked and not profile_id:
         st.warning("Please enter a Profile ID to analyze.")
+    
+    else:
+        # Show placeholder when no analysis has been run
+        with st.container(border=True):
+            st.markdown("### How to Use")
+            st.markdown("""
+            1. Enter a **Profile ID** in the input field above
+            2. Click **Analyze** to run the GNN-based prediction
+            3. View the **prediction result**, **confidence score**, and **network visualization**
+            
+            The model analyzes:
+            - Follow relationships
+            - Interaction patterns (comments, likes, tips)
+            - Co-ownership connections (shared wallets)
+            - Profile similarity (handles, bios, avatars)
+            """)
 
 
 if __name__ == "__main__":
