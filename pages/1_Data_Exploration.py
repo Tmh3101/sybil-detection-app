@@ -489,6 +489,10 @@ def main():
             type="primary",
             use_container_width=True
         ):
+            # Clear old lab data so exploration_data takes priority
+            for key in ['lab_data', 'uploaded_files_active', 'clustering_result', 'labeling_result', 'training_result']:
+                if key in st.session_state:
+                    del st.session_state[key]
             st.switch_page("pages/2_Model_Laboratory.py")
 
 

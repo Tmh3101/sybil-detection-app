@@ -358,7 +358,7 @@ def main():
                         del st.session_state['uploaded_files_active']
                     st.rerun()
             with col_reset2:
-                if st.button("🗑️ Clear All Data", use_container_width=True):
+                if st.button("Clear All Data", use_container_width=True):
                     for key in ['lab_data', 'exploration_data', 'uploaded_files_active']:
                         if key in st.session_state:
                             del st.session_state[key]
