@@ -42,16 +42,22 @@ class LabelingResult:
     """Container for labeling results."""
     cluster_id: int
     label: str
-    rule_applied: str
+    rules_violated: List[str]
     reason: str
     profile: ClusterProfile
+
+    @property
+    def rule_applied(self) -> str:
+        """Backward-compatible: joined rules or default."""
+        return " + ".join(self.rules_violated) if self.rules_violated else "Default: Organic Community"
 
 
 class LabelingEngine:
     """
-    Engine for applying rule-based labeling to cluster profiles.
+    Engine for applying accumulative rule-based labeling to cluster profiles.
     
-    Logic adapted from colab-code/labeling.py (lines 64-172)
+    Each priority rule is evaluated independently. A cluster can violate
+    multiple priorities simultaneously and ALL violations are recorded.
     """
     
     def __init__(self, thresholds: Optional[LabelingThresholds] = None):
@@ -71,8 +77,6 @@ class LabelingEngine:
     ) -> ClusterProfile:
         """
         Calculate statistics for a single cluster.
-        
-        Logic from colab-code/labeling.py (lines 66-111)
         """
         total_edges = max(len(edges_in_cluster), 1)  # Avoid division by zero
         
@@ -114,80 +118,66 @@ class LabelingEngine:
     
     def apply_rules(self, profile: ClusterProfile) -> LabelingResult:
         """
-        Apply rule-based classifier to a cluster profile.
+        Apply accumulative rule-based classifier to a cluster profile.
         
-        Logic from colab-code/labeling.py (lines 131-172)
+        Each priority is evaluated independently. A cluster can trigger
+        multiple priorities and all violations are recorded.
         
-        Priority order:
-        1. Co-owner Ring (strongest signal)
-        2. Name Pattern Abuse (fuzzy handle spam)
-        3. Industrial Bot Farm (batch creation + low social + low trust)
-        4. Default: Organic Community
+        Priorities:
+        1. Co-owner Ring
+        2. Name Pattern Abuse
+        3. Industrial Bot Farm
         """
         reasons = []
-        label = "NON-SYBIL"
-        rule_applied = "Default"
+        rules_violated = []
+        is_sybil = False
         
         t = self.thresholds  # Shorthand
         
-        # Priority 1: Co-owner Ring
+        # --- Priority 1: Co-owner Ring (independent) ---
         if profile.pct_co_owner > t.pct_co_owner:
-            label = "SYBIL"
-            rule_applied = "Priority 1: Co-owner Ring"
-            reasons.append(f"Co-owner edges > {t.pct_co_owner * 100:.1f}% ({profile.pct_co_owner:.1%})")
-            return LabelingResult(
-                cluster_id=profile.cluster_id,
-                label=label,
-                rule_applied=rule_applied,
-                reason="; ".join(reasons),
-                profile=profile
-            )
+            is_sybil = True
+            rules_violated.append("P1: Co-owner Ring")
+            reasons.append(f"[P1] Co-owner Ring ({profile.pct_co_owner:.1%} > {t.pct_co_owner:.1%})")
         
-        # Priority 2: Name Pattern Abuse
+        # --- Priority 2: Name Pattern Abuse (independent) ---
         if (profile.pct_fuzzy_handle == 1 or 
             (profile.pct_fuzzy_handle >= t.pct_fuzzy_handle and 
              profile.avg_trust <= t.co_owner_avg_trust)):
-            label = "SYBIL"
-            rule_applied = "Priority 2: Name Pattern Abuse"
-            reasons.append(f"Fuzzy Handle edges >= {t.pct_fuzzy_handle * 100:.1f}% ({profile.pct_fuzzy_handle:.1%})")
-            reasons.append(f"Low Trust ({profile.avg_trust:.2f} <= {t.co_owner_avg_trust})")
-            return LabelingResult(
-                cluster_id=profile.cluster_id,
-                label=label,
-                rule_applied=rule_applied,
-                reason="; ".join(reasons),
-                profile=profile
+            is_sybil = True
+            rules_violated.append("P2: Name Pattern Abuse")
+            reasons.append(
+                f"[P2] Name Abuse (Fuzzy: {profile.pct_fuzzy_handle:.1%}, "
+                f"Trust: {profile.avg_trust:.1f} ≤ {t.co_owner_avg_trust})"
             )
         
-        # Priority 3: Industrial Bot Farm
+        # --- Priority 3: Industrial Bot Farm (independent) ---
         cond_batch = (profile.pct_similarity >= t.pct_similarity or 
                       profile.std_creation_hours < t.std_creation_hours)
         cond_social = profile.pct_social <= t.pct_social
         cond_trust = profile.avg_trust <= t.industrial_avg_trust
         
         if cond_batch and cond_social and cond_trust:
-            label = "SYBIL"
-            rule_applied = "Priority 3: Industrial Bot Farm"
+            is_sybil = True
+            rules_violated.append("P3: Industrial Bot Farm")
+            p3_details = []
             if profile.pct_similarity >= t.pct_similarity:
-                reasons.append(f"High Similarity ({profile.pct_similarity:.1%})")
+                p3_details.append(f"Sim: {profile.pct_similarity:.1%}")
             if profile.std_creation_hours < t.std_creation_hours:
-                reasons.append(f"Batch Creation (< {t.std_creation_hours}h std)")
-            reasons.append("Low Social Activity")
-            reasons.append("Low Trust Score")
-            return LabelingResult(
-                cluster_id=profile.cluster_id,
-                label=label,
-                rule_applied=rule_applied,
-                reason="; ".join(reasons),
-                profile=profile
-            )
+                p3_details.append(f"Batch: {profile.std_creation_hours:.1f}h < {t.std_creation_hours}h")
+            p3_details.append(f"Social: {profile.pct_social:.1%}")
+            p3_details.append(f"Trust: {profile.avg_trust:.1f}")
+            reasons.append(f"[P3] Bot Farm ({', '.join(p3_details)})")
         
-        # Default: Organic Community
+        # --- Final Result ---
+        final_label = "SYBIL" if is_sybil else "NON-SYBIL"
+        final_reason = "; ".join(reasons) if reasons else "Organic Community"
+        
         return LabelingResult(
             cluster_id=profile.cluster_id,
-            label="NON-SYBIL",
-            rule_applied="Default: Organic Community",
-            reason="Safe Profile",
+            label=final_label,
+            rules_violated=rules_violated,
+            reason=final_reason,
             profile=profile
         )
     
@@ -264,8 +254,9 @@ class LabelingEngine:
                 'cluster_id': r.cluster_id,
                 'size': r.profile.size,
                 'label': r.label,
-                'rule_applied': r.rule_applied,
-                'reason': r.reason,
+                'violations': len(r.rules_violated),
+                'rules_violated': r.rule_applied,
+                'details': r.reason,
                 'avg_trust': r.profile.avg_trust,
                 'std_creation_hours': r.profile.std_creation_hours,
                 'pct_co_owner': r.profile.pct_co_owner,
@@ -282,9 +273,9 @@ class LabelingEngine:
         nodes_df: pd.DataFrame,
         cluster_labels: np.ndarray,
         labeling_results: List[LabelingResult]
-    ) -> np.ndarray:
+    ) -> Tuple[np.ndarray, List[str]]:
         """
-        Generate node-level labels from cluster labels.
+        Generate node-level labels and details from cluster labels.
         
         Args:
             nodes_df: Node DataFrame
@@ -292,19 +283,24 @@ class LabelingEngine:
             labeling_results: Labeling results per cluster
             
         Returns:
-            Array of labels (0=NON-SYBIL, 1=SYBIL) per node
+            Tuple of (label array [0=NON-SYBIL, 1=SYBIL], details list per node)
         """
-        # Create cluster -> label mapping
+        # Create cluster -> label/details mapping
         cluster_to_label = {}
+        cluster_to_details = {}
         for result in labeling_results:
             cluster_to_label[result.cluster_id] = 1 if result.label == "SYBIL" else 0
+            cluster_to_details[result.cluster_id] = result.reason
         
         # Map to nodes
         node_labels = np.array([
             cluster_to_label.get(c, 0) for c in cluster_labels
         ])
+        node_details = [
+            cluster_to_details.get(c, "Organic Community") for c in cluster_labels
+        ]
         
-        return node_labels
+        return node_labels, node_details
 
 
 def create_labeling_summary(
@@ -312,6 +308,9 @@ def create_labeling_summary(
 ) -> Dict[str, Any]:
     """
     Create summary statistics for labeling results.
+    
+    Handles accumulative logic: each individual priority rule is counted
+    separately even when a cluster violates multiple rules.
     """
     total_clusters = len(labeling_results)
     sybil_clusters = sum(1 for r in labeling_results if r.label == "SYBIL")
@@ -321,14 +320,25 @@ def create_labeling_summary(
     sybil_nodes = sum(r.profile.size for r in labeling_results if r.label == "SYBIL")
     nonsybil_nodes = total_nodes - sybil_nodes
     
-    # Count by rule
+    # Count by individual rule (accumulative: a cluster can appear in multiple rules)
     rules_count = {}
+    multi_violation_clusters = 0
     for r in labeling_results:
-        rule = r.rule_applied
-        if rule not in rules_count:
-            rules_count[rule] = {'clusters': 0, 'nodes': 0}
-        rules_count[rule]['clusters'] += 1
-        rules_count[rule]['nodes'] += r.profile.size
+        if not r.rules_violated:
+            # Organic community
+            key = "Default: Organic Community"
+            if key not in rules_count:
+                rules_count[key] = {'clusters': 0, 'nodes': 0}
+            rules_count[key]['clusters'] += 1
+            rules_count[key]['nodes'] += r.profile.size
+        else:
+            if len(r.rules_violated) > 1:
+                multi_violation_clusters += 1
+            for rule in r.rules_violated:
+                if rule not in rules_count:
+                    rules_count[rule] = {'clusters': 0, 'nodes': 0}
+                rules_count[rule]['clusters'] += 1
+                rules_count[rule]['nodes'] += r.profile.size
     
     return {
         'total_clusters': total_clusters,
@@ -338,5 +348,6 @@ def create_labeling_summary(
         'sybil_nodes': sybil_nodes,
         'nonsybil_nodes': nonsybil_nodes,
         'sybil_ratio': sybil_nodes / total_nodes if total_nodes > 0 else 0,
+        'multi_violation_clusters': multi_violation_clusters,
         'rules_breakdown': rules_count
     }

@@ -514,25 +514,6 @@ def main():
                 if not errors:
                     isolated_count = count_isolated_nodes(nodes_df, edges_df)
                     
-                    # ===== DEBUG INFO =====
-                    with st.expander("🔍 Debug Info (Click to expand)", expanded=False):
-                        st.markdown("**Nodes DataFrame:**")
-                        st.write(f"Shape: {nodes_df.shape}")
-                        st.write(f"Columns: {list(nodes_df.columns)}")
-                        st.write(f"Data types: {dict(nodes_df.dtypes)}")
-                        
-                        st.markdown("**Edges DataFrame:**")
-                        st.write(f"Shape: {edges_df.shape}")
-                        st.write(f"Columns: {list(edges_df.columns)}")
-                        st.write(f"Data types: {dict(edges_df.dtypes)}")
-                        
-                        if len(nodes_df) <= 10:
-                            st.markdown("**Sample Nodes:**")
-                            st.dataframe(nodes_df.head())
-                        if len(edges_df) <= 10:
-                            st.markdown("**Sample Edges:**")
-                            st.dataframe(edges_df.head())
-                    
                     viz_mode = st.radio(
                         "Graph Visualization Mode",
                         options=["Static (Matplotlib)", "Interactive (PyVis)"],
@@ -824,57 +805,56 @@ def main():
             
             with col1:
                 with st.container(border=True):
-                    st.markdown("### Threshold Configuration")
+                    st.markdown("### Rule Configuration")
+                    st.caption("Each rule is evaluated independently (accumulative)")
                     
-                    st.caption("Edge Ratio Thresholds")
+                    with st.expander("Priority 1: Co-Owner Ring", expanded=True):
+                        pct_co_owner = st.slider(
+                            "Co-Owner Edge %", 
+                            min_value=0.0, max_value=0.5, value=0.05, step=0.01,
+                            help="Clusters with co-owner edge ratio above this threshold are flagged",
+                            key="p1_pct_co_owner"
+                        )
                     
-                    pct_co_owner = st.slider(
-                        "Co-Owner Edge %", 
-                        min_value=0.0, max_value=0.5, value=0.05, step=0.01,
-                        help="Clusters with co-owner edge ratio above this are SYBIL"
-                    )
+                    with st.expander("Priority 2: Name Pattern Abuse", expanded=True):
+                        pct_fuzzy = st.slider(
+                            "Fuzzy Handle Edge %", 
+                            min_value=0.0, max_value=1.0, value=0.50, step=0.05,
+                            help="Fuzzy handle edge ratio threshold",
+                            key="p2_pct_fuzzy"
+                        )
+                        co_owner_avg_trust = st.slider(
+                            "Trust Score Threshold",
+                            min_value=0, max_value=100, value=25, step=1,
+                            help="Clusters with avg trust ≤ this AND high fuzzy ratio are flagged",
+                            key="p2_trust"
+                        )
                     
-                    pct_fuzzy = st.slider(
-                        "Fuzzy Handle Edge %", 
-                        min_value=0.0, max_value=1.0, value=0.50, step=0.05,
-                        help="Fuzzy handle edge ratio threshold"
-                    )
-                    
-                    pct_similarity = st.slider(
-                        "Similarity Edge %", 
-                        min_value=0.0, max_value=1.0, value=0.60, step=0.05,
-                        help="Similarity edge ratio for bot farm detection"
-                    )
-                    
-                    pct_social = st.slider(
-                        "Social Activity %",
-                        min_value=0.0, max_value=1.0, value=0.20, step=0.05,
-                        help="Clusters below this social activity are suspicious"
-                    )
-                    
-                    st.divider()
-                    st.caption("Trust Score Thresholds")
-                    
-                    co_owner_avg_trust = st.slider(
-                        "Co-Owner Trust Threshold",
-                        min_value=0, max_value=100, value=25,
-                        help="Max trust score for name pattern abuse"
-                    )
-                    
-                    industrial_avg_trust = st.slider(
-                        "Industrial Trust Threshold",
-                        min_value=0, max_value=100, value=20,
-                        help="Max trust score for bot farm detection"
-                    )
-                    
-                    st.divider()
-                    st.caption("Creation Time Threshold")
-                    
-                    std_creation_hours = st.slider(
-                        "Std Creation Hours",
-                        min_value=0.0, max_value=24.0, value=2.0, step=0.5,
-                        help="Accounts created within this std hours are batch-created"
-                    )
+                    with st.expander("Priority 3: Industrial Bot Farm", expanded=True):
+                        pct_similarity = st.slider(
+                            "Similarity Edge %", 
+                            min_value=0.0, max_value=1.0, value=0.60, step=0.05,
+                            help="Similarity edge ratio for bot farm detection",
+                            key="p3_pct_similarity"
+                        )
+                        std_creation_hours = st.slider(
+                            "Std Creation Hours",
+                            min_value=0.0, max_value=24.0, value=2.0, step=0.5,
+                            help="Accounts created within this std hours are batch-created",
+                            key="p3_std_creation"
+                        )
+                        pct_social = st.slider(
+                            "Social Activity %",
+                            min_value=0.0, max_value=1.0, value=0.20, step=0.05,
+                            help="Clusters below this social activity are suspicious",
+                            key="p3_pct_social"
+                        )
+                        industrial_avg_trust = st.slider(
+                            "Trust Score Threshold",
+                            min_value=0, max_value=100, value=20, step=1,
+                            help="Max trust score for bot farm detection",
+                            key="p3_trust"
+                        )
                     
                     run_labeling = st.button("Apply Rules", type="primary", use_container_width=True)
             
@@ -904,7 +884,7 @@ def main():
                             
                             results, summary_df = engine.label_clusters(profiles)
                             
-                            node_labels = engine.generate_node_labels(
+                            node_labels, node_details = engine.generate_node_labels(
                                 data['nodes_df'],
                                 cr['result'].labels,
                                 results
@@ -916,6 +896,7 @@ def main():
                                 'results': results,
                                 'summary_df': summary_df,
                                 'node_labels': node_labels,
+                                'node_details': node_details,
                                 'summary': summary
                             }
                             
@@ -943,6 +924,16 @@ def main():
                             metric_card("Sybil Nodes", f"{summary['sybil_nodes']:,}", compact=True)
                         with row2_col2:
                             metric_card("Sybil Ratio", f"{summary['sybil_ratio']:.1%}", compact=True)
+                        
+                        if summary.get('multi_violation_clusters', 0) > 0:
+                            st.info(f"⚡ {summary['multi_violation_clusters']} cluster(s) violated multiple rules simultaneously")
+                    
+                    with st.container(border=True):
+                        st.markdown("### Rules Breakdown")
+                        
+                        rules = summary['rules_breakdown']
+                        for rule_name, counts in rules.items():
+                            st.caption(f"**{rule_name}**: {counts['clusters']} clusters, {counts['nodes']:,} nodes")
                     
                     with st.container(border=True):
                         st.markdown("### Label Distribution")
