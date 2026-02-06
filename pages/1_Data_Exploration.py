@@ -202,17 +202,6 @@ def main():
         
         st.divider()
         
-        sidebar_header("Visualization")
-        
-        viz_mode = st.radio(
-            "Graph Mode",
-            options=["Static (Matplotlib)", "Interactive (PyVis)"],
-            index=0,
-            help="Choose visualization type"
-        )
-        
-        st.divider()
-        
         load_clicked = st.button(
             "Load Data",
             type="primary",
@@ -293,6 +282,17 @@ def main():
     
     # Section 2: Network Graph
     section_header("Network Graph")
+    
+    # Visualization mode selection
+    viz_mode = st.radio(
+        "Graph Visualization Mode",
+        options=["Static (Matplotlib)", "Interactive (PyVis)"],
+        index=0,
+        horizontal=True,
+        help="Choose visualization type"
+    )
+    
+    st.divider()
     
     if not edges_df.empty and len(nodes_df) <= 500:
         G = nx.DiGraph()

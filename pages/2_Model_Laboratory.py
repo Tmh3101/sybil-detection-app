@@ -17,7 +17,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
 import time
-import io
 
 from utils.ui import (
     setup_page,
@@ -298,16 +297,6 @@ def main():
     with tab_data:
         section_header("Data Ingestion & Preprocessing")
         
-        # Debug info (expandable)
-        with st.expander("🔍 Debug State Info", expanded=False):
-            st.write(f"**Data Source Mode:** `{data_source_mode}`")
-            st.write(f"**Has Exploration Data:** `{has_exploration_data}`")
-            st.write(f"**Has Processed Data:** `{has_processed_data}`")
-            st.write(f"**Uploaded Files Active:** `{'uploaded_files_active' in st.session_state and st.session_state['uploaded_files_active']}`")
-            if st.session_state.get('lab_data'):
-                data = st.session_state['lab_data']
-                st.write(f"**Lab Data:** {len(data['nodes_df'])} nodes, {len(data['edges_df'])} edges")
-        
         # === CASE 1: PROCESSED DATA (Already processed, show results) ===
         if data_source_mode == "processed":
             data = st.session_state['lab_data']
@@ -437,6 +426,8 @@ def main():
                     }
                     
                     st.success(f"Processed! Removed {removed} isolated nodes. Remaining: {len(processed_nodes)} nodes.")
+                    import time
+
                     time.sleep(0.5)
                     st.rerun()
                 

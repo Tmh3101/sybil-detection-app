@@ -19,6 +19,7 @@ from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, classifi
 from torch_geometric.data import Data
 from typing import Dict, Any, List, Tuple, Optional, Callable
 from dataclasses import dataclass, field
+from collections import Counter
 import time
 
 from models.gat_model import SybilGAT
@@ -91,24 +92,64 @@ class GATrainer:
         Prepare data with train/val/test masks.
         
         Logic from colab-code/train.py (lines 193-229)
+        Enhanced with robust splitting for small/imbalanced datasets.
         """
         num_nodes = data.num_nodes
         indices = list(range(num_nodes))
         
-        # Stratified split
-        train_idx, temp_idx = train_test_split(
-            indices,
-            test_size=self.config.test_size,
-            stratify=labels,
-            random_state=self.config.random_state
-        )
+        # Check class distribution for stratification feasibility
+        class_counts = Counter(labels.tolist())
+        min_class_count = min(class_counts.values())
+        total_samples = len(labels)
         
-        val_idx, test_idx = train_test_split(
-            temp_idx,
-            test_size=self.config.val_size,
-            stratify=labels[temp_idx],
-            random_state=self.config.random_state
-        )
+        print(f"📊 Dataset Info: {total_samples} samples, Class distribution: {dict(class_counts)}")
+        
+        # Handle extremely small datasets
+        if total_samples < 5:
+            print(f"⚠️ Warning: Dataset too small ({total_samples} samples). Using simple train/test split.")
+            # Force simple split for tiny datasets
+            train_size = max(1, int(0.6 * total_samples))
+            train_idx = indices[:train_size]
+            temp_idx = indices[train_size:]
+            
+            if len(temp_idx) < 2:
+                val_idx = temp_idx[:len(temp_idx)//2] if temp_idx else []
+                test_idx = temp_idx[len(temp_idx)//2:] if temp_idx else []
+            else:
+                val_idx = temp_idx[:len(temp_idx)//2]
+                test_idx = temp_idx[len(temp_idx)//2:]
+        else:
+            # Decide on stratification based on minimum class count
+            stratify_param = labels if min_class_count >= 2 else None
+            
+            if min_class_count < 2:
+                print(f"⚠️ Warning: Minority class has only {min_class_count} samples. Disabling stratification for robust splitting.")
+            
+            # First split: train vs (val + test)
+            train_idx, temp_idx = train_test_split(
+                indices,
+                test_size=self.config.test_size,
+                stratify=stratify_param,
+                random_state=self.config.random_state
+            )
+            
+            # Second split: val vs test
+            # Check if temp split is still viable for stratification
+            temp_labels = labels[temp_idx]
+            temp_class_counts = Counter(temp_labels.tolist())
+            temp_min_class_count = min(temp_class_counts.values())
+            
+            temp_stratify_param = temp_labels if temp_min_class_count >= 2 else None
+            
+            if temp_min_class_count < 2 and len(temp_idx) > 1:
+                print(f"⚠️ Warning: Validation split also has imbalanced classes. Using random split.")
+            
+            val_idx, test_idx = train_test_split(
+                temp_idx,
+                test_size=self.config.val_size,
+                stratify=temp_stratify_param,
+                random_state=self.config.random_state
+            )
         
         # Create masks
         train_mask = torch.zeros(num_nodes, dtype=torch.bool)
