@@ -14,9 +14,10 @@ import numpy as np
 import networkx as nx
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
+import matplotlib.pyplot as plt
 import streamlit.components.v1 as components
-from utils.visualizer import visualize_graph, create_legend_html
+from datetime import datetime
+from utils.visualizer import visualize_interactive_graph, visualize_static_graph, create_legend_html
 from plotly.subplots import make_subplots
 
 from utils.ui import (
@@ -125,7 +126,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
     
     if viz_mode == "Interactive (PyVis)":
         try:
-            html_content = visualize_graph(G)
+            html_content = visualize_interactive_graph(G)
             components.html(html_content, height=760, scrolling=False)
             st.markdown(create_legend_html(), unsafe_allow_html=True)
             
@@ -134,40 +135,9 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
             viz_mode = "Static (Matplotlib)"
     
     if viz_mode == "Static (Matplotlib)":
-        import matplotlib.pyplot as plt
-        
-        fig, ax = plt.subplots(figsize=(10, 6), facecolor='white')
-        ax.set_facecolor('white')
-        
-        pos = nx.spring_layout(G, k=0.5, seed=42)
-        
-        edge_colors_map = {
-            'follow': Colors.BLUE,
-            'interact': Colors.CYAN,
-            'co_owner': Colors.DANGER,
-            'similarity': Colors.PURPLE
-        }
-        
-        for etype, color in edge_colors_map.items():
-            edge_list = [(u, v) for u, v, d in G.edges(data=True) if d.get('edge_type') == etype]
-            if edge_list:
-                nx.draw_networkx_edges(
-                    G, pos, ax=ax, edgelist=edge_list,
-                    edge_color=color, alpha=0.6, width=1,
-                    arrows=True, arrowsize=8
-                )
-        
-        node_colors = ['#2563eb' for n in G.nodes()]  # Uniform blue color for all nodes
-        nx.draw_networkx_nodes(G, pos, ax=ax, node_color=node_colors, node_size=100, alpha=0.8)
-        
-        ax.set_xticks([])
-        ax.set_yticks([])
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-        
+        fig = visualize_static_graph(G)
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
-
 
 def main():
     """Main application entry point."""

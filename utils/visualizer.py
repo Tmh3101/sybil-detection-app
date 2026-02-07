@@ -20,6 +20,11 @@ from matplotlib.lines import Line2D
 import pandas as pd
 import torch
 from typing import Dict, List, Optional, Any, Tuple
+from pyvis.network import Network
+import tempfile
+import os
+import urllib.parse
+from utils.ui import Colors
 
 # Debug storage for Streamlit display
 _debug_messages: List[str] = []
@@ -64,7 +69,7 @@ except ImportError:
     PYVIS_AVAILABLE = False
 
 
-def _build_analysis_graph(
+def build_analysis_graph(
     node_info: Dict[str, Any],
     new_edge_index: torch.Tensor,
     new_edge_types: List[str],
@@ -193,7 +198,7 @@ def render_static_graph(
     if new_edge_index.numel() == 0:
         return None
     
-    G, target_idx, target_color = _build_analysis_graph(
+    G, target_idx, target_color = build_analysis_graph(
         node_info, new_edge_index, new_edge_types, new_edge_dirs, df_ref, prediction_result, ref_labels
     )
     
@@ -370,7 +375,7 @@ def render_interactive_graph(
         return None
     
     try:
-        G, target_idx, target_color = _build_analysis_graph(
+        G, target_idx, target_color = build_analysis_graph(
             node_info, new_edge_index, new_edge_types, new_edge_dirs, df_ref, prediction_result, ref_labels
         )
         _log(f"Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
@@ -541,113 +546,39 @@ def render_interactive_graph(
         return None
 
 
-def create_classify_legend_html() -> str:
-    """Create an HTML legend for the interactive graph."""
-    return """
-    <div style="
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        padding: 12px 16px;
-        background: #F8F9FA;
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        margin-top: 8px;
-        margin-bottom: 8px;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-size: 12px;
-        color: #111827;
-    ">
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #DC2626; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
-            <span>Sybil</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #059669; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
-            <span>Non-Sybil</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
-            <span style="color: #6B7280;">Follow</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
-            <span style="color: #6B7280;">Interact</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 3px; background: #DC2626;"></div>
-            <span style="color: #6B7280;">Co-owner</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
-            <span style="color: #6B7280;">Similarity</span>
-        </div>
-    </div>
+def _resolve_picture_url(raw_url: str) -> str:
+    """Resolve picture_url to a valid HTTPS URL for rendering.
+    
+    Handles:
+    - lens:// protocol -> grove storage HTTPS
+    - ipfs:// or other non-HTTP -> skip
+    - Valid HTTPS -> proxy through wsrv.nl for resizing
     """
+    picture_url = str((raw_url or '')).strip()
+    if not picture_url:
+        return ''
+    
+    # Convert lens:// to HTTPS via grove storage
+    if picture_url.startswith('lens://'):
+        picture_url = picture_url.replace('lens://', 'https://api.grove.storage/')
+    
+    # Only allow HTTPS URLs
+    if not picture_url.startswith('http'):
+        return ''
+    
+    # Proxy through wsrv.nl for consistent sizing
+    encoded_url = urllib.parse.quote(picture_url, safe='')
+    return f'https://wsrv.nl/?url={encoded_url}&w=64&h=64&fit=cover&q=70'
 
-def create_legend_html() -> str:
-    """Create an HTML legend for the interactive graph."""
-    return """
-    <div style="
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        padding: 12px 16px;
-        background: #F8F9FA;
-        border: 1px solid #E5E7EB;
-        border-radius: 8px;
-        margin-top: 8px;
-        margin-bottom: 8px;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-size: 12px;
-        color: #111827;
-    ">
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
-            <span>Node</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
-            <span style="color: #6B7280;">Follow</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
-            <span style="color: #6B7280;">Interact</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 3px; background: #DC2626;"></div>
-            <span style="color: #6B7280;">Co-owner</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
-            <span style="color: #6B7280;">Similarity</span>
-        </div>
-    </div>
+
+def visualize_interactive_graph(G: nx.Graph, is_classify: bool = False):
+    """Create an interactive PyVis visualization.
+    
+    Args:
+        G: NetworkX graph with node/edge attributes.
+        is_classify: If True, color nodes by SYBIL/NON-SYBIL status.
+                     If False, use uniform blue for all nodes.
     """
-
-
-# Keep backward compatibility
-def visualize_prediction_graph(
-    node_info: Dict[str, Any],
-    new_edge_index: torch.Tensor,
-    new_edge_types: List[str],
-    new_edge_dirs: List[str],
-    df_ref: pd.DataFrame,
-    prediction_result: Dict[str, Any],
-    ref_labels: Optional[torch.Tensor] = None
-) -> Optional[Figure]:
-    return render_static_graph(
-        node_info, new_edge_index, new_edge_types, new_edge_dirs, df_ref, prediction_result, ref_labels
-    )
-
-
-from pyvis.network import Network
-import tempfile
-import os
-import urllib.parse
-from utils.ui import Colors
-
-def visualize_graph(G: nx.Graph):    
     nt = Network(
         height="750px",
         width="100%",
@@ -672,41 +603,74 @@ def visualize_graph(G: nx.Graph):
     for node in G.nodes():
         attrs = G.nodes[node]
         score = attrs.get('trust_score', 0)
-        picture_url = str((attrs.get('picture_url', '') or '')).strip()
-
-        if picture_url:
-            # Change lens:// to https://api.grove.storage/
-            if picture_url.startswith("lens://"):
-                picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
-            
-            if picture_url.startswith("https://"):
-                encoded_url = urllib.parse.quote(picture_url, safe='')
-                
-                # Gọi qua wsrv.nl:
-                size = 64  # Kích thước mong muốn
-                quality = 70  # Chất lượng ảnh (0-100)
-                picture_url = f"https://wsrv.nl/?url={encoded_url}&w={size}&h={size}&fit=cover&q={quality}"
-            else:
-                picture_url = ''
-
-        color = '#2563eb'  # Uniform blue color for all nodes
+        picture_url = _resolve_picture_url(attrs.get('picture_url', ''))
         label = attrs.get('label', str(node)[:8])
-        title_parts = [f"ID: {node}", f"Score: {score}"]
-
-        if picture_url:
-            title_parts.append(f"Avatar: {picture_url}")
-
-        node_kwargs = {
-            "label": label,
-            "title": "\n".join(title_parts),
-            "color": color,
-            "size": 15
-        }
-
-        if picture_url:
-            node_kwargs["shape"] = "circularImage"
-            node_kwargs["image"] = picture_url or ""
-
+        
+        # Build tooltip
+        title_parts = [f"ID: {node}"]
+        if score:
+            title_parts.append(f"Score: {score}")
+        
+        if is_classify:
+            # Classification mode: color by SYBIL status
+            is_sybil = attrs.get('is_sybil', False)
+            node_type = attrs.get('node_type', 'reference')
+            is_target = node_type == 'target'
+            
+            bg_color = '#DC2626' if is_sybil else '#059669'
+            border_color = '#DC2626' if is_sybil else '#059669'
+            status_label = 'SYBIL' if is_sybil else 'NON-SYBIL'
+            
+            title_parts.append(f"Status: {status_label}")
+            if is_target:
+                title_parts.insert(0, 'TARGET')
+            
+            node_size = 30 if is_target else 15
+            border_width = 4 if is_target else 3
+            
+            node_kwargs = {
+                "label": label,
+                "title": "\n".join(title_parts),
+                "size": node_size,
+                "borderWidth": border_width,
+            }
+            
+            if picture_url:
+                # Show avatar with colored border
+                node_kwargs["shape"] = "circularImage"
+                node_kwargs["image"] = picture_url
+                node_kwargs["color"] = {
+                    "border": border_color,
+                    "highlight": {"border": '#2563EB'}
+                }
+            else:
+                # Solid colored node
+                node_kwargs["color"] = {
+                    "background": bg_color,
+                    "border": border_color,
+                    "highlight": {"background": bg_color, "border": '#2563EB'}
+                }
+        else:
+            # Exploration mode: uniform blue
+            if score:
+                title_parts.append(f"Score: {score}")
+            
+            node_kwargs = {
+                "label": label,
+                "title": "\n".join(title_parts),
+                "size": 15,
+            }
+            
+            if picture_url:
+                node_kwargs["shape"] = "circularImage"
+                node_kwargs["image"] = picture_url
+                node_kwargs["color"] = {
+                    "border": '#2563eb',
+                    "highlight": {"border": '#1d4ed8'}
+                }
+            else:
+                node_kwargs["color"] = '#2563eb'
+        
         nt.add_node(str(node), **node_kwargs)
     
     edge_colors = {
@@ -716,10 +680,37 @@ def visualize_graph(G: nx.Graph):
         'similarity': Colors.PURPLE
     }
     
+    # Track added undirected edges to avoid duplicates
+    added_undirected = set()
+    
     for u, v, data in G.edges(data=True):
         etype = data.get('edge_type', 'follow')
-        color = edge_colors.get(etype, Colors.NEUTRAL)
-        nt.add_edge(str(u), str(v), color=color, title=data.get('original_type', ''))
+        category = data.get('edge_category', etype)
+        is_undirected = data.get('undirected', False)
+        
+        # Skip duplicate undirected edges
+        if is_undirected:
+            edge_key = (min(u, v), max(u, v))
+            if edge_key in added_undirected:
+                continue
+            added_undirected.add(edge_key)
+        
+        color = edge_colors.get(category, edge_colors.get(etype, Colors.NEUTRAL))
+        edge_kwargs = {
+            "color": color,
+            "title": data.get('original_type', '') or data.get('edge_type', ''),
+        }
+        
+        if is_undirected:
+            edge_kwargs["arrows"] = ''
+        
+        if category == 'co_owner':
+            edge_kwargs["width"] = 3
+            edge_kwargs["dashes"] = True
+        elif category == 'similarity':
+            edge_kwargs["dashes"] = [5, 5]
+        
+        nt.add_edge(str(u), str(v), **edge_kwargs)
     
     with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
         nt.save_graph(f.name)
@@ -728,3 +719,164 @@ def visualize_graph(G: nx.Graph):
         os.unlink(f.name)
     
     return html_content
+
+
+def visualize_static_graph(G: nx.Graph, is_classify: bool = False):
+    """Create a static matplotlib visualization.
+    
+    Args:
+        G: NetworkX graph with node/edge attributes.
+        is_classify: If True, color nodes by SYBIL/NON-SYBIL status.
+                     If False, use uniform blue for all nodes.
+    """
+    fig, ax = plt.subplots(figsize=(12, 8), facecolor='white')
+    ax.set_facecolor('white')
+    
+    pos = nx.spring_layout(G, k=0.5, seed=42)
+    
+    edge_colors_map = {
+        'follow': Colors.BLUE,
+        'interact': Colors.CYAN,
+        'co_owner': Colors.DANGER,
+        'similarity': Colors.PURPLE
+    }
+    
+    for etype, color in edge_colors_map.items():
+        edge_list = [(u, v) for u, v, d in G.edges(data=True)
+                     if d.get('edge_category', d.get('edge_type')) == etype]
+        if edge_list:
+            is_undirected = etype in ('co_owner', 'similarity')
+            nx.draw_networkx_edges(
+                G, pos, ax=ax, edgelist=edge_list,
+                edge_color=color, alpha=0.6, width=1,
+                arrows=not is_undirected, arrowsize=8,
+                style='dashed' if etype == 'co_owner' else ('dotted' if etype == 'similarity' else 'solid')
+            )
+    
+    if is_classify:
+        # Classification mode: separate target from reference nodes
+        target_nodes = [n for n, d in G.nodes(data=True) if d.get('node_type') == 'target']
+        ref_nodes = [n for n, d in G.nodes(data=True) if d.get('node_type') == 'reference']
+        other_nodes = [n for n in G.nodes()
+                       if n not in target_nodes and n not in ref_nodes]
+        
+        # Draw reference nodes
+        if ref_nodes:
+            ref_colors = [G.nodes[n].get('color', '#059669') for n in ref_nodes]
+            nx.draw_networkx_nodes(
+                G, pos, ax=ax, nodelist=ref_nodes,
+                node_color=ref_colors, node_size=200,
+                edgecolors=[G.nodes[n].get('color', '#374151') for n in ref_nodes],
+                linewidths=2.0, alpha=0.85
+            )
+        
+        # Draw other nodes (fallback)
+        if other_nodes:
+            nx.draw_networkx_nodes(
+                G, pos, ax=ax, nodelist=other_nodes,
+                node_color='#2563eb', node_size=100, alpha=0.8
+            )
+        
+        # Draw target node with glow effect
+        if target_nodes:
+            target_color = G.nodes[target_nodes[0]].get('color', '#059669')
+            nx.draw_networkx_nodes(
+                G, pos, ax=ax, nodelist=target_nodes,
+                node_color=target_color, node_size=1200, alpha=0.25
+            )
+            nx.draw_networkx_nodes(
+                G, pos, ax=ax, nodelist=target_nodes,
+                node_color=target_color, node_size=600,
+                edgecolors='#ffffff', linewidths=3.0
+            )
+        
+        # Labels
+        labels = nx.get_node_attributes(G, 'label')
+        nx.draw_networkx_labels(
+            G, pos, ax=ax, labels=labels,
+            font_size=8, font_family='sans-serif', font_weight='medium',
+            bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=0.2)
+        )
+    else:
+        # Exploration mode: uniform blue
+        node_colors = ['#2563eb' for _ in G.nodes()]
+        nx.draw_networkx_nodes(G, pos, ax=ax, node_color=node_colors, node_size=100, alpha=0.8)
+    
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    return fig
+
+def create_nodes_legend_html(is_classify=False) -> str:
+    if is_classify:
+        return """
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 16px; height: 16px; border-radius: 50%; background: #DC2626; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
+    <span>Sybil</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 16px; height: 16px; border-radius: 50%; background: #059669; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
+    <span>Non-Sybil</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
+    <span style="color: #6B7280;">Follow</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
+    <span style="color: #6B7280;">Interact</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 3px; background: #DC2626;"></div>
+    <span style="color: #6B7280;">Co-owner</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
+    <span style="color: #6B7280;">Similarity</span>
+</div>
+"""
+    return """
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
+    <span>Node</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
+    <span style="color: #6B7280;">Follow</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
+    <span style="color: #6B7280;">Interact</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 3px; background: #DC2626;"></div>
+    <span style="color: #6B7280;">Co-owner</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+    <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
+    <span style="color: #6B7280;">Similarity</span>
+</div>
+"""
+
+
+def create_legend_html(is_classify=False) -> str:
+    """Create an HTML legend for the interactive graph."""
+    return f"""
+    <div style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 12px 16px;
+        background: #F8F9FA;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 12px;
+        color: #111827;
+    "> 
+        {create_nodes_legend_html(is_classify)}
+    """

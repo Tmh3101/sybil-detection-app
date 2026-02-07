@@ -7,25 +7,22 @@ on the Lens Protocol network.
 
 import streamlit as st
 import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
 
 from utils.predictor import SybilPredictor
 from utils.data_fetcher import bq_fetcher, mock_bq_fetcher
 from utils.visualizer import (
-    render_static_graph,
-    render_interactive_graph,
-    create_legend_html,
-    get_debug_messages,
-    PYVIS_AVAILABLE
+    build_analysis_graph,
+    visualize_interactive_graph,
+    visualize_static_graph,
+    create_legend_html
 )
 from utils.ui import (
     setup_page,
     page_header,
-    section_header,
     sidebar_header,
     metric_card,
-    profile_id_badge,
-    risk_badge,
-    Colors
+    profile_id_badge
 )
 
 
@@ -39,90 +36,112 @@ def load_predictor():
     return SybilPredictor()
 
 
-def render_graph_section(
-    result: dict,
-    new_edges,
-    new_types: list,
-    new_dirs: list,
-    df_ref,
-    viz_mode: str,
-    ref_labels=None
-) -> None:
-    """Render the network visualization based on selected mode."""
-    st.markdown("### Network Analysis")
+def _render_results(result, G, has_edges):
+    """Render analysis results and network graph from session state data."""
     
-    if new_edges.numel() == 0:
-        st.info("No connections found in reference graph.")
-        return
+    st.divider()
     
-    use_interactive = viz_mode == "Interactive (PyVis)"
-    fallback_used = False
-    
-    if use_interactive:
-        error_message = None
-        try:
-            html_path = render_interactive_graph(
-                result["node_info"],
-                new_edges,
-                new_types,
-                new_dirs,
-                df_ref,
-                result,
-                ref_labels=ref_labels
-            )
-            
-            if html_path is not None:
-                with open(html_path, 'r', encoding='utf-8') as f:
-                    graph_html = f.read()
-                
-                if len(graph_html) > 0:
-                    components.html(graph_html, height=570, scrolling=False)
-                    st.markdown(create_legend_html(), unsafe_allow_html=True)
-                    return
-                else:
-                    error_message = "Generated HTML file is empty"
-                    fallback_used = True
-            else:
-                error_message = "render_interactive_graph returned None"
-                fallback_used = True
-        except Exception as e:
-            error_message = str(e)
-            fallback_used = True
+    # Results container
+    with st.container(border=True):
+        st.markdown("### Analysis Results")
         
-        if fallback_used:
-            warning_msg = "Switched to static mode due to rendering issue."
-            if error_message:
-                warning_msg += f" Error: {error_message}"
-            st.warning(warning_msg)
+        col_metrics, col_details = st.columns([1, 2])
+        
+        with col_metrics:
+            # Profile Info
+            st.markdown("##### Profile Information")
             
-            debug_msgs = get_debug_messages()
-            if debug_msgs:
-                with st.expander("Debug Information", expanded=False):
-                    for msg in debug_msgs:
-                        if "[ERROR]" in msg:
-                            st.error(msg)
-                        else:
-                            st.text(msg)
-    
-    # Static mode (or fallback)
-    fig = render_static_graph(
-        result["node_info"],
-        new_edges,
-        new_types,
-        new_dirs,
-        df_ref,
-        result,
-        ref_labels=ref_labels
-    )
-    
-    if fig is not None:
-        st.pyplot(fig, use_container_width=True)
-    else:
-        st.info("Node is isolated - no connections found in reference graph.")
+            st.markdown(f'<p class="small-label">Profile ID</p>', unsafe_allow_html=True)
+            profile_id_badge(result["profile_id"])
+            
+            st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+            
+            st.markdown(f'<p class="small-label">Handle</p>', unsafe_allow_html=True)
+            st.markdown(f"**@{result['handle']}**")
+            
+            st.divider()
+            
+            # Verdict
+            st.markdown("##### Prediction")
+            
+            if result["prediction"] == "SYBIL":
+                st.markdown(f'<p class="verdict-sybil">SYBIL</p>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<p class="verdict-nonsybil">NON-SYBIL</p>', unsafe_allow_html=True)
+            
+            st.divider()
+            
+            # Metrics
+            col_m1, col_m2 = st.columns(2)
+            
+            with col_m1:
+                metric_card(
+                    "Confidence",
+                    result["sybil_probability_formatted"],
+                    compact=True
+                )
+            
+            with col_m2:
+                risk_level = result["analysis"]["risk_level"]
+                risk_status = "danger" if risk_level == "High" else ("warning" if risk_level == "Medium" else "safe")
+                metric_card(
+                    "Risk Level",
+                    risk_level,
+                    status=risk_status,
+                    compact=True
+                )
+            
+            st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+            
+            metric_card(
+                "Edges Found",
+                str(result["analysis"]["edges_found"]),
+                compact=True
+            )
+        
+        with col_details:
+            st.markdown("##### Network Graph")
+            
+            if not has_edges:
+                st.info("No connections found in reference graph.")
+            else:
+                # Visualization mode selection
+                viz_mode = st.radio(
+                    "Graph Visualization Mode",
+                    options=["Static (Matplotlib)", "Interactive (PyVis)"],
+                    index=0,
+                    horizontal=True,
+                    help="Choose visualization type",
+                    key="sybil_viz_mode"
+                )
+                
+                # Render graph using shared visualization functions
+                with st.container(border=True):
+                    st.markdown("### Network Analysis")
+                    
+                    if viz_mode == "Interactive (PyVis)":
+                        try:
+                            html_content = visualize_interactive_graph(G, is_classify=True)
+                            components.html(html_content, height=760, scrolling=False)
+                            st.markdown(create_legend_html(is_classify=True), unsafe_allow_html=True)
+                        except Exception as e:
+                            st.warning(f"PyVis rendering failed: {e}. Falling back to static.")
+                            viz_mode = "Static (Matplotlib)"
+                    
+                    if viz_mode == "Static (Matplotlib)":
+                        fig = visualize_static_graph(G, is_classify=True)
+                        st.pyplot(fig, use_container_width=True)
+                        plt.close(fig)
 
 
 def main():
     """Main application entry point."""
+    
+    # Initialize session state
+    if "sybil_result" not in st.session_state:
+        st.session_state.sybil_result = None
+        st.session_state.sybil_graph = None
+        st.session_state.sybil_has_edges = False
     
     # Sidebar
     with st.sidebar:
@@ -133,22 +152,6 @@ def main():
             options=["Mock Data", "Real Data (BigQuery)"],
             index=0,
             help="Select data source for profile lookup"
-        )
-        
-        st.divider()
-        
-        sidebar_header("Visualization")
-        
-        viz_options = ["Interactive (PyVis)", "Static (Matplotlib)"]
-        if not PYVIS_AVAILABLE:
-            viz_options = ["Static (Matplotlib)"]
-            st.caption("PyVis not available")
-        
-        viz_mode = st.radio(
-            "Graph Mode",
-            options=viz_options,
-            index=0,
-            help="Interactive mode allows zooming and panning"
         )
         
         st.divider()
@@ -189,7 +192,7 @@ def main():
         with col_button:
             analyze_clicked = st.button("Analyze", type="primary", use_container_width=True)
     
-    # Analysis section
+    # Run analysis when button is clicked — persist results to session state
     if analyze_clicked and profile_id:
         if not model_loaded:
             st.error("Model not loaded. Please check the system status in the sidebar.")
@@ -202,87 +205,43 @@ def main():
                 result, new_edges, new_types, new_dirs = predictor.predict(profile_id, fetcher)
             except Exception as e:
                 st.error(f"Analysis failed: {str(e)}")
+                st.session_state.sybil_result = None
                 return
         
         if "error" in result:
             st.error(f"Profile not found: {profile_id}")
+            st.session_state.sybil_result = None
             return
         
-        st.divider()
+        # Build graph and save everything to session state
+        has_edges = new_edges.numel() > 0
+        G = None
+        if has_edges:
+            G, _, _ = build_analysis_graph(
+                result["node_info"],
+                new_edges,
+                new_types,
+                new_dirs,
+                predictor.df_ref,
+                result,
+                ref_labels=predictor.ref_data.y
+            )
         
-        # Results container
-        with st.container(border=True):
-            st.markdown("### Analysis Results")
-            
-            col_metrics, col_graph = st.columns([1, 2])
-            
-            with col_metrics:
-                # Profile Info
-                st.markdown("##### Profile Information")
-                
-                st.markdown(f'<p class="small-label">Profile ID</p>', unsafe_allow_html=True)
-                profile_id_badge(result["profile_id"])
-                
-                st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-                
-                st.markdown(f'<p class="small-label">Handle</p>', unsafe_allow_html=True)
-                st.markdown(f"**@{result['handle']}**")
-                
-                st.divider()
-                
-                # Verdict
-                st.markdown("##### Prediction")
-                
-                if result["prediction"] == "SYBIL":
-                    st.markdown(f'<p class="verdict-sybil">SYBIL</p>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<p class="verdict-nonsybil">NON-SYBIL</p>', unsafe_allow_html=True)
-                
-                st.divider()
-                
-                # Metrics
-                col_m1, col_m2 = st.columns(2)
-                
-                with col_m1:
-                    metric_card(
-                        "Confidence",
-                        result["sybil_probability_formatted"],
-                        compact=True
-                    )
-                
-                with col_m2:
-                    risk_level = result["analysis"]["risk_level"]
-                    risk_status = "danger" if risk_level == "High" else ("warning" if risk_level == "Medium" else "safe")
-                    metric_card(
-                        "Risk Level",
-                        risk_level,
-                        status=risk_status,
-                        compact=True
-                    )
-                
-                st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
-                
-                metric_card(
-                    "Edges Found",
-                    str(result["analysis"]["edges_found"]),
-                    compact=True
-                )
-            
-            with col_graph:
-                render_graph_section(
-                    result,
-                    new_edges,
-                    new_types,
-                    new_dirs,
-                    predictor.df_ref,
-                    viz_mode,
-                    ref_labels=predictor.ref_data.y
-                )
+        st.session_state.sybil_result = result
+        st.session_state.sybil_graph = G
+        st.session_state.sybil_has_edges = has_edges
     
     elif analyze_clicked and not profile_id:
         st.warning("Please enter a Profile ID to analyze.")
     
-    else:
+    # Render results from session state (survives reruns from widget interactions)
+    if st.session_state.sybil_result is not None:
+        _render_results(
+            st.session_state.sybil_result,
+            st.session_state.sybil_graph,
+            st.session_state.sybil_has_edges
+        )
+    elif not analyze_clicked:
         # Show placeholder when no analysis has been run
         with st.container(border=True):
             st.markdown("### How to Use")
