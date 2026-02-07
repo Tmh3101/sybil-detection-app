@@ -155,21 +155,13 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
                 attrs = G.nodes[node]
                 score = attrs.get('trust_score', 0)
                 picture_url = str((attrs.get('picture_url', '') or '')).strip()
-                # Change lens:// to https://api.grove.storage/
-                # if picture_url.startswith("lens://"):
-                #     picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
-                # elif not picture_url.startswith("https://"):
-                #     picture_url = ''
 
                 if picture_url:
                     # Change lens:// to https://api.grove.storage/
                     if picture_url.startswith("lens://"):
                         picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
                     
-                    # BƯỚC QUAN TRỌNG: Bọc qua Proxy để resize ảnh
-                    # Chỉ giữ lại ảnh hợp lệ (bắt đầu bằng https)
                     if picture_url.startswith("https://"):
-                        # Encode URL gốc để tránh lỗi ký tự đặc biệt
                         encoded_url = urllib.parse.quote(picture_url, safe='')
                         
                         # Gọi qua wsrv.nl:
@@ -195,7 +187,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
 
                 if picture_url:
                     node_kwargs["shape"] = "circularImage"
-                    node_kwargs["image"] = picture_url
+                    node_kwargs["image"] = picture_url or ""
 
                 nt.add_node(str(node), **node_kwargs)
             
