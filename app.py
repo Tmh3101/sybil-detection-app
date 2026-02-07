@@ -22,7 +22,6 @@ load_css()
 
 def main():
     """Main application entry point."""
-    
     # Header
     st.markdown('<h1 class="page-title">Lens Sybil Detection</h1>', unsafe_allow_html=True)
     st.markdown(
@@ -31,10 +30,8 @@ def main():
         '</p>',
         unsafe_allow_html=True
     )
-    
     # Navigation cards - 3 columns
     col1, col2, col3 = st.columns(3, gap="medium")
-    
     with col1:
         feature_card(
             title="Data Exploration",
