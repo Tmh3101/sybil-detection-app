@@ -16,7 +16,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime
-import time
+import urllib.parse
 
 from utils.ui import (
     setup_page,
@@ -156,10 +156,28 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
                 score = attrs.get('trust_score', 0)
                 picture_url = str((attrs.get('picture_url', '') or '')).strip()
                 # Change lens:// to https://api.grove.storage/
-                if picture_url.startswith("lens://"):
-                    picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
-                elif not picture_url.startswith("https://"):
-                    picture_url = ''
+                # if picture_url.startswith("lens://"):
+                #     picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
+                # elif not picture_url.startswith("https://"):
+                #     picture_url = ''
+
+                if picture_url:
+                    # Change lens:// to https://api.grove.storage/
+                    if picture_url.startswith("lens://"):
+                        picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
+                    
+                    # BƯỚC QUAN TRỌNG: Bọc qua Proxy để resize ảnh
+                    # Chỉ giữ lại ảnh hợp lệ (bắt đầu bằng https)
+                    if picture_url.startswith("https://"):
+                        # Encode URL gốc để tránh lỗi ký tự đặc biệt
+                        encoded_url = urllib.parse.quote(picture_url, safe='')
+                        
+                        # Gọi qua wsrv.nl:
+                        size = 64  # Kích thước mong muốn
+                        quality = 70  # Chất lượng ảnh (0-100)
+                        picture_url = f"https://wsrv.nl/?url={encoded_url}&w={size}&h={size}&fit=cover&q={quality}"
+                    else:
+                        picture_url = ''
 
                 color = '#2563eb'  # Uniform blue color for all nodes
                 label = attrs.get('label', str(node)[:8])
