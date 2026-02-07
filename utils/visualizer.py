@@ -541,7 +541,7 @@ def render_interactive_graph(
         return None
 
 
-def create_legend_html() -> str:
+def create_classify_legend_html() -> str:
     """Create an HTML legend for the interactive graph."""
     return """
     <div style="
@@ -560,19 +560,51 @@ def create_legend_html() -> str:
     ">
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 16px; height: 16px; border-radius: 50%; background: #DC2626; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
-            <span>Target (Sybil)</span>
+            <span>Sybil</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 16px; height: 16px; border-radius: 50%; background: #059669; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
-            <span>Target (Non-Sybil)</span>
+            <span>Non-Sybil</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; border-radius: 50%; background: #DC2626; border: 2px solid #E5E7EB;"></div>
-            <span style="color: #6B7280;">Ref: Sybil</span>
+            <div style="width: 20px; height: 2px; background: #3b82f6;"></div>
+            <span style="color: #6B7280;">Follow</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; border-radius: 50%; background: #059669; border: 2px solid #E5E7EB;"></div>
-            <span style="color: #6B7280;">Ref: Non-Sybil</span>
+            <div style="width: 20px; height: 1.5px; background: #06b6d4;"></div>
+            <span style="color: #6B7280;">Interact</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 20px; height: 3px; background: #DC2626;"></div>
+            <span style="color: #6B7280;">Co-owner</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 20px; height: 2px; background: #7c3aed;"></div>
+            <span style="color: #6B7280;">Similarity</span>
+        </div>
+    </div>
+    """
+
+def create_legend_html() -> str:
+    """Create an HTML legend for the interactive graph."""
+    return """
+    <div style="
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 12px 16px;
+        background: #F8F9FA;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 12px;
+        color: #111827;
+    ">
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.1);"></div>
+            <span>Node</span>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
             <div style="width: 20px; height: 2px; background: #3b82f6;"></div>

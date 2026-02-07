@@ -110,7 +110,8 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
         G.add_node(
             row['profile_id'],
             label=handle[:12] if len(str(handle)) > 12 else handle,
-            trust_score=row.get('trust_score', 0)
+            trust_score=row.get('trust_score', 0),
+            picture_url=row.get('picture_url', '')
         )
     
     for _, row in edges_df.iterrows():
@@ -130,7 +131,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
             import streamlit.components.v1 as components
             
             nt = Network(
-                height="450px",
+                height="750px",
                 width="100%",
                 bgcolor="#FFFFFF",
                 font_color="#111827",
@@ -153,16 +154,30 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
             for node in G.nodes():
                 attrs = G.nodes[node]
                 score = attrs.get('trust_score', 0)
-                color = Colors.SAFE if score and score > 10 else Colors.DANGER
+                picture_url = str((attrs.get('picture_url', '') or '')).strip()
+                # Skip non-HTTP avatars (e.g., lens:// or raw ipfs:// entries)
+                if picture_url.startswith("lens://") or not picture_url.startswith("http"):
+                    picture_url = ''
+
+                color = '#2563eb'  # Uniform blue color for all nodes
                 label = attrs.get('label', str(node)[:8])
-                
-                nt.add_node(
-                    str(node),
-                    label=label,
-                    title=f"ID: {node}\nScore: {score}",
-                    color=color,
-                    size=15
-                )
+                title_parts = [f"ID: {node}", f"Score: {score}"]
+
+                if picture_url:
+                    title_parts.append(f"Avatar: {picture_url}")
+
+                node_kwargs = {
+                    "label": label,
+                    "title": "\n".join(title_parts),
+                    "color": color,
+                    "size": 15
+                }
+
+                if picture_url:
+                    node_kwargs["shape"] = "circularImage"
+                    node_kwargs["image"] = picture_url
+
+                nt.add_node(str(node), **node_kwargs)
             
             edge_colors = {
                 'follow': Colors.BLUE,
@@ -182,7 +197,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
                     html_content = html_file.read()
                 os.unlink(f.name)
             
-            components.html(html_content, height=470, scrolling=False)
+            components.html(html_content, height=760, scrolling=False)
             st.markdown(create_legend_html(), unsafe_allow_html=True)
             
         except Exception as e:
@@ -213,7 +228,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
                     arrows=True, arrowsize=8
                 )
         
-        node_colors = [Colors.SAFE if G.nodes[n].get('trust_score', 0) > 10 else Colors.DANGER for n in G.nodes()]
+        node_colors = ['#2563eb' for n in G.nodes()]  # Uniform blue color for all nodes
         nx.draw_networkx_nodes(G, pos, ax=ax, node_color=node_colors, node_size=100, alpha=0.8)
         
         ax.set_xticks([])
