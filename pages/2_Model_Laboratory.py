@@ -155,8 +155,10 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
                 attrs = G.nodes[node]
                 score = attrs.get('trust_score', 0)
                 picture_url = str((attrs.get('picture_url', '') or '')).strip()
-                # Skip non-HTTP avatars (e.g., lens:// or raw ipfs:// entries)
-                if picture_url.startswith("lens://") or not picture_url.startswith("http"):
+                # Change lens:// to https://api.grove.storage/
+                if picture_url.startswith("lens://"):
+                    picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
+                elif not picture_url.startswith("https://"):
                     picture_url = ''
 
                 color = '#2563eb'  # Uniform blue color for all nodes
