@@ -14,9 +14,10 @@ import numpy as np
 import networkx as nx
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from datetime import datetime
-import urllib.parse
+import streamlit.components.v1 as components
+from utils.visualizer import visualize_graph, create_legend_html
+from plotly.subplots import make_subplots
 
 from utils.ui import (
     setup_page,
@@ -27,7 +28,6 @@ from utils.ui import (
     apply_plotly_theme,
     Colors
 )
-from utils.visualizer import create_legend_html
 
 
 # Page setup
@@ -125,90 +125,7 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
     
     if viz_mode == "Interactive (PyVis)":
         try:
-            from pyvis.network import Network
-            import tempfile
-            import os
-            import streamlit.components.v1 as components
-            
-            nt = Network(
-                height="750px",
-                width="100%",
-                bgcolor="#FFFFFF",
-                font_color="#111827",
-                directed=True,
-                cdn_resources='remote'
-            )
-            
-            nt.set_options("""
-            {
-                "nodes": {"borderWidth": 2, "font": {"size": 10, "color": "#111827"}},
-                "edges": {"smooth": {"type": "curvedCW", "roundness": 0.1}},
-                "physics": {
-                    "enabled": true,
-                    "stabilization": {"iterations": 100},
-                    "barnesHut": {"gravitationalConstant": -2000, "springLength": 100}
-                }
-            }
-            """)
-            
-            for node in G.nodes():
-                attrs = G.nodes[node]
-                score = attrs.get('trust_score', 0)
-                picture_url = str((attrs.get('picture_url', '') or '')).strip()
-
-                if picture_url:
-                    # Change lens:// to https://api.grove.storage/
-                    if picture_url.startswith("lens://"):
-                        picture_url = picture_url.replace("lens://", "https://api.grove.storage/")
-                    
-                    if picture_url.startswith("https://"):
-                        encoded_url = urllib.parse.quote(picture_url, safe='')
-                        
-                        # Gọi qua wsrv.nl:
-                        size = 64  # Kích thước mong muốn
-                        quality = 70  # Chất lượng ảnh (0-100)
-                        picture_url = f"https://wsrv.nl/?url={encoded_url}&w={size}&h={size}&fit=cover&q={quality}"
-                    else:
-                        picture_url = ''
-
-                color = '#2563eb'  # Uniform blue color for all nodes
-                label = attrs.get('label', str(node)[:8])
-                title_parts = [f"ID: {node}", f"Score: {score}"]
-
-                if picture_url:
-                    title_parts.append(f"Avatar: {picture_url}")
-
-                node_kwargs = {
-                    "label": label,
-                    "title": "\n".join(title_parts),
-                    "color": color,
-                    "size": 15
-                }
-
-                if picture_url:
-                    node_kwargs["shape"] = "circularImage"
-                    node_kwargs["image"] = picture_url or ""
-
-                nt.add_node(str(node), **node_kwargs)
-            
-            edge_colors = {
-                'follow': Colors.BLUE,
-                'interact': Colors.CYAN,
-                'co_owner': Colors.DANGER,
-                'similarity': Colors.PURPLE
-            }
-            
-            for u, v, data in G.edges(data=True):
-                etype = data.get('edge_type', 'follow')
-                color = edge_colors.get(etype, Colors.NEUTRAL)
-                nt.add_edge(str(u), str(v), color=color, title=data.get('original_type', ''))
-            
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
-                nt.save_graph(f.name)
-                with open(f.name, 'r', encoding='utf-8') as html_file:
-                    html_content = html_file.read()
-                os.unlink(f.name)
-            
+            html_content = visualize_graph(G)
             components.html(html_content, height=760, scrolling=False)
             st.markdown(create_legend_html(), unsafe_allow_html=True)
             

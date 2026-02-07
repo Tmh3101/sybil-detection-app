@@ -7,11 +7,13 @@ and visualize statistical insights.
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import networkx as nx
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import streamlit.components.v1 as components
+import matplotlib.pyplot as plt
+from utils.visualizer import visualize_graph, create_legend_html
 
 from config import MAX_DAYS_RANGE, DATASET_ID
 from utils.ui import (
@@ -316,88 +318,14 @@ def main():
         
         if viz_mode == "Interactive (PyVis)":
             try:
-                from pyvis.network import Network
-                import tempfile
-                import os
-                import streamlit.components.v1 as components
-                
-                nt = Network(
-                    height="500px",
-                    width="100%",
-                    bgcolor="#FFFFFF",
-                    font_color="#111827",
-                    directed=True,
-                    cdn_resources='remote'
-                )
-                
-                nt.set_options("""
-                {
-                    "nodes": {"borderWidth": 2, "font": {"size": 10, "color": "#111827"}},
-                    "edges": {"smooth": {"type": "curvedCW", "roundness": 0.1}},
-                    "physics": {
-                        "enabled": true,
-                        "stabilization": {"iterations": 100},
-                        "barnesHut": {"gravitationalConstant": -2000, "springLength": 100}
-                    }
-                }
-                """)
-                
-                for node in G.nodes():
-                    attrs = G.nodes[node]
-                    score = attrs.get('trust_score', 0)
-                    picture_url = (attrs.get('picture_url', '') or '').strip()
-                    # Skip non-HTTP avatars (e.g., lens:// or raw ipfs:// entries)
-                    if picture_url.startswith("lens://") or not picture_url.startswith("http"):
-                        picture_url = ''
-
-                    color = '#2563eb'  # Uniform blue color for all nodes
-                    label = attrs.get('label', str(node)[:8])
-                    title_parts = [f"ID: {node}", f"Score: {score}"]
-
-                    if picture_url:
-                        title_parts.append(f"Avatar: {picture_url}")
-
-                    node_kwargs = {
-                        "label": label,
-                        "title": "\n".join(title_parts),
-                        "color": color,
-                        "size": 15
-                    }
-
-                    if picture_url:
-                        node_kwargs["shape"] = "circularImage"
-                        node_kwargs["image"] = picture_url
-
-                    nt.add_node(str(node), **node_kwargs)
-                
-                edge_colors = {
-                    'follow': Colors.BLUE,
-                    'interact': Colors.CYAN,
-                    'co_owner': Colors.DANGER,
-                    'similarity': Colors.PURPLE
-                }
-                
-                for u, v, data in G.edges(data=True):
-                    etype = data.get('edge_type', 'follow')
-                    color = edge_colors.get(etype, Colors.NEUTRAL)
-                    nt.add_edge(str(u), str(v), color=color, title=data.get('original_type', ''))
-                
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
-                    nt.save_graph(f.name)
-                    with open(f.name, 'r', encoding='utf-8') as html_file:
-                        html_content = html_file.read()
-                    os.unlink(f.name)
-                
-                components.html(html_content, height=520, scrolling=False)
-                st.markdown(create_legend_html(), unsafe_allow_html=True)
-                
+                html_content = visualize_graph(G)
+                components.html(html_content, height=760, scrolling=False)
+                st.markdown(create_legend_html(), unsafe_allow_html=True)    
             except Exception as e:
                 st.warning(f"PyVis rendering failed: {e}. Falling back to static.")
                 viz_mode = "Static (Matplotlib)"
         
         if viz_mode == "Static (Matplotlib)":
-            import matplotlib.pyplot as plt
-            
             fig, ax = plt.subplots(figsize=(12, 8), facecolor='white')
             ax.set_facecolor('white')
             
