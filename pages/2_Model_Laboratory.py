@@ -88,7 +88,6 @@ def count_isolated_nodes(nodes_df: pd.DataFrame, edges_df: pd.DataFrame) -> int:
     """Count nodes with no edges."""
     if nodes_df.empty or edges_df.empty:
         return len(nodes_df)
-    
     connected_nodes = set(edges_df['source'].unique()) | set(edges_df['target'].unique())
     isolated_count = len(nodes_df[~nodes_df['profile_id'].isin(connected_nodes)])
     return isolated_count
@@ -99,13 +98,11 @@ def render_data_graph(nodes_df: pd.DataFrame, edges_df: pd.DataFrame, viz_mode: 
     if nodes_df.empty or edges_df.empty:
         st.info("No data to visualize.")
         return
-    
     if len(nodes_df) > 500:
         st.info(f"Graph too large ({len(nodes_df)} nodes). Visualization skipped for performance.")
         return
     
     G = nx.DiGraph()
-    
     for _, row in nodes_df.iterrows():
         handle = row.get('handle', str(row['profile_id'])[:8])
         G.add_node(
