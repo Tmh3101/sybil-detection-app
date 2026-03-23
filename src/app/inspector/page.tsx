@@ -16,13 +16,13 @@ import {
   Loader2,
 } from "lucide-react";
 
-const EgoGraph3D = dynamic(() => import("@/components/graph/ego-graph-3d"), {
+const EgoGraph2D = dynamic(() => import("@/components/graph/ego-graph-2d"), {
   ssr: false,
   loading: () => (
     <div className="h-full w-full flex flex-col items-center justify-center gap-4 bg-black/20">
       <Loader2 className="text-accent-cyan animate-spin" size={32} />
       <span className="text-[10px] font-mono text-accent-cyan animate-pulse uppercase tracking-[0.2em] font-bold">
-        INITIALIZING 3D RENDER ENGINE...
+        INITIALIZING 2D RENDER ENGINE...
       </span>
     </div>
   ),
@@ -50,12 +50,16 @@ function InspectorContent() {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-4">
         <div className="p-8 border-2 border-dashed border-border rounded-lg bg-surface/50 max-w-lg text-center">
-          <Activity className="mx-auto mb-4 text-slate-500 animate-pulse" size={48} />
+          <Activity
+            className="mx-auto mb-4 text-slate-500 animate-pulse"
+            size={48}
+          />
           <h2 className="text-xl font-black italic tracking-tighter uppercase text-foreground mb-2">
             Awaiting Target Input...
           </h2>
           <p className="text-sm font-mono text-slate-500 uppercase tracking-widest leading-relaxed">
-            Please enter a wallet address or handle in the search bar above to begin risk assessment.
+            Please enter a wallet address or handle in the search bar above to
+            begin risk assessment.
           </p>
         </div>
       </div>
@@ -89,7 +93,8 @@ function InspectorContent() {
             [ERR] Failed to Fetch Target Data
           </h2>
           <p className="text-sm font-mono text-slate-500 uppercase tracking-widest leading-relaxed">
-            The sybil engine encountered an error while analyzing the target. Please verify the ID and try again.
+            The sybil engine encountered an error while analyzing the target.
+            Please verify the ID and try again.
           </p>
         </div>
       </div>
@@ -114,7 +119,10 @@ function InspectorContent() {
         </div>
         <div className="flex items-center gap-4">
           <div className="px-4 py-2 bg-surface border border-border rounded-sm text-xs font-mono">
-            ID: <span className="text-accent-cyan font-bold uppercase">{walletId.slice(0, 6)}...{walletId.slice(-4)}</span>
+            ID:{" "}
+            <span className="text-accent-cyan font-bold uppercase">
+              {walletId.slice(0, 6)}...{walletId.slice(-4)}
+            </span>
           </div>
           <button className="px-6 py-2 bg-accent-red text-white dark:text-black font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all rounded-sm italic shadow-lg">
             QUARANTINE
@@ -149,13 +157,15 @@ function InspectorContent() {
                   strokeWidth="12"
                   fill="transparent"
                   strokeDasharray={502.4}
-                  strokeDashoffset={502.4 * (1 - (prob / 100))}
+                  strokeDashoffset={502.4 * (1 - prob / 100)}
                   className={`${colorClass} transition-all duration-1000 ease-out`}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute flex flex-col items-center">
-                <span className={`text-5xl font-black italic tracking-tighter ${colorClass}`}>
+                <span
+                  className={`text-5xl font-black italic tracking-tighter ${colorClass}`}
+                >
                   {Math.round(prob)}%
                 </span>
                 <span className="text-subtle -mt-1 uppercase tracking-widest text-[10px] font-bold">
@@ -201,8 +211,8 @@ function InspectorContent() {
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
 
-            {/* Live 3D Ego Graph */}
-            <EgoGraph3D 
+            {/* Live 2D Ego Graph */}
+            <EgoGraph2D
               graphData={data?.local_graph || { nodes: [], links: [] }}
               targetId={walletId || ""}
               classification={data?.analysis?.classification}
@@ -211,10 +221,10 @@ function InspectorContent() {
             {/* Overlays */}
             <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
               <div className="px-2 py-1 bg-black/80 border border-slate-700 text-[9px] font-mono text-accent-cyan uppercase font-bold">
-                EGO_GRAPH_v3_WEBGL
+                EGO_GRAPH_v3_CANVAS
               </div>
               <div className="px-2 py-1 bg-black/80 border border-slate-700 text-[9px] font-mono text-slate-400 uppercase">
-                REAL_TIME_SPATIAL
+                REAL_TIME_2D_VIEW
               </div>
             </div>
 
@@ -235,7 +245,13 @@ function InspectorContent() {
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 bg-surface-secondary border-2 border-border rounded-sm flex items-center justify-center relative overflow-hidden group shadow-inner">
                 {profile?.picture_url ? (
-                  <Image src={profile.picture_url} alt={profile.handle} width={64} height={64} className="w-full h-full object-cover" />
+                  <Image
+                    src={profile.picture_url}
+                    alt={profile.handle}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <User
                     size={32}
@@ -261,12 +277,19 @@ function InspectorContent() {
                   </span>
                 </div>
                 <span className="text-xs font-mono text-accent-cyan font-bold">
-                  {profile?.owned_by ? `${profile.owned_by.slice(0, 6)}...${profile.owned_by.slice(-4)}` : "N/A"}
+                  {profile?.owned_by
+                    ? `${profile.owned_by.slice(0, 6)}...${profile.owned_by.slice(-4)}`
+                    : "N/A"}
                 </span>
               </div>
               <div className="flex justify-between items-center p-3 bg-surface-secondary/20 border border-border rounded-sm shadow-sm">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={14} className={prob > 70 ? "text-accent-red" : "text-accent-green"} />
+                  <ShieldCheck
+                    size={14}
+                    className={
+                      prob > 70 ? "text-accent-red" : "text-accent-green"
+                    }
+                  />
                   <span className="text-[10px] text-slate-500 uppercase font-mono font-bold">
                     Risk Level
                   </span>
@@ -293,24 +316,38 @@ function InspectorContent() {
             <div className="space-y-4">
               <div className="p-3 bg-surface-secondary/20 border border-border rounded-sm">
                 <div className="flex justify-between mb-2">
-                  <span className="text-[9px] font-mono text-slate-500 font-bold uppercase">Sybil Probability</span>
-                  <span className={`text-[9px] font-bold font-mono ${colorClass}`}>{Math.round(prob)}%</span>
+                  <span className="text-[9px] font-mono text-slate-500 font-bold uppercase">
+                    Sybil Probability
+                  </span>
+                  <span
+                    className={`text-[9px] font-bold font-mono ${colorClass}`}
+                  >
+                    {Math.round(prob)}%
+                  </span>
                 </div>
                 <div className="w-full h-1.5 bg-background overflow-hidden rounded-full border border-border">
                   <div
-                    className={`h-full transition-all duration-1000 ease-out ${prob > 70 ? 'bg-accent-red' : prob > 30 ? 'bg-orange-500' : 'bg-accent-green'}`}
+                    className={`h-full transition-all duration-1000 ease-out ${prob > 70 ? "bg-accent-red" : prob > 30 ? "bg-orange-500" : "bg-accent-green"}`}
                     style={{ width: `${prob}%` }}
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <span className="text-[9px] font-mono text-slate-500 font-bold uppercase px-1">Reasoning Tokens:</span>
+                <span className="text-[9px] font-mono text-slate-500 font-bold uppercase px-1">
+                  Reasoning Tokens:
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {(analysis?.reasoning || []).slice(0, 4).map((r, i) => {
-                    const tag = r.split(':')[0].replace('[', '').replace(']', '');
+                    const tag = r
+                      .split(":")[0]
+                      .replace("[", "")
+                      .replace("]", "");
                     return (
-                      <span key={i} className="px-2 py-0.5 bg-surface-secondary border border-border text-[8px] font-mono text-slate-400 uppercase">
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 bg-surface-secondary border border-border text-[8px] font-mono text-slate-400 uppercase"
+                      >
                         {tag}
                       </span>
                     );
@@ -327,14 +364,16 @@ function InspectorContent() {
 
 export default function InspectorPage() {
   return (
-    <Suspense fallback={
-      <div className="h-full flex flex-col items-center justify-center gap-6">
-        <Loader2 className="text-accent-cyan animate-spin" size={48} />
-        <span className="text-sm font-mono text-accent-cyan animate-pulse uppercase tracking-[0.2em] font-bold">
-          [SYS] INITIALIZING MODULE...
-        </span>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="h-full flex flex-col items-center justify-center gap-6">
+          <Loader2 className="text-accent-cyan animate-spin" size={48} />
+          <span className="text-sm font-mono text-accent-cyan animate-pulse uppercase tracking-[0.2em] font-bold">
+            [SYS] INITIALIZING MODULE...
+          </span>
+        </div>
+      }
+    >
       <InspectorContent />
     </Suspense>
   );
