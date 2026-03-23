@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useInspectProfile } from "@/hooks/use-sybil-inference";
 import { IndustrialCard } from "@/components/ui/industrial-card";
@@ -15,14 +16,22 @@ import {
   Loader2,
 } from "lucide-react";
 
+const EgoGraph3D = dynamic(() => import("@/components/graph/ego-graph-3d"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full flex flex-col items-center justify-center gap-4 bg-black/20">
+      <Loader2 className="text-accent-cyan animate-spin" size={32} />
+      <span className="text-[10px] font-mono text-accent-cyan animate-pulse uppercase tracking-[0.2em] font-bold">
+        INITIALIZING 3D RENDER ENGINE...
+      </span>
+    </div>
+  ),
+});
+
 function InspectorContent() {
   const searchParams = useSearchParams();
   const walletId = searchParams.get("wallet");
   const { data, isLoading, isError } = useInspectProfile(walletId);
-
-  const nodeOffsets = useMemo(() => {
-    return [...Array(24)].map(() => 150 + Math.random() * 100);
-  }, []);
 
   const getClassificationColor = (classification: string) => {
     switch (classification) {
@@ -189,88 +198,27 @@ function InspectorContent() {
         <div className="col-span-6">
           <div className="h-full w-full bg-[#050608] border border-border rounded-sm relative overflow-hidden group shadow-2xl">
             {/* Background Grid - Visible on dark screen */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-20 pointer-events-none" />
 
-            {/* Mock Ego Graph SVG */}
-            <svg
-              className="absolute inset-0 w-full h-full"
-              viewBox="0 0 800 600"
-            >
-              <defs>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {/* Central Node Connection Lines */}
-              {[...Array(12)].map((_, i) => (
-                <line
-                  key={i}
-                  x1="400"
-                  y1="300"
-                  x2={400 + Math.cos((i * 30 * Math.PI) / 180) * 180}
-                  y2={300 + Math.sin((i * 30 * Math.PI) / 180) * 180}
-                  stroke={i % 3 === 0 && prob > 70 ? "#ff1744" : "#00f2ff"}
-                  strokeWidth={i % 3 === 0 ? "2" : "0.5"}
-                  strokeOpacity={i % 3 === 0 ? "0.8" : "0.4"}
-                  strokeDasharray={i % 3 === 0 ? "5,5" : "0"}
-                />
-              ))}
-
-              {/* Random Nodes */}
-              {nodeOffsets.map((offset, i) => (
-                <circle
-                  key={i}
-                  cx={
-                    400 + Math.cos((i * 15 * Math.PI) / 180) * offset
-                  }
-                  cy={
-                    300 + Math.sin((i * 15 * Math.PI) / 180) * offset
-                  }
-                  r={i % 4 === 0 ? "4" : "2"}
-                  fill={i % 4 === 0 && prob > 70 ? "#ff1744" : "#1e293b"}
-                  stroke={i % 4 === 0 ? "white" : "#475569"}
-                  strokeWidth="1"
-                  className={i % 4 === 0 ? "animate-pulse" : ""}
-                />
-              ))}
-
-              {/* Central Target Node */}
-              <circle
-                cx="400"
-                cy="300"
-                r="15"
-                fill={prob > 70 ? "#ff1744" : "#00f2ff"}
-                filter="url(#glow)"
-                className="animate-pulse"
-              />
-              <circle
-                cx="400"
-                cy="300"
-                r="25"
-                fill="transparent"
-                stroke={prob > 70 ? "#ff1744" : "#00f2ff"}
-                strokeWidth="1"
-                strokeDasharray="4,4"
-              />
-            </svg>
+            {/* Live 3D Ego Graph */}
+            <EgoGraph3D 
+              graphData={data?.local_graph || { nodes: [], links: [] }}
+              targetId={walletId || ""}
+              classification={data?.analysis?.classification}
+            />
 
             {/* Overlays */}
-            <div className="absolute top-4 left-4 flex gap-2">
+            <div className="absolute top-4 left-4 flex gap-2 pointer-events-none">
               <div className="px-2 py-1 bg-black/80 border border-slate-700 text-[9px] font-mono text-accent-cyan uppercase font-bold">
-                EGO_GRAPH_v2
+                EGO_GRAPH_v3_WEBGL
               </div>
               <div className="px-2 py-1 bg-black/80 border border-slate-700 text-[9px] font-mono text-slate-400 uppercase">
-                3D_SPATIAL_MOCK
+                REAL_TIME_SPATIAL
               </div>
             </div>
 
-            <div className="absolute bottom-4 right-4 flex flex-col gap-1 items-end">
+            <div className="absolute bottom-4 right-4 flex flex-col gap-1 items-end pointer-events-none">
               <span className="text-[8px] font-mono text-slate-500 uppercase font-bold">
                 Node Connections: {data?.local_graph?.nodes?.length || 0}
               </span>
