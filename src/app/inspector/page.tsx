@@ -61,17 +61,17 @@ function InspectorContent() {
             <div className="relative">
               <Radar className="text-slate-700" size={120} strokeWidth={1} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-2 w-2 animate-ping rounded-full bg-accent-cyan/50" />
+                <div className="bg-accent-cyan/50 h-2 w-2 animate-ping rounded-full" />
               </div>
             </div>
-            
+
             <div className="flex flex-col items-center text-center">
               <h2 className="mb-2 text-2xl font-black tracking-tighter text-slate-400 uppercase italic">
                 [ SYSTEM STANDBY ]
               </h2>
               <div className="flex items-center gap-3">
                 <span className="h-[1px] w-8 bg-slate-800" />
-                <p className="font-mono text-xs tracking-[0.3em] text-accent-cyan/60 uppercase">
+                <p className="text-accent-cyan/60 font-mono text-xs tracking-[0.3em] uppercase">
                   Awaiting Target Input
                 </p>
                 <span className="h-[1px] w-8 bg-slate-800" />
@@ -131,7 +131,7 @@ function InspectorContent() {
               {walletId.slice(0, 6)}...{walletId.slice(-4)}
             </span>
           </div>
-          <button className="bg-accent-red rounded-sm px-6 py-2 text-xs font-black tracking-widest text-white uppercase italic shadow-lg transition-all hover:brightness-110 active:shadow-neo-concave active:translate-y-0.5 dark:text-black">
+          <button className="bg-accent-red active:shadow-neo-concave rounded-sm px-6 py-2 text-xs font-black tracking-widest text-white uppercase italic shadow-lg transition-all hover:brightness-110 active:translate-y-0.5 dark:text-black">
             QUARANTINE
           </button>
         </div>

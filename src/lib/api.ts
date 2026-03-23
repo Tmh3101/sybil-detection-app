@@ -15,8 +15,9 @@ apiClient.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const errorMessage = error.response?.data?.error || error.message || "UNKNOWN_SYSTEM_ERROR";
-    
+    const errorMessage =
+      error.response?.data?.error || error.message || "UNKNOWN_SYSTEM_ERROR";
+
     toast.error(`[SYS_ERR] ${errorMessage.toUpperCase()}`, {
       description: `TIME: ${new Date().toISOString()}`,
     });

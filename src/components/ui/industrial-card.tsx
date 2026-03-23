@@ -15,7 +15,7 @@ export const IndustrialCard: React.FC<IndustrialCardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-surface relative overflow-hidden rounded-sm border border-slate-200/60 p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-accent-cyan/50 dark:border-slate-800/60 ${className} `}
+      className={`bg-surface hover:border-accent-cyan/50 relative overflow-hidden rounded-sm border border-slate-200/60 p-6 transition-all duration-300 ease-out hover:-translate-y-0.5 dark:border-slate-800/60 ${className} `}
     >
       {/* 
          Mechanical screw points at corners 
