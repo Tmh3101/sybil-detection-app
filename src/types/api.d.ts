@@ -17,27 +17,19 @@ export interface Analysis {
   reasoning: string[];
 }
 
-export interface LocalGraph {
-  nodes: any[]; // Detailed in Task 3
-  links: any[];
-}
-
-export interface InspectorResponse {
-  profile_info: ProfileInfo;
-  analysis: Analysis;
-  local_graph: LocalGraph;
-}
-
 export interface SybilNode {
   id: string;
   label: string;
   trust_score: number;
   is_sybil: boolean;
+  x?: number;
+  y?: number;
+  z?: number;
   attributes: {
     follower_count?: number;
     following_count?: number;
     account_age?: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | undefined;
   };
 }
 
@@ -46,4 +38,15 @@ export interface SybilEdge {
   target: string;
   type: "comment" | "follow" | "upvote" | "transfer";
   weight: number;
+}
+
+export interface LocalGraph {
+  nodes: SybilNode[];
+  links: SybilEdge[];
+}
+
+export interface InspectorResponse {
+  profile_info: ProfileInfo;
+  analysis: Analysis;
+  local_graph: LocalGraph;
 }

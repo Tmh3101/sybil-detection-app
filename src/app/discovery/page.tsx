@@ -1,13 +1,29 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { TerminalLog } from "@/components/ui/terminal-log";
 import { Play, Calendar, Filter, Database } from "lucide-react";
 
+interface ClusterNode {
+  cx: number;
+  cy: number;
+  r: number;
+  delay: string;
+}
+
+interface ClusterData {
+  alpha: ClusterNode[];
+  sigma: ClusterNode[];
+  threat: ClusterNode[];
+}
+
 export default function DiscoveryPage() {
-  const clusterData = useMemo(() => {
-    return {
+  const [clusterData, setClusterData] = useState<ClusterData | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setClusterData({
       alpha: [...Array(30)].map(() => ({
         cx: 250 + Math.random() * 150,
         cy: 200 + Math.random() * 150,
@@ -26,7 +42,7 @@ export default function DiscoveryPage() {
         r: 3 + Math.random() * 5,
         delay: `${Math.random() * 2}s`,
       })),
-    };
+    });
   }, []);
 
   return (
@@ -97,72 +113,76 @@ export default function DiscoveryPage() {
 
         {/* Mock Cluster Map SVG */}
         <svg className="w-full h-full max-h-[500px]" viewBox="0 0 1000 600">
-          {/* Cluster Clouds */}
-          {/* Purple Cluster */}
-          <g className="opacity-60">
-            {clusterData.alpha.map((node, i) => (
-              <circle
-                key={`p-${i}`}
-                cx={node.cx}
-                cy={node.cy}
-                r={node.r}
-                fill="#a855f7"
-                className="animate-pulse"
-                style={{ animationDelay: node.delay }}
-              />
-            ))}
-            <text
-              x="250"
-              y="180"
-              className="fill-purple-400 font-mono text-[10px] font-bold uppercase tracking-widest"
-            >
-              Cluster_Alpha_T7
-            </text>
-          </g>
+          {clusterData && (
+            <>
+              {/* Cluster Clouds */}
+              {/* Purple Cluster */}
+              <g className="opacity-60">
+                {clusterData.alpha.map((node, i) => (
+                  <circle
+                    key={`p-${i}`}
+                    cx={node.cx}
+                    cy={node.cy}
+                    r={node.r}
+                    fill="#a855f7"
+                    className="animate-pulse"
+                    style={{ animationDelay: node.delay }}
+                  />
+                ))}
+                <text
+                  x="250"
+                  y="180"
+                  className="fill-purple-400 font-mono text-[10px] font-bold uppercase tracking-widest"
+                >
+                  Cluster_Alpha_T7
+                </text>
+              </g>
 
-          {/* Orange Cluster */}
-          <g className="opacity-60">
-            {clusterData.sigma.map((node, i) => (
-              <circle
-                key={`o-${i}`}
-                cx={node.cx}
-                cy={node.cy}
-                r={node.r}
-                fill="#f97316"
-                className="animate-pulse"
-                style={{ animationDelay: node.delay }}
-              />
-            ))}
-            <text
-              x="700"
-              y="330"
-              className="fill-orange-400 font-mono text-[10px] font-bold uppercase tracking-widest"
-            >
-              Cluster_Sigma_X4
-            </text>
-          </g>
+              {/* Orange Cluster */}
+              <g className="opacity-60">
+                {clusterData.sigma.map((node, i) => (
+                  <circle
+                    key={`o-${i}`}
+                    cx={node.cx}
+                    cy={node.cy}
+                    r={node.r}
+                    fill="#f97316"
+                    className="animate-pulse"
+                    style={{ animationDelay: node.delay }}
+                  />
+                ))}
+                <text
+                  x="700"
+                  y="330"
+                  className="fill-orange-400 font-mono text-[10px] font-bold uppercase tracking-widest"
+                >
+                  Cluster_Sigma_X4
+                </text>
+              </g>
 
-          {/* Red (Danger) Cluster */}
-          <g className="opacity-80">
-            {clusterData.threat.map((node, i) => (
-              <circle
-                key={`r-${i}`}
-                cx={node.cx}
-                cy={node.cy}
-                r={node.r}
-                fill="#ff1744"
-                className="animate-pulse"
-                style={{ animationDelay: node.delay }}
-              />
-            ))}
-            <text
-              x="500"
-              y="230"
-              className="fill-accent-red font-mono text-[10px] font-bold uppercase tracking-widest"
-            >
-              SYBIL_THREAT_OMEGA
-            </text>
-          </g>
+              {/* Red (Danger) Cluster */}
+              <g className="opacity-80">
+                {clusterData.threat.map((node, i) => (
+                  <circle
+                    key={`r-${i}`}
+                    cx={node.cx}
+                    cy={node.cy}
+                    r={node.r}
+                    fill="#ff1744"
+                    className="animate-pulse"
+                    style={{ animationDelay: node.delay }}
+                  />
+                ))}
+                <text
+                  x="500"
+                  y="230"
+                  className="fill-accent-red font-mono text-[10px] font-bold uppercase tracking-widest"
+                >
+                  SYBIL_THREAT_OMEGA
+                </text>
+              </g>
+            </>
+          )}
 
           {/* Connection Lines */}
           <line

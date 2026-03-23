@@ -2,82 +2,100 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Radar, FlaskConical, Fingerprint, Activity } from "lucide-react";
+import {
+  LayoutDashboard,
+  Search,
+  FlaskConical,
+  Settings,
+  Database,
+} from "lucide-react";
+
+const navItems = [
+  {
+    name: "DASHBOARD",
+    href: "/",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "DISCOVERY_LAB",
+    href: "/discovery",
+    icon: FlaskConical,
+  },
+  {
+    name: "INSPECTOR",
+    href: "/inspector",
+    icon: Search,
+  },
+  {
+    name: "DATA_STREAMS",
+    href: "#",
+    icon: Database,
+  },
+  {
+    name: "SETTINGS",
+    href: "#",
+    icon: Settings,
+  },
+];
 
 export const Sidebar = () => {
   const pathname = usePathname();
 
-  const navItems = [
-    { name: "Profile Inspector", href: "/inspector", icon: Radar },
-    { name: "Discovery Lab", href: "/discovery", icon: FlaskConical },
-  ];
-
   return (
-    <aside className="w-72 h-full bg-surface border-r border-border flex flex-col shadow-xl z-20 transition-colors duration-300">
-      <div className="p-8 border-b border-border flex flex-col gap-1">
-        <h2 className="text-accent-cyan font-bold tracking-[0.2em] flex items-center gap-3 text-xl italic">
-          <Fingerprint
-            size={28}
-            className="text-accent-cyan drop-shadow-[0_0_8px_rgba(var(--accent-cyan),0.5)]"
-          />
-          SYBIL ENGINE
-        </h2>
-        <span className="text-[10px] text-slate-500 font-mono tracking-tighter opacity-50 uppercase">
-          Autonomous Detection Protocol v.4.0
-        </span>
-      </div>
-
-      <nav className="flex-1 p-6 space-y-4">
-        <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest mb-6 border-b border-border pb-2">
-          Navigation Modules
-        </div>
-
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`group flex items-center gap-4 p-4 rounded-sm transition-all border ${
-                isActive
-                  ? "bg-surface-secondary border-border text-accent-cyan"
-                  : "text-slate-500 border-transparent hover:border-border hover:text-foreground hover:bg-surface-secondary/50"
-              }`}
-            >
-              <Icon
-                size={20}
-                className={`${isActive ? "text-accent-cyan" : "group-hover:text-foreground"}`}
-              />
-              <span className="font-mono text-xs font-bold tracking-wider uppercase">
-                {item.name}
-              </span>
-              {isActive && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse shadow-[0_0_8px_var(--accent-cyan)]" />
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* <div className="p-6 mt-auto border-t border-border bg-surface-secondary/20">
-        <div className="flex items-center gap-3 text-slate-500 mb-4">
-          <Activity size={14} className="text-accent-green" />
-          <span className="text-[10px] font-mono uppercase tracking-tighter">
-            System Health: Nominal
+    <aside className="w-64 bg-surface border-r border-border flex flex-col transition-colors duration-300">
+      <div className="p-8 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="w-4 h-4 bg-accent-cyan shadow-[0_0_8px_var(--accent-cyan)]" />
+          <span className="font-black tracking-[0.4em] text-xs text-foreground uppercase italic">
+            SYBIL_ENGINE
           </span>
         </div>
-        <div className="p-3 bg-background/50 rounded-sm border border-border shadow-inner">
-          <div className="flex justify-between text-[9px] font-mono text-slate-500 mb-1">
-            <span>Uptime</span>
-            <span>99.99%</span>
-          </div>
-          <div className="w-full h-1 bg-border rounded-full overflow-hidden">
-            <div className="w-[99.99%] h-full bg-accent-cyan" />
-          </div>
+      </div>
+
+      <nav className="flex-1 py-10 px-4">
+        <ul className="space-y-4">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center gap-4 px-6 py-3 rounded-sm text-[10px] font-mono font-bold tracking-[0.2em] transition-all
+                    ${
+                      isActive
+                        ? "bg-surface-secondary text-accent-cyan border-l-2 border-accent-cyan shadow-inner"
+                        : "text-slate-500 hover:text-foreground hover:bg-surface-secondary/50"
+                    }
+                  `}
+                >
+                  <item.icon size={16} />
+                  {item.name}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      <div className="p-8 border-t border-border flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold">
+            Engine Version
+          </span>
+          <span className="text-[8px] font-mono text-accent-cyan font-bold italic">
+            v2.4.1-STABLE
+          </span>
         </div>
-      </div> */}
+        <div className="flex flex-col gap-1">
+          <div className="h-1 w-full bg-surface-secondary rounded-full overflow-hidden">
+            <div className="h-full w-2/3 bg-accent-cyan animate-pulse" />
+          </div>
+          <span className="text-[7px] font-mono text-slate-600 uppercase text-right">
+            System Load: 68%
+          </span>
+        </div>
+      </div>
     </aside>
   );
 };

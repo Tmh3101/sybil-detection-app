@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, Suspense } from "react";
+import { Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useInspectProfile } from "@/hooks/use-sybil-inference";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { TerminalLog } from "@/components/ui/terminal-log";
+import Image from "next/image";
 import {
   Wallet,
   ShieldCheck,
   User,
-  Zap,
   Activity,
   AlertTriangle,
   Loader2,
@@ -235,7 +235,7 @@ function InspectorContent() {
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 bg-surface-secondary border-2 border-border rounded-sm flex items-center justify-center relative overflow-hidden group shadow-inner">
                 {profile?.picture_url ? (
-                  <img src={profile.picture_url} alt={profile.handle} className="w-full h-full object-cover" />
+                  <Image src={profile.picture_url} alt={profile.handle} width={64} height={64} className="w-full h-full object-cover" />
                 ) : (
                   <User
                     size={32}

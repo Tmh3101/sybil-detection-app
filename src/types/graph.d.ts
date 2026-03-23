@@ -1,18 +1,20 @@
-export interface GraphNode {
+export interface Node {
   id: string;
   name?: string;
   val?: number;
   color?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
-export interface GraphLink {
-  source: string | GraphNode;
-  target: string | GraphNode;
-  [key: string]: any;
+export interface Link {
+  source: string;
+  target: string;
+  color?: string;
+  value?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface GraphData {
-  nodes: GraphNode[];
-  links: GraphLink[];
+  nodes: Node[];
+  links: Link[];
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Terminal, ShieldCheck, Cpu, Power, Sun, Moon, Search } from "lucide-react";
+import { Terminal, Sun, Moon, Search } from "lucide-react";
 import { useThemeStore } from "@/store/theme-store";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -35,8 +35,9 @@ export const TopHeader = () => {
   const { theme, toggleTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch by only rendering theme toggle after mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -79,38 +80,6 @@ export const TopHeader = () => {
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
         )}
-
-        {/* <div className="flex items-center gap-3">
-          <Cpu size={16} className="text-slate-500" />
-          <div className="flex flex-col">
-            <span className="text-[8px] font-mono text-slate-500 uppercase">
-              Core Load
-            </span>
-            <div className="flex gap-0.5">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className={`w-3 h-1.5 rounded-sm ${i <= 2 ? "bg-accent-cyan" : "bg-border"}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="h-8 w-px bg-border mx-2" />
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-surface-secondary px-4 py-2 rounded-sm border border-border">
-            <ShieldCheck size={18} className="text-accent-cyan" />
-            <span className="text-[10px] text-foreground font-mono uppercase tracking-[0.1em] font-bold">
-              SECURE-NODE
-            </span>
-          </div>
-
-          <button className="p-2 text-accent-red/60 hover:text-accent-red hover:bg-surface-secondary transition-all border border-transparent hover:border-border rounded-sm">
-            <Power size={18} />
-          </button>
-        </div> */}
       </div>
     </header>
   );
