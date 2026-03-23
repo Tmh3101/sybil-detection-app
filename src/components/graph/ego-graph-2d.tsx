@@ -21,7 +21,9 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
   targetId,
   classification,
 }) => {
-  const fgRef = useRef<ForceGraphMethods<SybilNode, SybilEdge> | null>(null);
+  const fgRef = useRef<ForceGraphMethods<SybilNode, SybilEdge> | undefined>(
+    undefined
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
@@ -149,4 +151,3 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
 };
 
 export default EgoGraph2D;
-
