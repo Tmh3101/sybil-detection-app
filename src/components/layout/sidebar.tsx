@@ -54,16 +54,16 @@ export const Sidebar = () => {
               />
             </div>
             <h1 className="text-foreground text-sm leading-none font-black tracking-[0.2em] uppercase italic">
-              SYBIL <span className="text-accent-cyan">OVERWATCH</span>
+              SYBIL <span className="text-accent-cyan">ENGINE</span>
             </h1>
           </div>
 
-          <div className="bg-surface-secondary/50 flex items-center gap-2 rounded-sm border border-dashed border-slate-700/30 px-3 py-1.5">
+          {/* <div className="bg-surface-secondary/50 flex items-center gap-2 rounded-sm border border-dashed border-slate-700/30 px-3 py-1.5">
             <div className="bg-accent-green h-1 w-1 animate-pulse rounded-full shadow-[0_0_3px_var(--accent-green)]" />
             <span className="font-mono text-[7px] tracking-[0.2em] text-slate-500 uppercase">
               Global Discovery Active
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
 
