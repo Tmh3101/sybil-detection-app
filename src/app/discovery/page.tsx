@@ -114,15 +114,21 @@ export default function DiscoveryPage() {
     if (statusData) {
       const statusLog = `[${statusData.status}] PROGRESS: ${statusData.progress}% - ${statusData.current_step}`;
       baseLogs.push(statusLog);
+
       if (statusData.message) {
-        baseLogs.push(`[MESSAGE] ${statusData.message}`);
+        const messagePrefix =
+          statusData.status === "FAILED" ? "[ERROR]" : "[MESSAGE]";
+        baseLogs.push(`${messagePrefix} ${statusData.message}`);
       }
+
       if (statusData.status === "COMPLETED") {
         baseLogs.push(
           "[SUCCESS] DISCOVERY PROTOCOL COMPLETED. RENDERING CLUSTER MAP."
         );
       } else if (statusData.status === "FAILED") {
-        baseLogs.push("[ERROR] DISCOVERY PROTOCOL FAILED. CHECK SYSTEM LOGS.");
+        baseLogs.push(
+          "[CRITICAL] DISCOVERY PROTOCOL ABORTED. CHECK SYSTEM ARCHIVE."
+        );
       }
     }
 
@@ -321,22 +327,31 @@ export default function DiscoveryPage() {
         {/* Legend */}
         {statusData?.status === "COMPLETED" && (
           <div className="absolute top-6 right-6 z-10 flex flex-col gap-3 border border-slate-700 bg-black/80 p-4 shadow-2xl backdrop-blur-sm">
+            <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
+              Legend
+            </div>
             <div className="flex items-center gap-3">
-              <div className="bg-accent-red h-2 w-2 rounded-full shadow-[0_0_8px_#ff1744]" />
+              <div className="h-2 w-2 rounded-full bg-[#ff1744] shadow-[0_0_8px_#ff1744]" />
               <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
                 High Risk Sybil
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="bg-accent-cyan h-2 w-2 rounded-full" />
+              <div className="h-2 w-2 rounded-full bg-[#00f2ff]" />
               <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                Cluster A
+                Cluster Engine A
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-purple-500" />
+              <div className="h-2 w-2 rounded-full bg-[#8b5cf6]" />
               <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                Cluster B
+                Cluster Engine B
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-2 w-2 rounded-full bg-[#f43f5e]" />
+              <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
+                Cluster Engine C
               </span>
             </div>
           </div>

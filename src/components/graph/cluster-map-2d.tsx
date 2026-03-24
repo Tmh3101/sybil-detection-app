@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ForceGraph2D, {
   ForceGraphMethods,
   NodeObject,
@@ -11,16 +11,19 @@ interface ClusterMap2DProps {
   graphData: {
     nodes: SybilNode[];
     links: SybilEdge[];
-  } | null;
+  };
 }
 
+// Neon color palette for clusters
 const CLUSTER_COLORS = [
   "#00f2ff", // Cyan
-  "#a855f7", // Purple
-  "#f97316", // Orange
-  "#22c55e", // Green
-  "#eab308", // Yellow
-  "#ec4899", // Pink
+  "#f43f5e", // Rose/Red
+  "#8b5cf6", // Purple
+  "#fb923c", // Orange
+  "#4ade80", // Green
+  "#e879f9", // Fuchsia
+  "#22d3ee", // Sky
+  "#facc15", // Yellow
 ];
 
 const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
@@ -30,30 +33,37 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
+  // Update dimensions based on parent container
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setDimensions({ width, height });
+    const handleResize = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight,
+        });
       }
-    });
+    };
 
+    handleResize();
+    const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
   }, []);
 
   const getNodeColor = useCallback((node: NodeObject<SybilNode>) => {
-    if (node.is_high_risk) return "#ff1744"; // Neon Red for high risk
-    const colorIdx = (node.cluster_id || 0) % CLUSTER_COLORS.length;
-    return CLUSTER_COLORS[colorIdx];
+    if (node.is_high_risk) return "#ff1744"; // Vivid Red for high risk
+
+    if (node.cluster_id !== undefined) {
+      return CLUSTER_COLORS[node.cluster_id % CLUSTER_COLORS.length];
+    }
+
+    return "#475569"; // Slate-600 default
   }, []);
 
-  if (!graphData) return null;
-
   return (
-    <div ref={containerRef} className="h-full w-full">
+    <div ref={containerRef} className="relative h-full w-full bg-black/40">
       <ForceGraph2D
         ref={fgRef}
         width={dimensions.width}
@@ -61,43 +71,50 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
         graphData={graphData}
         backgroundColor="rgba(0,0,0,0)"
         nodeColor={getNodeColor}
-        nodeLabel={undefined} // Disable labels for performance
-        nodeRelSize={4}
-        linkColor={() => "rgba(71, 85, 105, 0.2)"} // Subdued link color
+        nodeVal={(node) => (node.is_high_risk ? 4 : 2)}
+        linkColor={() => "rgba(71, 85, 105, 0.2)"} // Very subtle links
         linkWidth={0.5}
+        // Performance optimizations for large graphs
         enableNodeDrag={true}
-        cooldownTicks={100}
-        onEngineStop={() => {
-          if (fgRef.current) {
-            fgRef.current.zoomToFit(400);
-          }
-        }}
-        nodeCanvasObject={(
-          node: NodeObject<SybilNode>,
-          ctx: CanvasRenderingContext2D,
-          globalScale: number
-        ) => {
-          const color = getNodeColor(node);
-          const r = node.is_high_risk ? 4 : 2;
-
-          const x = node.x ?? 0;
-          const y = node.y ?? 0;
-
-          ctx.beginPath();
-          ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-          ctx.fillStyle = color;
-          ctx.fill();
-
+        enableZoomInteraction={true}
+        enablePanInteraction={true}
+        // Hide labels for performance
+        nodeLabel={(node: NodeObject<SybilNode>) => `
+          <div class="bg-black/90 border border-slate-700 p-2 font-mono text-[10px] uppercase">
+            <div class="text-accent-cyan font-bold mb-1">CLUSTER_${node.cluster_id}</div>
+            <div class="text-slate-400">ID: ${node.id.slice(0, 8)}...</div>
+            ${node.is_high_risk ? '<div class="text-accent-red font-bold mt-1">[HIGH_RISK_ENTITY]</div>' : ""}
+          </div>
+        `}
+        // Draw glow for high risk nodes on canvas
+        nodeCanvasObjectMode={() => "after"}
+        nodeCanvasObject={(node, ctx, globalScale) => {
           if (node.is_high_risk) {
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 10;
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-            ctx.lineWidth = 1 / globalScale;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
+            const x = node.x ?? 0;
+            const y = node.y ?? 0;
+            ctx.beginPath();
+            ctx.arc(x, y, 5 / globalScale, 0, 2 * Math.PI, false);
+            ctx.fillStyle = "rgba(255, 23, 68, 0.3)";
+            ctx.fill();
           }
         }}
       />
+
+      {/* Mini Legend Overlay */}
+      <div className="pointer-events-none absolute bottom-4 left-4 rounded-sm border border-slate-800 bg-black/60 p-2 backdrop-blur-md">
+        <div className="mb-1 flex items-center gap-2">
+          <div className="h-2 w-2 animate-pulse rounded-full bg-[#ff1744]"></div>
+          <span className="font-mono text-[8px] tracking-widest text-slate-400 uppercase">
+            High Risk Entity
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-[#00f2ff]"></div>
+          <span className="font-mono text-[8px] tracking-widest text-slate-400 uppercase">
+            Sybil Cluster
+          </span>
+        </div>
+      </div>
     </div>
   );
 };

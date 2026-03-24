@@ -31,6 +31,8 @@ export interface SybilNode {
     follower_count?: number;
     following_count?: number;
     account_age?: string;
+    picture_url?: string;
+    total_reposts?: number;
     [key: string]: string | number | boolean | undefined;
   };
 }
