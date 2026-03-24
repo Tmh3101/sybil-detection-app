@@ -269,6 +269,9 @@ function InspectorContent() {
 
             {/* Overlays */}
             <div className="pointer-events-none absolute right-4 bottom-4 flex flex-col items-end gap-1">
+              <span className="text-accent-cyan/80 font-mono text-[8px] font-bold uppercase animate-pulse">
+                [ 2D RENDER ENGINE ACTIVE ]
+              </span>
               <span className="text-subtle font-mono text-[8px] font-bold uppercase">
                 Node Connections: {data?.local_graph?.nodes?.length || 0}
               </span>

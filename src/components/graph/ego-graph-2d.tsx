@@ -131,18 +131,28 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
 
           // Draw label if zoomed in
           if (globalScale > 3) {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.fillStyle = "rgba(15, 23, 42, 0.9)"; // Slate-900 with alpha
             ctx.fillRect(
               x - bckgDimensions[0] / 2,
-              y - bckgDimensions[1] / 2 - 8,
+              y - bckgDimensions[1] / 2 - 12,
+              bckgDimensions[0],
+              bckgDimensions[1]
+            );
+
+            // Add border to label background
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1 / globalScale;
+            ctx.strokeRect(
+              x - bckgDimensions[0] / 2,
+              y - bckgDimensions[1] / 2 - 12,
               bckgDimensions[0],
               bckgDimensions[1]
             );
 
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillStyle = "#000";
-            ctx.fillText(label, x, y - 8);
+            ctx.fillStyle = color; // Use node color (Cyan or Red)
+            ctx.fillText(label, x, y - 12);
           }
         }}
       />
