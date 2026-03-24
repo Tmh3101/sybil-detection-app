@@ -114,7 +114,7 @@ export default function DiscoveryPage() {
       </div>
 
       {/* Top Controls */}
-      <IndustrialCard title="DISCOVERY_PARAMETERS">
+      <IndustrialCard title="DISCOVERY PARAMETERS">
         <div className="flex items-end gap-8">
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
@@ -164,9 +164,7 @@ export default function DiscoveryPage() {
               <Play size={18} fill="currentColor" />
             )}
             <span className="tracking-[0.2em] uppercase italic">
-              {isProcessing
-                ? "PROCESSING PROTOCOL..."
-                : "START DISCOVERY PROTOCOL"}
+              {isProcessing ? "PROCESSING..." : "START DISCOVERY"}
             </span>
           </button>
         </div>

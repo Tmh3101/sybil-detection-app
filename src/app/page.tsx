@@ -1,13 +1,13 @@
 "use client";
 
-import { IndustrialCard } from "@/components/ui/industrial-card";
+// import { IndustrialCard } from "@/components/ui/industrial-card";
 import {
   Radar,
   FlaskConical,
-  ShieldAlert,
-  Activity,
-  Cpu,
-  HardDrive,
+  // ShieldAlert,
+  // Activity,
+  // Cpu,
+  // HardDrive,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -25,7 +25,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {/* <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <IndustrialCard
           title="THREAT_LEVEL"
           className="border-l-accent-red border-l-4"
@@ -76,9 +76,9 @@ export default function HomePage() {
             <HardDrive size={48} className="text-accent-green opacity-20" />
           </div>
         </IndustrialCard>
-      </div>
+      </div> */}
 
-      <div className="mt-4 grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="mt-4 grid gap-8">
         <div className="flex flex-col gap-4">
           <h3 className="text-subtle border-border border-b pb-2 font-bold">
             Available Modules
@@ -87,7 +87,7 @@ export default function HomePage() {
             <Link href="/inspector">
               <div className="group bg-surface border-border hover:border-accent-cyan relative cursor-pointer overflow-hidden rounded-sm border p-6 transition-all">
                 <div className="group-hover:text-accent-cyan absolute top-0 right-0 p-2 opacity-10 transition-all group-hover:opacity-100">
-                  <Radar size={40} />
+                  <Radar size={32} />
                 </div>
                 <h4 className="text-foreground group-hover:text-accent-cyan text-xl font-bold tracking-widest uppercase italic transition-colors">
                   Profile Inspector
@@ -101,7 +101,7 @@ export default function HomePage() {
             <Link href="/discovery">
               <div className="group bg-surface border-border hover:border-accent-cyan relative cursor-pointer overflow-hidden rounded-sm border p-6 transition-all">
                 <div className="group-hover:text-accent-cyan absolute top-0 right-0 p-2 opacity-10 transition-all group-hover:opacity-100">
-                  <FlaskConical size={40} />
+                  <FlaskConical size={32} />
                 </div>
                 <h4 className="text-foreground group-hover:text-accent-cyan text-xl font-bold tracking-widest uppercase italic transition-colors">
                   Discovery Lab
@@ -115,7 +115,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
+        {/* <div className="flex flex-col gap-4">
           <h3 className="text-subtle border-border border-b pb-2 font-bold">
             System Diagnostics
           </h3>
@@ -153,7 +153,7 @@ export default function HomePage() {
               <span>Diagnostic Sync: Nominal [Last check: 0.02s ago]</span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
