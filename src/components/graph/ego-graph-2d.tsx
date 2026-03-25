@@ -15,42 +15,8 @@ import ForceGraph2D, {
 } from "react-force-graph-2d";
 import { SybilNode, SybilEdge, RiskClassification } from "@/types/api";
 import { resolvePictureUrl } from "@/lib/utils";
-
-// --- VISUAL CONSTANTS (Unified with ClusterMap2D) ---
-const LABEL_COLORS: Record<string, string> = {
-  BENIGN: "#00f2ff",
-  LOW_RISK: "#4ade80",
-  HIGH_RISK: "#fb923c",
-  MALICIOUS: "#ef4444",
-  UNKNOWN: "#94a3b8",
-};
-
-const RELATION_COLORS: Record<string, string> = {
-  // Follow Layer
-  FOLLOW: "#3b82f6",
-
-  // Interact Layer
-  UPVOTE: "#10b981",
-  REACTION: "#10b981",
-  COMMENT: "#10b981",
-  QUOTE: "#10b981",
-  MIRROR: "#10b981",
-  COLLECT: "#10b981",
-  TIP: "#10b981",
-  INTERACT: "#10b981",
-
-  // Co-Owner Layer
-  "CO-OWNER": "#f97316",
-
-  // Similarity Layer
-  SAME_AVATAR: "#a855f7",
-  FUZZY_HANDLE: "#a855f7",
-  SIM_BIO: "#a855f7",
-  CLOSE_CREATION_TIME: "#a855f7",
-  SIMILARITY: "#a855f7",
-
-  UNKNOWN: "#64748b",
-};
+import { LABEL_COLORS, RELATION_COLORS } from "@/lib/graph-constants";
+import GraphLegend from "./graph-legend";
 
 interface ExtendedNode extends SybilNode {
   __img?: HTMLImageElement;
@@ -155,7 +121,7 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
     });
 
     return { nodes, links: aggregatedLinks };
-  }, [graphData, targetId, imagesLoaded]);
+  }, [graphData, targetId]);
 
   // Update dimensions based on parent container
   useEffect(() => {
@@ -274,6 +240,7 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
   return (
     <div ref={containerRef} className="relative h-full min-h-[400px] w-full">
       <ForceGraph2D
+        key={`fg-${imagesLoaded}`}
         ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
@@ -288,11 +255,13 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
             (relationType && RELATION_COLORS[relationType as string]) ||
             RELATION_COLORS.UNKNOWN;
 
-          // Simple transparent industrial vibe
+          // Industrial vibe: consistent opacity
           return `${baseColor}99`; // 0.6 opacity
         }}
         linkWidth={1.5}
-        linkDirectionalParticles={(link: LinkObject<ExtendedNode, ExtendedLink>) => {
+        linkDirectionalParticles={(
+          link: LinkObject<ExtendedNode, ExtendedLink>
+        ) => {
           const weight = link.aggregated_weight || 1;
           // Keep particles only for aggregated edges for subtle feedback, but fixed size
           return weight > 1 ? 2 : 0;
@@ -342,79 +311,16 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
         d3VelocityDecay={0.3}
       />
 
-      {/* Legend Overlay */}
-      <div className="absolute top-6 right-6 z-10 flex min-w-[180px] flex-col gap-4 border border-slate-700 bg-black/80 p-4 shadow-2xl backdrop-blur-md">
-        <div className="flex flex-col gap-2">
-          <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
-            Node Map
-          </div>
-          {/* Target Entity Highlight (Specific to EgoGraph) */}
-          <div className="flex items-center gap-3">
+      <GraphLegend
+        extraItems={
+          <div className="mb-1 flex items-center gap-3">
             <div className="h-3 w-3 animate-pulse rounded-full bg-[#00f2ff] shadow-[0_0_8px_rgba(0,242,255,0.6)]" />
             <span className="text-accent-cyan font-mono text-[9px] font-bold uppercase italic">
               Target Node
             </span>
           </div>
-
-          {[
-            {
-              label: "Normal",
-              color: LABEL_COLORS["BENIGN"],
-              key: "BENIGN",
-            },
-            {
-              label: "Low Risk",
-              color: LABEL_COLORS["LOW_RISK"],
-              key: "LOW_RISK",
-            },
-            {
-              label: "High Risk",
-              color: LABEL_COLORS["HIGH_RISK"],
-              key: "HIGH_RISK",
-            },
-            {
-              label: "Malicious",
-              color: LABEL_COLORS["MALICIOUS"],
-              key: "MALICIOUS",
-            },
-          ].map(({ label, color, key }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div
-                className={`h-2 w-2 rounded-full ${key === "MALICIOUS" ? "animate-pulse shadow-[0_0_8px_#ef4444]" : ""}`}
-                style={{ backgroundColor: color }}
-              />
-              <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-slate-800 pt-3">
-          <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
-            Relation Layers
-          </div>
-          {[
-            { label: "Co-Owner", type: "CO-OWNER" },
-            { label: "Follow", type: "FOLLOW" },
-            { label: "Interact", type: "INTERACT" },
-            { label: "Similarity", type: "SIMILARITY" },
-          ].map(({ label, type }) => (
-            <div key={type} className="flex items-center gap-3">
-              <div
-                className="h-0.5 w-3"
-                style={{
-                  backgroundColor:
-                    RELATION_COLORS[type] || RELATION_COLORS.UNKNOWN,
-                }}
-              />
-              <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+        }
+      />
     </div>
   );
 };

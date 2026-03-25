@@ -9,15 +9,7 @@ import { BootSequenceLoader } from "@/components/ui/boot-sequence-loader";
 import { resolvePictureUrl } from "@/lib/utils";
 import { ProbabilityEqualizer } from "@/components/inspector/probability-equalizer";
 import Image from "next/image";
-import {
-  ShieldCheck,
-  User,
-  // Activity,
-  AlertTriangle,
-  Loader2,
-  Radar,
-  Search,
-} from "lucide-react";
+import { User, AlertTriangle, Loader2, Radar, Search } from "lucide-react";
 
 const SearchForm = () => {
   const router = useRouter();

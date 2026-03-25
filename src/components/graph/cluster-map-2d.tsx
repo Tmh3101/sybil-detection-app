@@ -7,6 +7,8 @@ import ForceGraph2D, {
 } from "react-force-graph-2d";
 import { SybilNode, SybilEdge } from "@/types/api";
 import { resolvePictureUrl } from "@/lib/utils";
+import { LABEL_COLORS, RELATION_COLORS } from "@/lib/graph-constants";
+import GraphLegend from "./graph-legend";
 
 interface ClusterMap2DProps {
   graphData: {
@@ -15,47 +17,13 @@ interface ClusterMap2DProps {
   };
 }
 
-const LABEL_COLORS: Record<string, string> = {
-  BENIGN: "#00f2ff",
-  LOW_RISK: "#4ade80",
-  HIGH_RISK: "#fb923c",
-  MALICIOUS: "#ef4444",
-  UNKNOWN: "#94a3b8",
-};
-
-const RELATION_COLORS: Record<string, string> = {
-  // Follow Layer
-  FOLLOW: "#3b82f6",
-
-  // Interact Layer
-  UPVOTE: "#10b981",
-  REACTION: "#10b981",
-  COMMENT: "#10b981",
-  QUOTE: "#10b981",
-  MIRROR: "#10b981",
-  COLLECT: "#10b981",
-  TIP: "#10b981",
-  INTERACT: "#10b981",
-
-  // Co-Owner Layer
-  "CO-OWNER": "#f97316",
-
-  // Similarity Layer
-  SAME_AVATAR: "#a855f7",
-  FUZZY_HANDLE: "#a855f7",
-  SIM_BIO: "#a855f7",
-  CLOSE_CREATION_TIME: "#a855f7",
-  SIMILARITY: "#a855f7",
-
-  UNKNOWN: "#64748b",
-};
-
 const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
   const fgRef = useRef<ForceGraphMethods<SybilNode, SybilEdge> | undefined>(
     undefined
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [imagesLoaded, setImagesLoaded] = useState(0); // Trigger re-render when images load
 
   // Thêm cache cho avatar để tối ưu render giống ego-graph
   const imgCache = useRef<Record<string, HTMLImageElement>>({});
@@ -128,6 +96,7 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
           newImg.src = resolvePictureUrl(rawImgUrl);
           newImg.onload = () => {
             imgCache.current[rawImgUrl] = newImg;
+            setImagesLoaded((prev) => prev + 1); // Trigger re-render
           };
           imgCache.current[rawImgUrl] = newImg;
         }
@@ -160,19 +129,21 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
   return (
     <div ref={containerRef} className="relative h-full w-full bg-black/40">
       <ForceGraph2D
+        key={`fg-${imagesLoaded}`}
         ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
         graphData={graphData}
         backgroundColor="rgba(0,0,0,0)"
-        // --- SỬA CẠNH (LINKS) Ở ĐÂY ---
+        // --- PERFORMANCE OPTIMIZED LINKS ---
         linkColor={(link: SybilEdge) => {
           const color =
             (link.edge_type && RELATION_COLORS[link.edge_type]) ||
             RELATION_COLORS.UNKNOWN;
-          return `${color}CC`; // 0.8 opacity (CC in hex)
+          return `${color}88`; // Higher transparency for dense clusters
         }}
-        linkWidth={1}
+        linkWidth={0.5}
+        linkDirectionalParticles={0} // Disable for performance
         // --- SỬA NODE Ở ĐÂY ---
         nodeCanvasObjectMode={() => "replace"}
         nodeCanvasObject={drawNode}
@@ -203,68 +174,7 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
         }}
       />
 
-      {/* Legend Overlay */}
-      <div className="absolute top-6 right-6 z-10 flex min-w-[180px] flex-col gap-4 border border-slate-700 bg-black/80 p-4 shadow-2xl backdrop-blur-md">
-        <div className="flex flex-col gap-2">
-          <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
-            Node Map
-          </div>
-          {[
-            {
-              label: "Benign",
-              color: LABEL_COLORS["BENIGN"],
-              key: "BENIGN",
-            },
-            {
-              label: "Low Risk",
-              color: LABEL_COLORS["LOW_RISK"],
-              key: "LOW_RISK",
-            },
-            {
-              label: "High Risk",
-              color: LABEL_COLORS["HIGH_RISK"],
-              key: "HIGH_RISK",
-            },
-            {
-              label: "Malicious",
-              color: LABEL_COLORS["MALICIOUS"],
-              key: "MALICIOUS",
-            },
-          ].map(({ label, color, key }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div
-                className={`h-2 w-2 rounded-full ${key === "MALICIOUS" ? "animate-pulse shadow-[0_0_8px_#ef4444]" : ""}`}
-                style={{ backgroundColor: color }}
-              />
-              <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-2 border-t border-slate-800 pt-3">
-          <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
-            Relation Layers
-          </div>
-          {[
-            { label: "Co-Owner", type: "CO-OWNER" },
-            { label: "Follow", type: "FOLLOW" },
-            { label: "Interact", type: "INTERACT" },
-            { label: "Similarity", type: "SIMILARITY" },
-          ].map(({ label, type }) => (
-            <div key={type} className="flex items-center gap-3">
-              <div
-                className="h-0.5 w-3"
-                style={{ backgroundColor: RELATION_COLORS[type] }}
-              />
-              <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <GraphLegend />
     </div>
   );
 };
