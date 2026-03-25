@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import ForceGraph2D, {
   ForceGraphMethods,
@@ -15,19 +9,16 @@ import ForceGraph2D, {
 } from "react-force-graph-2d";
 import { SybilNode, SybilEdge, RiskClassification } from "@/types/api";
 import { resolvePictureUrl } from "@/lib/utils";
-import { LABEL_COLORS, RELATION_COLORS } from "@/lib/graph-constants";
+import {
+  LABEL_COLORS,
+  RELATION_COLORS,
+  MIN_LINK_WIDTH,
+} from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
+import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
 
 interface ExtendedNode extends SybilNode {
   __img?: HTMLImageElement;
-}
-
-interface ExtendedLink extends Omit<SybilEdge, "source" | "target"> {
-  source: string | NodeObject<ExtendedNode>;
-  target: string | NodeObject<ExtendedNode>;
-  aggregated_weight?: number;
-  multiLinkIndex?: number;
-  multiLinkCount?: number;
 }
 
 interface EgoGraph2DProps {
@@ -45,83 +36,18 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
   risk_label,
 }) => {
   const fgRef = useRef<
-    ForceGraphMethods<ExtendedNode, ExtendedLink> | undefined
+    ForceGraphMethods<ExtendedNode, AggregatedLink> | undefined
   >(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [imagesLoaded, setImagesLoaded] = useState(0); // Trigger re-render when images load
   const imgCache = useRef<Record<string, HTMLImageElement>>({});
 
-  // Process data for aggregation and multi-link support
-  const processedData = useMemo(() => {
-    const nodes = graphData.nodes.map((n) => {
-      const isTarget = n.id === targetId;
-      return {
-        ...n,
-        fx: isTarget ? 0 : undefined,
-        fy: isTarget ? 0 : undefined,
-      } as ExtendedNode;
-    });
-
-    // 1. Aggregate links by source-target-type
-    const linkMap = new Map<string, ExtendedLink>();
-
-    graphData.links.forEach((link) => {
-      // Safely handle source/target which might be objects from force-graph mutation
-      const sId =
-        typeof link.source === "object"
-          ? (link.source as NodeObject<ExtendedNode>).id
-          : (link.source as string);
-      const tId =
-        typeof link.target === "object"
-          ? (link.target as NodeObject<ExtendedNode>).id
-          : (link.target as string);
-      const type = link.edge_type || "UNKNOWN";
-      const key = `${sId}-${tId}-${type}`;
-
-      if (linkMap.has(key)) {
-        const existing = linkMap.get(key)!;
-        existing.aggregated_weight =
-          (existing.aggregated_weight || 0) + (link.weight || 1);
-      } else {
-        linkMap.set(key, {
-          ...link,
-          source: sId as string,
-          target: tId as string,
-          aggregated_weight: link.weight || 1,
-          edge_type: type,
-        } as ExtendedLink);
-      }
-    });
-
-    const aggregatedLinks = Array.from(linkMap.values());
-
-    // 2. Assign indices for curvature if multiple edge types exist between same pair
-    const pairGroups: Record<string, ExtendedLink[]> = {};
-    aggregatedLinks.forEach((link) => {
-      const sId =
-        typeof link.source === "object"
-          ? (link.source as NodeObject<ExtendedNode>).id
-          : link.source;
-      const tId =
-        typeof link.target === "object"
-          ? (link.target as NodeObject<ExtendedNode>).id
-          : link.target;
-      const id = [sId as string, tId as string].sort().join("-");
-      if (!pairGroups[id]) pairGroups[id] = [];
-      pairGroups[id].push(link);
-    });
-
-    Object.values(pairGroups).forEach((group) => {
-      const count = group.length;
-      group.forEach((link, i) => {
-        link.multiLinkIndex = i;
-        link.multiLinkCount = count;
-      });
-    });
-
-    return { nodes, links: aggregatedLinks };
-  }, [graphData, targetId]);
+  // Use the standardized graph processor hook
+  const processedData = useGraphProcessor(graphData, {
+    targetId,
+    aggregateEdges: true,
+  });
 
   // Update dimensions based on parent container
   useEffect(() => {
@@ -204,7 +130,7 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
       ctx.arc(x, y, size, 0, 2 * Math.PI, false);
       ctx.clip();
 
-      if (img && img.complete) {
+      if (img && img.complete && img.naturalWidth > 0) {
         try {
           ctx.drawImage(img, x - size, y - size, size * 2, size * 2);
         } catch {
@@ -249,25 +175,40 @@ const EgoGraph2D: React.FC<EgoGraph2DProps> = ({
         nodeCanvasObject={drawNode}
         nodeCanvasObjectMode={() => "always"}
         // Link Rendering
-        linkColor={(link: LinkObject<ExtendedNode, ExtendedLink>) => {
+        linkColor={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
           const relationType = link.edge_type;
           const baseColor =
             (relationType && RELATION_COLORS[relationType as string]) ||
             RELATION_COLORS.UNKNOWN;
 
-          // Industrial vibe: consistent opacity
-          return `${baseColor}99`; // 0.6 opacity
+          const weight = link.aggregated_weight || 1;
+          const opacity = Math.min(0.4 + Math.log10(weight) * 0.2, 0.8);
+
+          const r = parseInt(baseColor.slice(1, 3), 16);
+          const g = parseInt(baseColor.slice(3, 5), 16);
+          const b = parseInt(baseColor.slice(5, 7), 16);
+
+          return `rgba(${r}, ${g}, ${b}, ${opacity})`;
         }}
-        linkWidth={1.5}
+        linkWidth={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
+          const weight = link.aggregated_weight || 1;
+          return Math.max(MIN_LINK_WIDTH, Math.sqrt(weight));
+        }}
         linkDirectionalParticles={(
-          link: LinkObject<ExtendedNode, ExtendedLink>
+          link: LinkObject<ExtendedNode, AggregatedLink>
         ) => {
           const weight = link.aggregated_weight || 1;
-          // Keep particles only for aggregated edges for subtle feedback, but fixed size
-          return weight > 1 ? 2 : 0;
+          return weight > 1
+            ? Math.min(Math.floor(Math.log2(weight)) + 1, 5)
+            : 0;
         }}
-        linkDirectionalParticleWidth={2}
-        linkCurvature={(link: LinkObject<ExtendedNode, ExtendedLink>) => {
+        linkDirectionalParticleWidth={(
+          link: LinkObject<ExtendedNode, AggregatedLink>
+        ) => {
+          const weight = link.aggregated_weight || 1;
+          return weight > 5 ? 2.2 : 1.2;
+        }}
+        linkCurvature={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
           const index = link.multiLinkIndex ?? 0;
           const count = link.multiLinkCount;

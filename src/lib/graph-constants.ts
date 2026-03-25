@@ -46,3 +46,7 @@ export const LABEL_GROUPS = [
   { label: "High Risk", key: "HIGH_RISK" },
   { label: "Malicious", key: "MALICIOUS" },
 ];
+
+export const MIN_LINK_WIDTH = 0.5;
+export const MAX_LINK_WIDTH = 5;
+export const DEFAULT_LINK_WIDTH = 1.5;

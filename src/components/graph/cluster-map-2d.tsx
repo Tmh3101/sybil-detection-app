@@ -7,8 +7,13 @@ import ForceGraph2D, {
 } from "react-force-graph-2d";
 import { SybilNode, SybilEdge } from "@/types/api";
 import { resolvePictureUrl } from "@/lib/utils";
-import { LABEL_COLORS, RELATION_COLORS } from "@/lib/graph-constants";
+import {
+  LABEL_COLORS,
+  RELATION_COLORS,
+  MIN_LINK_WIDTH,
+} from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
+import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
 
 interface ClusterMap2DProps {
   graphData: {
@@ -18,12 +23,17 @@ interface ClusterMap2DProps {
 }
 
 const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
-  const fgRef = useRef<ForceGraphMethods<SybilNode, SybilEdge> | undefined>(
-    undefined
-  );
+  const fgRef = useRef<
+    ForceGraphMethods<SybilNode, AggregatedLink> | undefined
+  >(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [imagesLoaded, setImagesLoaded] = useState(0); // Trigger re-render when images load
+
+  // Use the standardized graph processor hook - light aggregation for performance
+  const processedData = useGraphProcessor(graphData, {
+    aggregateEdges: true,
+  });
 
   // Thêm cache cho avatar để tối ưu render giống ego-graph
   const imgCache = useRef<Record<string, HTMLImageElement>>({});
@@ -59,7 +69,7 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
 
     // Link distance - shorter distance brings linked nodes together
     fgRef.current.d3Force("link")?.distance(30);
-  }, [graphData, dimensions]);
+  }, [processedData, dimensions]);
 
   const getNodeColor = useCallback((node: NodeObject<SybilNode>) => {
     return (
@@ -108,8 +118,13 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
       ctx.arc(x, y, size, 0, 2 * Math.PI, false);
       ctx.clip();
 
-      if (img && img.complete) {
-        ctx.drawImage(img, x - size, y - size, size * 2, size * 2);
+      if (img && img.complete && img.naturalWidth > 0) {
+        try {
+          ctx.drawImage(img, x - size, y - size, size * 2, size * 2);
+        } catch {
+          ctx.fillStyle = "#1e293b"; // Fallback color
+          ctx.fill();
+        }
       } else {
         ctx.fillStyle = "#1e293b"; // Fallback color
         ctx.fill();
@@ -133,17 +148,17 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
         ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
-        graphData={graphData}
+        graphData={processedData}
         backgroundColor="rgba(0,0,0,0)"
         // --- PERFORMANCE OPTIMIZED LINKS ---
-        linkColor={(link: SybilEdge) => {
+        linkColor={(link: AggregatedLink) => {
           const color =
             (link.edge_type && RELATION_COLORS[link.edge_type]) ||
             RELATION_COLORS.UNKNOWN;
-          return `${color}88`; // Higher transparency for dense clusters
+          return `${color}66`; // Higher transparency for dense clusters
         }}
-        linkWidth={0.5}
-        linkDirectionalParticles={0} // Disable for performance
+        linkWidth={MIN_LINK_WIDTH}
+        linkDirectionalParticles={0} // Disable for performance in Cluster Map
         // --- SỬA NODE Ở ĐÂY ---
         nodeCanvasObjectMode={() => "replace"}
         nodeCanvasObject={drawNode}
@@ -151,6 +166,9 @@ const ClusterMap2D: React.FC<ClusterMap2DProps> = ({ graphData }) => {
         enableZoomInteraction={true}
         enablePanInteraction={true}
         nodeLabel={(node: NodeObject<SybilNode>) => {
+          // Conditional Rendering: Only show labels if node count is reasonable
+          if (processedData.nodes.length > 500) return "";
+
           const isHighRisk =
             node.risk_label === "MALICIOUS" || node.risk_label === "HIGH_RISK";
           return `
