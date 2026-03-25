@@ -1,698 +1,682 @@
 {
-  "task_id": "fc-01KMGA878VW7GEFW5E69QJY7X4",
+  "task_id": "fc-01KMJQK3GXBG0ZS22ZAXXCR13N",
   "status": "COMPLETED",
   "progress": 100,
   "current_step": "COMPLETE",
   "graph_data": {
     "nodes": [
       {
-        "id": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "label": "0_BENIGN",
-        "cluster_id": 1,
-        "risk_score": 0.0,
-        "attributes": {
-          "handle": "dankshard",
-          "trust_score": 99.96,
-          "follower_count": 29746,
-          "post_count": 2,
-          "picture_url": "https://api.grove.storage/86a7f4b9f60fcfb4330379c2f1c26bfdc673e3bbca9b11d52e66df290560fdc5",
-          "owned_by": "0x288d0a09f7cd59ee93eb4a540d30fd91c179ec73",
-          "reason": "None"
-        }
-      },
-      {
-        "id": "0x3d3014af988cc18f4933b1c744be67c5dd3af542",
-        "label": "3_MALICIOUS",
+        "id": "0xf46bfb21ccb72e83db06b23d3f05e86b3e259efd",
+        "risk_label": "MALICIOUS",
         "cluster_id": 2,
-        "risk_score": 0.8,
+        "risk_score": 0.95,
         "attributes": {
-          "handle": "romanlos1188",
-          "trust_score": 0.24,
+          "handle": "edvacrypto",
+          "trust_score": 0.26,
           "follower_count": 0,
           "post_count": 0,
           "picture_url": "",
-          "owned_by": "0x4acff7df46b8b39e432a63e06a51ccca9015eace",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0x6b6d9189486d9326c4676167bfe5e2e448d291e8",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.005021) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.26) +20"
+          ]
         }
       },
       {
-        "id": "0x41d92ab30b6d749c257008aa783f9e7e7103bdce",
-        "label": "3_MALICIOUS",
+        "id": "0xffcb4b09f394f452c5100f0152cef89aede9973c",
+        "risk_label": "MALICIOUS",
         "cluster_id": 2,
-        "risk_score": 0.8,
+        "risk_score": 0.95,
         "attributes": {
-          "handle": "lidiaa",
-          "trust_score": 0.21,
+          "handle": "edvardas",
+          "trust_score": 0.26,
           "follower_count": 0,
           "post_count": 0,
           "picture_url": "",
-          "owned_by": "0x8e458ca4e1b18955b549f33df2c05a9c0c106f28",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0x6b6d9189486d9326c4676167bfe5e2e448d291e8",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.005021) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.26) +20"
+          ]
         }
       },
       {
-        "id": "0x81bf77f0d11c77c709ff14a039803f9b25408257",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "kerinna",
-          "trust_score": 0.22,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x0b52969cea76d269914de9b8b14dc505835c7153",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x43005f96f3e4e3041aeb796430ee2c168fa6513e",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "jesselin",
-          "trust_score": 0.22,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x0b52969cea76d269914de9b8b14dc505835c7153",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x73c8afa4452f8db17e2b860e9c6742cbb0835d7b",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "zoyaolla",
-          "trust_score": 0.22,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb2597af416f462edf90c84da5d6eada674dd4ca4",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x48e3d6114d5ac17a4c2e6afac864ad36947d77ea",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "zhannabella",
-          "trust_score": 0.23,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb2597af416f462edf90c84da5d6eada674dd4ca4",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "label": "0_BENIGN",
-        "cluster_id": 1,
-        "risk_score": 0.0,
-        "attributes": {
-          "handle": "lenssick",
-          "trust_score": 99.97,
-          "follower_count": 13270,
-          "post_count": 226,
-          "picture_url": "https://api.grove.storage/f6972d59faef319334d8cc1d553a85b634962841b46728224794a6ccadf65d3d",
-          "owned_by": "0x6ea4e2d5667e7d8cf5052383bfd09db548d2ec3e",
-          "reason": "None"
-        }
-      },
-      {
-        "id": "0x815504b5c6e4533783a580fdda2b03a4f51de73f",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "lylifenom",
-          "trust_score": 0.21,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xf6721ddf443d9ced571149a5deaea55f673a2cad",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x154c79c233d443796e9f6a787f64171d0fc1dad8",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "laylacanggu",
-          "trust_score": 0.22,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xf6721ddf443d9ced571149a5deaea55f673a2cad",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x177f884014bb868cf9758b0a5d5e67f59a1eb3e6",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "arthurnobel",
-          "trust_score": 0.23,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x3bbf9cdce28a93138a2b793f3ecffccf68480043",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x60748518cb6a2cf470e08a8e4b03238b3f69e081",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "arthurlee",
-          "trust_score": 0.25,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x3bbf9cdce28a93138a2b793f3ecffccf68480043",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x82a553ecaaa96b358d44299aaefdaf1d2416dede",
-        "label": "3_MALICIOUS",
-        "cluster_id": 3,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "brandon12_",
-          "trust_score": 0.23,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x3bbf9cdce28a93138a2b793f3ecffccf68480043",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "label": "0_BENIGN",
-        "cluster_id": 1,
-        "risk_score": 0.0,
-        "attributes": {
-          "handle": "altss",
-          "trust_score": 92.78,
-          "follower_count": 1747,
-          "post_count": 17,
-          "picture_url": "https://media.orbapi.xyz/thumbnailDimension768/https://ik.imagekit.io/lens/cc06fd7dd283a3a8aeb4eb3c15c4d715fecee4ac81fc0149275627f397d13404_WxFO5nP6aV.webp",
-          "owned_by": "0xe93c369507a38a6e8efa64344f0ed51b1b3bf223",
-          "reason": "None"
-        }
-      },
-      {
-        "id": "0xf4c03a8209a7b4bb934c35d1e3a722153f8a5d19",
-        "label": "3_MALICIOUS",
+        "id": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "risk_label": "MALICIOUS",
         "cluster_id": 0,
         "risk_score": 0.95,
         "attributes": {
-          "handle": "jamescc",
-          "trust_score": 0.26,
+          "handle": "henryinthemorning",
+          "trust_score": 0.39,
           "follower_count": 0,
-          "post_count": 0,
+          "post_count": 1,
           "picture_url": "",
-          "owned_by": "0xb9763828083c2ac410e4b2fdbbdf4cb9affc631a",
-          "reason": "High Co-owner relationship; Batch Creation detected; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
         }
       },
       {
-        "id": "0xfd5d49ca4372987fd56ad3dafa331371172d4bb4",
-        "label": "3_MALICIOUS",
+        "id": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "risk_label": "MALICIOUS",
         "cluster_id": 0,
         "risk_score": 0.95,
         "attributes": {
-          "handle": "jamesccc",
-          "trust_score": 0.26,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb9763828083c2ac410e4b2fdbbdf4cb9affc631a",
-          "reason": "High Co-owner relationship; Batch Creation detected; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0xc63db1fe30ff4e12dc54c271bfd3434a5ba39b1a",
-        "label": "3_MALICIOUS",
-        "cluster_id": 0,
-        "risk_score": 0.95,
-        "attributes": {
-          "handle": "jamescccc",
-          "trust_score": 0.25,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb9763828083c2ac410e4b2fdbbdf4cb9affc631a",
-          "reason": "High Co-owner relationship; Batch Creation detected; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x5a15b4a386a5e2c1307d3696f20e37a738e8cf8d",
-        "label": "3_MALICIOUS",
-        "cluster_id": 4,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "analee_rose",
-          "trust_score": 0.36,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb300ba4f950b989409f68d45e3b15dabec97c797",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0xfe56a51c614a996d617eb3a95764b93a4d1d0610",
-        "label": "3_MALICIOUS",
-        "cluster_id": 4,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "davidguetta_",
-          "trust_score": 0.22,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xb300ba4f950b989409f68d45e3b15dabec97c797",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x2cf6cdb74a8475383ec69a632465a0597960400e",
-        "label": "3_MALICIOUS",
-        "cluster_id": 4,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "kameiduwi",
-          "trust_score": 0.25,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xc15e7e16ae727f7863094d4b858d87e7b77bc0a6",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x274309e4beaeb692da4168126cb52d081c639c88",
-        "label": "3_MALICIOUS",
-        "cluster_id": 4,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "kameid",
-          "trust_score": 0.26,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xc15e7e16ae727f7863094d4b858d87e7b77bc0a6",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0xc4111003762e813efd978d14a26fdab6b5801002",
-        "label": "1_LOW_RISK",
-        "cluster_id": 5,
-        "risk_score": 0.35,
-        "attributes": {
-          "handle": "binanceen",
-          "trust_score": 0.77,
-          "follower_count": 1,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xc16dd5a5199d730b78408a791c069564a36c1849",
-          "reason": "Batch Creation detected; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x3429ff39822d5d3e76af60ba8a2fbafbeb0499e3",
-        "label": "1_LOW_RISK",
-        "cluster_id": 5,
-        "risk_score": 0.35,
-        "attributes": {
-          "handle": "binancecn",
-          "trust_score": 6.77,
-          "follower_count": 6,
-          "post_count": 0,
-          "picture_url": "https://api.grove.storage/ce1e868d08c94c74a597c9ae1c557b918d08bd3cb78954bd331853eca1f5d783",
-          "owned_by": "0x90058f82265f80227c01a3bb60b333b7876e18f9",
-          "reason": "Batch Creation detected; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0xb4556e1a135c45c91a82a18edaed2237d434e59c",
-        "label": "3_MALICIOUS",
-        "cluster_id": 2,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "orbisonmm1",
-          "trust_score": 6.89,
-          "follower_count": 0,
-          "post_count": 2,
-          "picture_url": "https://ik.imagekit.io/lens/f2ae610b911a4a154b43c7dad9ffe83baf2be3fb045c6a9fc2487d9aeb5022f7_U-mgvmEuy.webp",
-          "owned_by": "0xd95b4dcbe214a42920873858993cfc1d115cc432",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x9bc2497674cddbb5ff8844bbe48b84a0ccaa047b",
-        "label": "3_MALICIOUS",
-        "cluster_id": 2,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "onmorb",
-          "trust_score": 0.26,
-          "follower_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xd95b4dcbe214a42920873858993cfc1d115cc432",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
-        }
-      },
-      {
-        "id": "0x8d8fb8b5c0a9230c2efa93f852fc25ed5f7dadd6",
-        "label": "3_MALICIOUS",
-        "cluster_id": 2,
-        "risk_score": 0.8,
-        "attributes": {
-          "handle": "1orbisonmm",
+          "handle": "wanttokillmyself",
           "trust_score": 0.35,
           "follower_count": 0,
-          "post_count": 0,
+          "post_count": 1,
           "picture_url": "",
-          "owned_by": "0xd95b4dcbe214a42920873858993cfc1d115cc432",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
         }
       },
       {
-        "id": "0xffdec3fe366e42a96d4c7688a7edff1f3ff7eab3",
-        "label": "3_MALICIOUS",
-        "cluster_id": 2,
-        "risk_score": 0.8,
+        "id": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
         "attributes": {
-          "handle": "ashu1orbisonmm",
-          "trust_score": 0.26,
+          "handle": "horracetoyall",
+          "trust_score": 0.22,
           "follower_count": 0,
           "post_count": 0,
           "picture_url": "",
-          "owned_by": "0xd95b4dcbe214a42920873858993cfc1d115cc432",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
         }
       },
       {
-        "id": "0xf76b3d950941b687e7afe845fe89f93592badb34",
-        "label": "0_BENIGN",
+        "id": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "jimmymtfcker",
+          "trust_score": 0.22,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "richardashuman",
+          "trust_score": 0.22,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "lindamarl",
+          "trust_score": 0.2,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "imisa",
+          "trust_score": 0.21,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x19487d63cd790ac6ab8e186932b6c87753f02011",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "manel3289",
+          "trust_score": 6.36,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "lens://6543fa708a402c320ede2a827e46b84a163aa34a46eca44f2698cbf96330a88b",
+          "owned_by": "0xea7dc52627932f5572b01d1f3935dfeb95bbf58d",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "greginhere",
+          "trust_score": 0.22,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "gtsmmny",
+          "trust_score": 0.21,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "risk_label": "MALICIOUS",
+        "cluster_id": 0,
+        "risk_score": 0.95,
+        "attributes": {
+          "handle": "lemonfck",
+          "trust_score": 0.24,
+          "follower_count": 0,
+          "post_count": 1,
+          "picture_url": "",
+          "owned_by": "0x7d78cd9438165feb80057437802aec2a218863ae",
+          "reasons": [
+            "High Co-owner relationship (97.83%) +50",
+            "Batch Creation detected (std: 0.114309) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.80) +20"
+          ]
+        }
+      },
+      {
+        "id": "0x84335c4cca84378d59c761db1ec6a6ca2dab102e",
+        "risk_label": "BENIGN",
         "cluster_id": 1,
         "risk_score": 0.0,
         "attributes": {
-          "handle": "ethdaily",
-          "trust_score": 99.92,
-          "follower_count": 13610,
-          "post_count": 19,
-          "picture_url": "https://gw.ipfs-lens.dev/ipfs/bafkreicqrb7jeowukiga2lwopyseop6nkskzks7ht2yp3s5advk3l7xnhu",
-          "owned_by": "0x7cda10f1c4e11d9c536009e43f141743d11f2fed",
-          "reason": "None"
+          "handle": "emmajane1313",
+          "trust_score": 99.74,
+          "follower_count": 1348,
+          "post_count": 0,
+          "picture_url": "https://gw.ipfs-lens.dev/ipfs/bafkreiborp35hwyg3lkaldu6lg3mmelfhkdrrgofopclj6z6s2rt3ea3ke",
+          "owned_by": "0x70209107aa82cc0cf95c3caf84ec164e7e1ac32a",
+          "reasons": []
         }
       },
       {
-        "id": "0xe1e67a2a548f296fb7cb5d9e5b23477ef01dc091",
-        "label": "3_MALICIOUS",
+        "id": "0xdef44af9b09ffce0d9e7e1499d797485340d40c9",
+        "risk_label": "MALICIOUS",
         "cluster_id": 4,
-        "risk_score": 0.8,
+        "risk_score": 0.95,
         "attributes": {
-          "handle": "alokvasquez",
+          "handle": "sicon",
           "trust_score": 0.26,
           "follower_count": 0,
           "post_count": 0,
           "picture_url": "",
-          "owned_by": "0x7765a5d6dbc7bb64adaf33b44904f6d28edb7771",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0xd5519052f1ce7a90538c97a891da525bdef8691b",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.030537) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.26) +20"
+          ]
         }
       },
       {
-        "id": "0xfa90f27687f123fef5091c3c3f1c062ff73a85fc",
-        "label": "3_MALICIOUS",
+        "id": "0x9b2ea85d30b641dce85748c7e6083853cbfd0364",
+        "risk_label": "MALICIOUS",
         "cluster_id": 4,
-        "risk_score": 0.8,
+        "risk_score": 0.95,
         "attributes": {
-          "handle": "alokvaaquez",
-          "trust_score": 0.23,
+          "handle": "axi2k",
+          "trust_score": 0.26,
           "follower_count": 0,
           "post_count": 0,
           "picture_url": "",
-          "owned_by": "0x7765a5d6dbc7bb64adaf33b44904f6d28edb7771",
-          "reason": "High Co-owner relationship; Low Social interaction; Very Low Trust Score"
+          "owned_by": "0xd5519052f1ce7a90538c97a891da525bdef8691b",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.030537) +15",
+            "Low Social interaction (0.00%) +10",
+            "Very Low Trust Score (avg: 0.26) +20"
+          ]
+        }
+      },
+      {
+        "id": "0xa7a0198f52e1166f6e854b3d2b5de51b998fd6bc",
+        "risk_label": "BENIGN",
+        "cluster_id": 1,
+        "risk_score": 0.0,
+        "attributes": {
+          "handle": "xverx",
+          "trust_score": 6.48,
+          "follower_count": 1324,
+          "post_count": 4601,
+          "picture_url": "https://ik.imagekit.io/lens/597957a386a70c74acec880b22c215f9e59a14551d649f0d6545a6349ba3d08e_d7X7e-iG_.webp",
+          "owned_by": "0x50b68702548fd2bfde1c4c02129cb2ce7067b2c4",
+          "reasons": []
+        }
+      },
+      {
+        "id": "0x0464c6772455f95feaf0ba14f4cb705e53d6fd6f",
+        "risk_label": "HIGH_RISK",
+        "cluster_id": 3,
+        "risk_score": 0.75,
+        "attributes": {
+          "handle": "alexchencrypto",
+          "trust_score": 9.94,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "https://api.grove.storage/036c4dd81d6a49a23e7b076d93f88ecf353b2ebcdd6a14fc989ab2aa86a11009",
+          "owned_by": "0x3f398e179754df0a8bf4ac5db7abb9b86f4e689b",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.112716) +15",
+            "Low Social interaction (0.00%) +10"
+          ]
+        }
+      },
+      {
+        "id": "0xb04750caf69cccdc8f5af5adadfa8555080c431a",
+        "risk_label": "HIGH_RISK",
+        "cluster_id": 3,
+        "risk_score": 0.75,
+        "attributes": {
+          "handle": "city_alexchen",
+          "trust_score": 9.94,
+          "follower_count": 0,
+          "post_count": 0,
+          "picture_url": "https://api.grove.storage/840c7389e24968b107dfc3291be98f887b68d96c4e46abb3088a785334577f60",
+          "owned_by": "0x3f398e179754df0a8bf4ac5db7abb9b86f4e689b",
+          "reasons": [
+            "High Co-owner relationship (100.00%) +50",
+            "Batch Creation detected (std: 0.112716) +15",
+            "Low Social interaction (0.00%) +10"
+          ]
         }
       }
     ],
     "links": [
       {
-        "source": "0x3429ff39822d5d3e76af60ba8a2fbafbeb0499e3",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
+        "source": "0xa7a0198f52e1166f6e854b3d2b5de51b998fd6bc",
+        "target": "0x84335c4cca84378d59c761db1ec6a6ca2dab102e",
         "edge_type": "FOLLOW",
         "weight": 2.0
       },
       {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0xf76b3d950941b687e7afe845fe89f93592badb34",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x3429ff39822d5d3e76af60ba8a2fbafbeb0499e3",
-        "target": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0xc4111003762e813efd978d14a26fdab6b5801002",
-        "target": "0x3429ff39822d5d3e76af60ba8a2fbafbeb0499e3",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x3429ff39822d5d3e76af60ba8a2fbafbeb0499e3",
-        "target": "0xc4111003762e813efd978d14a26fdab6b5801002",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "target": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0xf76b3d950941b687e7afe845fe89f93592badb34",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "target": "0xf76b3d950941b687e7afe845fe89f93592badb34",
-        "edge_type": "FOLLOW",
-        "weight": 2.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0x9fafa610d40c35fa68260d75ef1b805d1c2e0229",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "target": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0x8d52471914c971ebc9b94edcf66dc41cf72430cb",
-        "target": "0xf4e23ab731c72c3a4ce19c0f0051b2863257b1f5",
-        "edge_type": "COMMENT",
-        "weight": 1.0
-      },
-      {
-        "source": "0x81bf77f0d11c77c709ff14a039803f9b25408257",
-        "target": "0x43005f96f3e4e3041aeb796430ee2c168fa6513e",
+        "source": "0x0464c6772455f95feaf0ba14f4cb705e53d6fd6f",
+        "target": "0xb04750caf69cccdc8f5af5adadfa8555080c431a",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x177f884014bb868cf9758b0a5d5e67f59a1eb3e6",
-        "target": "0x60748518cb6a2cf470e08a8e4b03238b3f69e081",
+        "source": "0xf46bfb21ccb72e83db06b23d3f05e86b3e259efd",
+        "target": "0xffcb4b09f394f452c5100f0152cef89aede9973c",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x177f884014bb868cf9758b0a5d5e67f59a1eb3e6",
-        "target": "0x82a553ecaaa96b358d44299aaefdaf1d2416dede",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x60748518cb6a2cf470e08a8e4b03238b3f69e081",
-        "target": "0x82a553ecaaa96b358d44299aaefdaf1d2416dede",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xe1e67a2a548f296fb7cb5d9e5b23477ef01dc091",
-        "target": "0xfa90f27687f123fef5091c3c3f1c062ff73a85fc",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x73c8afa4452f8db17e2b860e9c6742cbb0835d7b",
-        "target": "0x48e3d6114d5ac17a4c2e6afac864ad36947d77ea",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x5a15b4a386a5e2c1307d3696f20e37a738e8cf8d",
-        "target": "0xfe56a51c614a996d617eb3a95764b93a4d1d0610",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0xf552d2f3046b41493e8123484c5603358b228de2",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xf4c03a8209a7b4bb934c35d1e3a722153f8a5d19",
-        "target": "0xfd5d49ca4372987fd56ad3dafa331371172d4bb4",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xf4c03a8209a7b4bb934c35d1e3a722153f8a5d19",
-        "target": "0xc63db1fe30ff4e12dc54c271bfd3434a5ba39b1a",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xfd5d49ca4372987fd56ad3dafa331371172d4bb4",
-        "target": "0xc63db1fe30ff4e12dc54c271bfd3434a5ba39b1a",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x2cf6cdb74a8475383ec69a632465a0597960400e",
-        "target": "0x274309e4beaeb692da4168126cb52d081c639c88",
+        "source": "0xb88c8ffb879f1e1aba113ae730cd7a4c0e56e3ab",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xb4556e1a135c45c91a82a18edaed2237d434e59c",
-        "target": "0x9bc2497674cddbb5ff8844bbe48b84a0ccaa047b",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xb4556e1a135c45c91a82a18edaed2237d434e59c",
-        "target": "0x8d8fb8b5c0a9230c2efa93f852fc25ed5f7dadd6",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0xb4556e1a135c45c91a82a18edaed2237d434e59c",
-        "target": "0xffdec3fe366e42a96d4c7688a7edff1f3ff7eab3",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x9bc2497674cddbb5ff8844bbe48b84a0ccaa047b",
-        "target": "0x8d8fb8b5c0a9230c2efa93f852fc25ed5f7dadd6",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0xf552d2f3046b41493e8123484c5603358b228de2",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x9bc2497674cddbb5ff8844bbe48b84a0ccaa047b",
-        "target": "0xffdec3fe366e42a96d4c7688a7edff1f3ff7eab3",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x8d8fb8b5c0a9230c2efa93f852fc25ed5f7dadd6",
-        "target": "0xffdec3fe366e42a96d4c7688a7edff1f3ff7eab3",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x815504b5c6e4533783a580fdda2b03a4f51de73f",
-        "target": "0x154c79c233d443796e9f6a787f64171d0fc1dad8",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
         "edge_type": "CO-OWNER",
         "weight": 5.0
       },
       {
-        "source": "0x41d92ab30b6d749c257008aa783f9e7e7103bdce",
-        "target": "0x3d3014af988cc18f4933b1c744be67c5dd3af542",
+        "source": "0x96924fb77ec718a740cf97519dff4b2dda52b474",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xb9cd598d4fd15c13610b79699828d4290410d2a9",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x4e5d4fe07250979a03c24c37f69cc83b77f2a008",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "target": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x63cff7128d00d024ee724b6f66af1c2a20f69fd8",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "target": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xf552d2f3046b41493e8123484c5603358b228de2",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "target": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xc905e7b845826dd473f42bae8a2cddbe2c630420",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "target": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x382be3dc2539c2d419704b468a1e2df7ea4a04d0",
+        "target": "0x98e33655d33fffc1380f79a43bc14cd85f84b7b4",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0xdef44af9b09ffce0d9e7e1499d797485340d40c9",
+        "target": "0x9b2ea85d30b641dce85748c7e6083853cbfd0364",
+        "edge_type": "CO-OWNER",
+        "weight": 5.0
+      },
+      {
+        "source": "0x7efa24fc75075cf6d28671aee9aac9ebf8134d66",
+        "target": "0x19487d63cd790ac6ab8e186932b6c87753f02011",
         "edge_type": "SIMILARITY",
         "weight": 3.0
       }
     ],
-    "cluster_count": 6
+    "cluster_count": 5
   },
   "message": null
 }

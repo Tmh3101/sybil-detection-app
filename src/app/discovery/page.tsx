@@ -448,20 +448,12 @@ export default function DiscoveryPage() {
                 {statusData.graph_data?.cluster_count}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-8">
-              <span className="font-mono text-[10px] text-slate-400 uppercase">
-                CLUSTERS FOUND
-              </span>
-              <span className="text-accent-cyan font-mono text-[11px] font-bold">
-                {statusData.graph_data?.cluster_count || 0}
-              </span>
-            </div>
             <div className="flex items-center justify-between gap-8 border-t border-slate-800 pt-1">
               <span className="font-mono text-[10px] text-slate-400 uppercase">
                 Nodes Found
               </span>
               <span className="font-mono text-[11px] font-bold text-white">
-                {statusData.graph_data?.nodes.length || 0}
+                {statusData.graph_data?.num_nodes}
               </span>
             </div>
             <div className="flex items-center justify-between gap-8">
@@ -469,7 +461,7 @@ export default function DiscoveryPage() {
                 Edges Found
               </span>
               <span className="font-mono text-[11px] font-bold text-white">
-                {statusData.graph_data?.links.length || 0}
+                {statusData.graph_data?.num_edges}
               </span>
             </div>
           </div>

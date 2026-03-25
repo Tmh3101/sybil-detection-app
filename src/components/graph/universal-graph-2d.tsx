@@ -76,11 +76,17 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       }
     } else {
       // CLUSTER mode forces
-      fgRef.current
-        .d3Force("center")
-        ?.x(dimensions.width / 2)
-        .y(dimensions.height / 2);
-      fgRef.current.d3Force("charge")?.strength(-150);
+      // Use forceX and forceY to pull disconnected clusters towards center
+      fgRef.current.d3Force("x", d3.forceX(0).strength(0.05));
+      fgRef.current.d3Force("y", d3.forceY(0).strength(0.05));
+
+      // Traditional centering force
+      fgRef.current.d3Force("center", d3.forceCenter(0, 0));
+
+      // Manageable charge force
+      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-100));
+
+      // Default link distance
       fgRef.current.d3Force("link")?.distance(30);
     }
 
@@ -138,19 +144,20 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       // Optimization: Skip image rendering if too many nodes in CLUSTER mode
       const skipImages = mode === "CLUSTER" && processedData.nodes.length > 500;
       const rawImgUrl = node.attributes?.picture_url;
+      const safeUrl = resolvePictureUrl(rawImgUrl);
       let img = null;
 
-      if (!skipImages && rawImgUrl) {
-        if (imgCache.current[rawImgUrl]) {
-          img = imgCache.current[rawImgUrl];
+      if (!skipImages && safeUrl) {
+        if (imgCache.current[safeUrl]) {
+          img = imgCache.current[safeUrl];
         } else {
           const newImg = new Image();
-          newImg.src = resolvePictureUrl(rawImgUrl);
+          newImg.src = safeUrl;
           newImg.onload = () => {
-            imgCache.current[rawImgUrl] = newImg;
+            imgCache.current[safeUrl] = newImg;
             setImagesLoaded((prev) => prev + 1);
           };
-          imgCache.current[rawImgUrl] = newImg;
+          imgCache.current[safeUrl] = newImg;
         }
       }
 
@@ -196,7 +203,7 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative h-full min-h-[400px] w-full bg-black/40"
+      className="relative h-full min-h-[400px] w-full bg-slate-950/40"
     >
       <ForceGraph2D
         key={`fg-${imagesLoaded}-${mode}`}
@@ -280,14 +287,20 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
               <div class="text-slate-400 border-t border-slate-800 pt-2">
                 <div class="mb-1 text-[8px] font-bold text-slate-500 uppercase tracking-tighter">Detection Reasons:</div>
                 <div class="flex flex-wrap gap-1 mt-1">
-                  ${(node.attributes?.reasons as string[] || [])
-                    .map(r => `<span class="bg-slate-800/80 border border-slate-700 px-1.5 py-0.5 rounded-sm text-[8px] uppercase italic text-slate-300 leading-none whitespace-nowrap">${r}</span>`)
-                    .join('') || '<span class="text-[9px] italic text-slate-600">No specific flags detected</span>'}
+                  ${
+                    ((node.attributes?.reasons as string[]) || [])
+                      .map(
+                        (r) =>
+                          `<span class="bg-slate-800/80 border border-slate-700 px-1.5 py-0.5 rounded-sm text-[8px] uppercase italic text-slate-300 leading-none whitespace-nowrap">${r}</span>`
+                      )
+                      .join("") ||
+                    '<span class="text-[9px] italic text-slate-600">No specific flags detected</span>'
+                  }
                 </div>
               </div>
               </div>
               `;
-              }}
+        }}
         onNodeClick={(node: NodeObject<ExtendedNode>) => {
           if (fgRef.current && node.x !== undefined && node.y !== undefined) {
             fgRef.current.centerAt(node.x, node.y, 1000);
