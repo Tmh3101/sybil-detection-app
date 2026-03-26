@@ -206,13 +206,9 @@ export default function UniversalGraph2D({
       const size =
         mode === "EGO"
           ? isTarget
-            ? 14
+            ? 12
             : 6
-          : isMalicious
-            ? 9
-            : isHighRisk
-              ? 7
-              : 5;
+          : 6;
 
       const x = n.x ?? 0;
       const y = n.y ?? 0;
