@@ -20,13 +20,13 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
   extraItems,
   graphData,
 }) => {
-  // ── Edge counts per layer ──
+  // Edge counts per layer
   const edgeCounts = useMemo(() => {
     if (!graphData?.links) return {};
     return computeEdgeCounts(graphData.links);
   }, [graphData]);
 
-  // ── Node counts per risk label ──
+  // Node counts per risk label
   const nodeCounts = useMemo(() => {
     if (!graphData?.nodes) return {};
     const c: Record<string, number> = {};
@@ -55,7 +55,9 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
               </span>
             )}
           </div>
+
           {extraItems}
+
           {LABEL_GROUPS.map(({ label, key }) => {
             const count = nodeCounts[key] ?? 0;
             return (
@@ -81,7 +83,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 {count > 0 && (
                   <span
                     className="font-mono text-[8px] font-bold tabular-nums"
-                    style={{ color: LABEL_COLORS[key] + "bb" }}
+                    style={{ color: LABEL_COLORS[key] + "aa" }}
                   >
                     {count}
                   </span>
@@ -95,7 +97,9 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
       {/* ── Relation layers ── */}
       {showRelations && (
         <div
-          className={`flex flex-col gap-1.5 ${showNodes ? "border-t border-slate-800/80 pt-3" : ""}`}
+          className={`flex flex-col gap-1.5 ${
+            showNodes ? "border-t border-slate-800/80 pt-3" : ""
+          }`}
         >
           <div className="mb-1 flex items-center justify-between">
             <span className="font-mono text-[8px] font-bold tracking-[0.18em] text-slate-500 uppercase">
@@ -116,13 +120,14 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 className="flex items-center justify-between gap-2"
               >
                 <div className="flex items-center gap-2">
-                  {/* Line + arrow/diamond indicator */}
+                  {/* Line + direction indicator */}
                   <div className="flex flex-shrink-0 items-center gap-0.5">
                     <div
                       className="h-px w-4"
                       style={{ backgroundColor: layer.color }}
                     />
                     {layer.directed ? (
+                      /* Arrow for directed layers */
                       <svg
                         width="5"
                         height="6"
@@ -132,6 +137,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                         <polygon points="0,0 5,3 0,6" fill="currentColor" />
                       </svg>
                     ) : (
+                      /* Diamond for undirected layers */
                       <svg
                         width="6"
                         height="6"
@@ -151,6 +157,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                     {layer.label}
                   </span>
                 </div>
+
                 {/* Edge count badge */}
                 {count > 0 ? (
                   <span
@@ -173,28 +180,34 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
           {/* Direction key */}
           <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-800/60 pt-2">
             <div className="flex items-center gap-2">
-              <svg width="12" height="8" viewBox="0 0 12 8">
+              <svg width="14" height="8" viewBox="0 0 14 8">
                 <line
                   x1="0"
                   y1="4"
-                  x2="7"
+                  x2="8"
                   y2="4"
                   stroke="#334155"
                   strokeWidth="1"
                 />
-                <polygon points="7,1 12,4 7,7" fill="#334155" />
+                <polygon points="8,1.5 13,4 8,6.5" fill="#334155" />
               </svg>
               <span className="font-mono text-[7px] text-slate-600">
                 directed
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <svg width="12" height="8" viewBox="0 0 12 8">
+              <svg width="14" height="8" viewBox="0 0 14 8">
                 <line
                   x1="0"
                   y1="4"
-                  x2="12"
+                  x2="14"
                   y2="4"
+                  stroke="#334155"
+                  strokeWidth="1"
+                />
+                <polygon
+                  points="7,1.5 12,4 7,6.5 2,4"
+                  fill="none"
                   stroke="#334155"
                   strokeWidth="1"
                 />

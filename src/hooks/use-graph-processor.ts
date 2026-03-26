@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { SybilNode, SybilEdge } from "@/types/api";
 import { NodeObject } from "react-force-graph-2d";
+import { LABEL_COLORS } from "@/lib/graph-constants";
 
 export interface AggregatedLink extends Omit<SybilEdge, "source" | "target"> {
   source: string | NodeObject<SybilNode>;
@@ -20,9 +21,6 @@ interface GraphProcessorOptions {
   targetId?: string;
 }
 
-/**
- * Standardized Hook to process Graph Data (Aggregation & Normalization)
- */
 export function useGraphProcessor(
   graphData: { nodes: SybilNode[]; links: SybilEdge[] },
   options: GraphProcessorOptions = {}
@@ -30,16 +28,22 @@ export function useGraphProcessor(
   const { aggregateEdges = true, targetId } = options;
 
   return useMemo(() => {
-    // 1. Process Nodes (Force target node to center)
-    const tid = targetId?.toLowerCase();
+    // 1. Process nodes — inject __color and __isTarget for reliable canvas access
     const nodes = graphData.nodes.map((n) => {
-      const isTarget = tid && n.id.toLowerCase() === tid;
-      return {
+      const isTarget = !!(targetId && String(n.id) === String(targetId));
+      const riskLabel = n.risk_label as string;
+      const nodeColor = LABEL_COLORS[riskLabel] || LABEL_COLORS.UNKNOWN;
+
+      const enriched = {
         ...n,
-        id: n.id,
         fx: isTarget ? 0 : undefined,
         fy: isTarget ? 0 : undefined,
-      } as SybilNode;
+        // These two are the KEY FIX — set before d3 processes nodes
+        __color: nodeColor,
+        __isTarget: isTarget,
+      };
+
+      return enriched as SybilNode;
     });
 
     if (!aggregateEdges) {
@@ -50,7 +54,6 @@ export function useGraphProcessor(
     const linkMap = new Map<string, AggregatedLink>();
 
     graphData.links.forEach((link) => {
-      // Extract IDs safely from strings or objects
       const sId =
         typeof link.source === "object"
           ? (link.source as NodeObject<SybilNode>).id
@@ -80,7 +83,7 @@ export function useGraphProcessor(
 
     const aggregatedLinks = Array.from(linkMap.values());
 
-    // 3. Assign indices for curvature if multiple edge types exist between same pair
+    // 3. Multi-link curvature indices
     const pairGroups: Record<string, AggregatedLink[]> = {};
     aggregatedLinks.forEach((link) => {
       const sId =

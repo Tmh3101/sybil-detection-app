@@ -1,13 +1,15 @@
 import { SybilEdge } from "@/types/api";
 
+// ─── Risk label colors ───
 export const LABEL_COLORS: Record<string, string> = {
-  BENIGN: "#00f2ff",
-  LOW_RISK: "#4ade80",
-  HIGH_RISK: "#fb923c",
-  MALICIOUS: "#ef4444",
-  UNKNOWN: "#94a3b8",
+  BENIGN: "#00f2ff", // cyan
+  LOW_RISK: "#4ade80", // green
+  HIGH_RISK: "#fb923c", // orange
+  MALICIOUS: "#ef4444", // red
+  UNKNOWN: "#94a3b8", // slate
 };
 
+// ─── Edge type colors by relation layer ───
 export const RELATION_COLORS: Record<string, string> = {
   // Follow layer (directed) — blue
   FOLLOW: "#3b82f6",
@@ -31,7 +33,7 @@ export const RELATION_COLORS: Record<string, string> = {
   UNKNOWN: "#475569",
 };
 
-// Which edge_type values are DIRECTED (Follow + Interact layers)
+// ─── Which edge_type values are DIRECTED (Follow + Interact layers) ───
 export const DIRECTED_EDGE_TYPES = new Set([
   "FOLLOW",
   "UPVOTE",
@@ -43,7 +45,7 @@ export const DIRECTED_EDGE_TYPES = new Set([
   "TIP",
 ]);
 
-// Layer grouping for legend display
+// ─── Layer grouping for legend ───
 export const EDGE_LAYERS: {
   key: string;
   label: string;
@@ -89,7 +91,7 @@ export const EDGE_LAYERS: {
   },
 ];
 
-// Legacy compat exports (some components import these)
+// ─── Legacy compat exports ───
 export const RELATION_GROUPS = EDGE_LAYERS.map(({ key, label }) => ({
   type: key,
   label,
@@ -102,16 +104,15 @@ export const LABEL_GROUPS = [
   { label: "Malicious", key: "MALICIOUS" },
 ];
 
-export const MIN_LINK_WIDTH = 0.8;
+export const MIN_LINK_WIDTH = 0.5;
 export const MAX_LINK_WIDTH = 5;
-export const DEFAULT_LINK_WIDTH = 1.8;
+export const DEFAULT_LINK_WIDTH = 1.5;
 
-// Compute edge counts per layer from a links array
+// ─── Compute edge counts per layer from a links array ───
 export function computeEdgeCounts(links: SybilEdge[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const link of links) {
     const et = link.edge_type || "UNKNOWN";
-    // Map to layer key
     let layerKey = "UNKNOWN";
     for (const layer of EDGE_LAYERS) {
       if (layer.types.includes(et)) {

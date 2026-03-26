@@ -19,103 +19,77 @@ import {
   LABEL_COLORS,
   RELATION_COLORS,
   MIN_LINK_WIDTH,
-  DEFAULT_LINK_WIDTH,
   DIRECTED_EDGE_TYPES,
 } from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
 import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
-import { Maximize2, ZoomIn, ZoomOut } from "lucide-react";
+import { Maximize2, ZoomIn, ZoomOut, Weight } from "lucide-react";
 
-const AVATAR_CACHE: Record<string, HTMLImageElement | "error" | "pending"> = {};
-
-type ExtendedNode = SybilNode & {
-  picture_url?: string;
-  handle?: string;
+type EnrichedNode = SybilNode & {
+  __color?: string;
+  __isTarget?: boolean;
 };
 
 export interface UniversalGraph2DProps {
   graphData: { nodes: SybilNode[]; links: SybilEdge[] };
   mode: "EGO" | "CLUSTER";
   targetId?: string;
-  risk_label?: RiskClassification; // kept for compat, color derived from data
+  risk_label?: RiskClassification;
   depthFilter?: 1 | 2;
   onClusterNodeClick?: (clusterId: number, nodes: SybilNode[]) => void;
   allNodes?: SybilNode[];
 }
 
-// ─── Letter-avatar: drawn directly on canvas, no CORS needed ───
-function drawLetterAvatar(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  color: string,
-  handle: string
-) {
-  // Fill circle background
-  ctx.beginPath();
-  ctx.arc(x, y, size, 0, Math.PI * 2);
-  ctx.fillStyle = color + "22"; // slightly more opaque
-  ctx.fill();
-
-  // Draw letter
-  const letter = (handle || "?").charAt(0).toUpperCase();
-  const fs = Math.max(size * 0.85, 5);
-  ctx.font = `bold ${fs}px "JetBrains Mono",monospace`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = color + "bb";
-  ctx.fillText(letter, x, y);
-}
-
-const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
+export default function UniversalGraph2D({
   graphData,
   mode,
   targetId,
   depthFilter = 2,
   onClusterNodeClick,
   allNodes,
-}) => {
+}: UniversalGraph2DProps) {
   const fgRef = useRef<
-    ForceGraphMethods<ExtendedNode, AggregatedLink> | undefined
+    ForceGraphMethods<EnrichedNode, AggregatedLink> | undefined
   >(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [avatarTrigger, setAvatarTrigger] = useState(0);
+  const [showWeights, setShowWeights] = useState(false);
 
+  const imgCache = useRef<
+    Record<string, HTMLImageElement | "error" | "pending">
+  >({});
+
+  // ─── Depth filter (frontend, EGO only) ───
   const depthFilteredData = useMemo(() => {
     if (mode !== "EGO" || depthFilter === 2 || !targetId) return graphData;
-    const tid = targetId.toLowerCase();
-    const direct = new Set<string>([tid]);
+    const direct = new Set<string>([String(targetId)]);
     graphData.links.forEach((l) => {
       const s = String(
         typeof l.source === "object"
           ? (l.source as { id: string }).id
           : l.source
-      ).toLowerCase();
+      );
       const t = String(
         typeof l.target === "object"
           ? (l.target as { id: string }).id
           : l.target
-      ).toLowerCase();
-      if (s === tid) direct.add(t);
-      if (t === tid) direct.add(s);
+      );
+      if (s === String(targetId)) direct.add(t);
+      if (t === String(targetId)) direct.add(s);
     });
     return {
-      nodes: graphData.nodes.filter((n) =>
-        direct.has(String(n.id).toLowerCase())
-      ),
+      nodes: graphData.nodes.filter((n) => direct.has(String(n.id))),
       links: graphData.links.filter((l) => {
         const s = String(
           typeof l.source === "object"
             ? (l.source as { id: string }).id
             : l.source
-        ).toLowerCase();
+        );
         const t = String(
           typeof l.target === "object"
             ? (l.target as { id: string }).id
             : l.target
-        ).toLowerCase();
+        );
         return direct.has(s) && direct.has(t);
       }),
     };
@@ -126,20 +100,7 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     aggregateEdges: true,
   });
 
-  // Target color for legend
-  const targetNodeColor = useMemo(() => {
-    if (!targetId) return LABEL_COLORS.BENIGN;
-    const found = processedData.nodes.find(
-      (n) => String(n.id).toLowerCase() === String(targetId).toLowerCase()
-    );
-
-    const rl = String(found?.risk_label || "UNKNOWN")
-      .toUpperCase()
-      .trim();
-    return LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
-  }, [processedData.nodes, targetId]);
-
-  // Resize
+  // ─── Resize ───
   useEffect(() => {
     if (!containerRef.current) return;
     const ro = new ResizeObserver((entries) => {
@@ -152,13 +113,13 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  // Forces
+  // ─── D3 forces ───
   useEffect(() => {
     if (!fgRef.current) return;
     if (mode === "EGO") {
       fgRef.current.d3Force("radial", d3.forceRadial(190, 0, 0));
       (
-        fgRef.current.d3Force("charge") as d3.ForceManyBody<ExtendedNode>
+        fgRef.current.d3Force("charge") as d3.ForceManyBody<EnrichedNode>
       )?.strength(-260);
     } else {
       fgRef.current.d3Force("x", d3.forceX(0).strength(0.05));
@@ -176,25 +137,26 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       const url = resolvePictureUrl(rawUrl);
       if (!url) return null;
 
-      const cached = AVATAR_CACHE[url];
+      const cached = imgCache.current[url];
       if (cached === "error" || cached === "pending") return null;
       if (cached instanceof HTMLImageElement) {
-        return cached.complete ? cached : null;
+        return cached.complete && cached.naturalWidth > 0 ? cached : null;
       }
 
       // First request
-      AVATAR_CACHE[url] = "pending";
+      imgCache.current[url] = "pending";
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
-        AVATAR_CACHE[url] = img;
-        setAvatarTrigger((prev) => prev + 1);
-        // Explicitly refresh graph once image is ready
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setTimeout(() => (fgRef.current as any)?.refresh(), 10);
+        imgCache.current[url] = img;
+        try {
+          (fgRef.current as unknown as { refresh?: () => void })?.refresh?.();
+        } catch {
+          fgRef.current?.d3ReheatSimulation();
+        }
       };
       img.onerror = () => {
-        AVATAR_CACHE[url] = "error";
+        imgCache.current[url] = "error";
       };
       img.src = url;
       return null;
@@ -202,115 +164,95 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     []
   );
 
-  // ─── NODE CANVAS RENDERER ───
+  // ─── NODE RENDERER ───
   const drawNode = useCallback(
     (
-      node: NodeObject<ExtendedNode>,
+      node: NodeObject<EnrichedNode>,
       ctx: CanvasRenderingContext2D,
       globalScale: number
     ) => {
-      // Harmless usage to satisfy ESLint dependency check
-      void avatarTrigger;
+      const n = node as EnrichedNode;
 
-      const ext = node as ExtendedNode;
-      const rl = String(ext.risk_label || "UNKNOWN")
-        .toUpperCase()
-        .trim();
+      const isTarget = !!n.__isTarget;
+      const baseColor = n.__color || LABEL_COLORS.UNKNOWN;
+      const color = baseColor;
 
-      const isTarget =
-        mode === "EGO" &&
-        !!targetId &&
-        String(node.id).toLowerCase() === String(targetId).toLowerCase();
-      const isMalicious = rl === "MALICIOUS";
-      const isHighRisk = rl === "HIGH_RISK";
+      const riskLabel = n.risk_label || "UNKNOWN";
+      const isMalicious = riskLabel === "MALICIOUS";
+      const isHighRisk = riskLabel === "HIGH_RISK";
 
       const size =
         mode === "EGO"
           ? isTarget
-            ? 20 // Increased from 16
-            : 10 // Increased from 6
+            ? 14
+            : 6
           : isMalicious
             ? 9
             : isHighRisk
               ? 7
               : 5;
 
-      const x = node.x ?? 0;
-      const y = node.y ?? 0;
-
-      // Color from label
-      const color = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
+      const x = n.x ?? 0;
+      const y = n.y ?? 0;
 
       // ── Glow aura ──
       if (isTarget) {
-        // Larger, more vibrant aura for target
-        ([size + 18, size + 10, size + 4] as number[]).forEach(
-          (r: number, i: number) => {
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fillStyle = color + (["0a", "1a", "30"] as string[])[i];
-            ctx.fill();
-          }
-        );
-
-        // Vibrant outer ring
-        ctx.beginPath();
-        ctx.arc(x, y, size + 3, 0, Math.PI * 2);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      } else if (isMalicious && mode === "CLUSTER") {
+        ([size + 12, size + 7, size + 3] as number[]).forEach((r, i) => {
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = color + (["0d", "20", "38"] as string[])[i];
+          ctx.fill();
+        });
+      } else if (mode === "CLUSTER" && isMalicious) {
         ctx.beginPath();
         ctx.arc(x, y, size + 4, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(239,68,68,0.22)";
+        ctx.fillStyle = "rgba(239,68,68,0.2)";
         ctx.fill();
-      } else if (isHighRisk && mode === "CLUSTER") {
+      } else if (mode === "CLUSTER" && isHighRisk) {
         ctx.beginPath();
         ctx.arc(x, y, size + 3, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(251,146,60,0.18)";
         ctx.fill();
       }
 
-      // ── Node body: 3-layer architecture ──
-      const skipImg = mode === "CLUSTER" && processedData.nodes.length > 2500;
-      const rawUrl =
-        ext.attributes?.picture_url || ext.picture_url
-          ? String(ext.attributes?.picture_url || ext.picture_url)
-          : undefined;
-      const handle = String(ext.attributes?.handle || node.id || "?");
-      const img = skipImg ? null : getOrLoadImage(rawUrl);
-
-      // LAYER 1: Solid Background
+      // ── Node body: background + clip + avatar or letter ──
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-      ctx.fillStyle = img ? "#0f172a" : color; // Very dark bg if image loading/found, otherwise risk color
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+
+      ctx.fillStyle = color + "15";
       ctx.fill();
 
-      // LAYER 2: Clipped Image & Fallback
-      if (img && img.complete && img.naturalWidth > 0) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-        ctx.clip();
+      // Now clip for avatar/letter
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.clip();
+
+      const skipImg = mode === "CLUSTER" && processedData.nodes.length > 500;
+      const rawUrl = n.attributes?.picture_url
+        ? String(n.attributes.picture_url)
+        : undefined;
+      const handle = String(n.attributes?.handle || n.id || "?");
+      const img = skipImg ? null : getOrLoadImage(rawUrl);
+
+      if (img) {
         try {
           ctx.drawImage(img, x - size, y - size, size * 2, size * 2);
         } catch {
-          drawLetterAvatar(ctx, x, y, size, color, handle);
+          // CORS taint — letter fallback
+          drawLetter(ctx, x, y, size, color, handle);
         }
-        ctx.restore();
       } else {
-        // Always draw letter avatar if image is missing, loading, or failed
-        // unless it's way too small (below 1.2 scale in cluster mode)
-        if (globalScale >= 1.2 || mode === "EGO") {
-          drawLetterAvatar(ctx, x, y, size, color, handle);
-        }
+        drawLetter(ctx, x, y, size, color, handle);
       }
 
-      // LAYER 3: Crisp Border (Drawn over everything, unclipped)
+      ctx.restore();
+
+      // ── Border ring ──
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-      ctx.lineWidth = isTarget ? 2.5 : isMalicious || isHighRisk ? 1.8 : 1;
+      ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.strokeStyle = color;
+      ctx.lineWidth = isTarget ? 2.5 : isMalicious || isHighRisk ? 1.8 : 1;
       ctx.stroke();
 
       // ── Target: dashed orbit ──
@@ -331,14 +273,8 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         (mode === "CLUSTER" && globalScale > 2.8);
 
       if (showLabel) {
-        if (isTarget) {
-          ctx.font = `bold ${Math.max(10 / globalScale, 6)}px "JetBrains Mono",monospace`;
-          ctx.fillStyle = color;
-          ctx.fillText("[TARGET]", x, y - size - 14 / globalScale);
-        }
-
         const fs =
-          mode === "EGO" && isTarget ? 14 / globalScale : 9 / globalScale;
+          mode === "EGO" && isTarget ? 12 / globalScale : 9 / globalScale;
         ctx.font = `${isTarget ? "bold " : ""}${Math.max(fs, 4)}px "JetBrains Mono",monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
@@ -346,53 +282,93 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         ctx.fillText(handle.slice(0, 14), x, y + size + 2);
       }
     },
-    [mode, targetId, processedData.nodes.length, getOrLoadImage, avatarTrigger]
+    [mode, processedData.nodes.length, getOrLoadImage]
+  );
+
+  // ── GAT Weight label on edges (shown at high zoom) ──
+  const drawEdgeWeight = useCallback(
+    (
+      link: LinkObject<EnrichedNode, AggregatedLink>,
+      ctx: CanvasRenderingContext2D,
+      globalScale: number
+    ) => {
+      if (!showWeights || globalScale < 2.5) return;
+
+      const src = link.source as { x?: number; y?: number };
+      const tgt = link.target as { x?: number; y?: number };
+      if (src.x === undefined || tgt.x === undefined) return;
+
+      const midX = ((src.x || 0) + (tgt.x || 0)) / 2;
+      const midY = ((src.y || 0) + (tgt.y || 0)) / 2;
+
+      const w = (link as AggregatedLink).aggregated_weight || 1;
+      const label = w.toFixed(0);
+
+      const fs = Math.max(2.5, 8 / globalScale);
+      ctx.font = `bold ${fs}px monospace`;
+
+      const edgeType = ((link as AggregatedLink).edge_type as string) || "";
+      const edgeColor = RELATION_COLORS[edgeType] || RELATION_COLORS.UNKNOWN;
+
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillRect(midX - tw / 2 - 2, midY - fs / 2 - 1, tw + 4, fs + 2);
+
+      ctx.fillStyle = edgeColor + "dd";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, midX, midY);
+    },
+    [showWeights]
   );
 
   // ── Tooltip ──
   const nodeLabel = useCallback(
-    (node: NodeObject<ExtendedNode>) => {
+    (node: NodeObject<EnrichedNode>) => {
       if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
-      const ext = node as ExtendedNode;
-      const rl = String(ext.risk_label || "UNKNOWN")
-        .toUpperCase()
-        .trim();
-      const c = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
+      const n = node as EnrichedNode;
+      const rl = n.risk_label || "UNKNOWN";
+      const c = n.__color || LABEL_COLORS.UNKNOWN;
       const isHigh = rl === "MALICIOUS" || rl === "HIGH_RISK";
-      const reasons = (ext.attributes?.reasons as string[]) || [];
+      const reasons = (n.attributes?.reasons as string[]) || [];
+
+      // Explicit cluster_id access from root or attributes
+      const clusterId =
+        n.cluster_id !== undefined && n.cluster_id !== null
+          ? n.cluster_id
+          : n.attributes?.cluster_id;
 
       return `
       <div style="background:#020617;border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:230px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ext.attributes?.handle || "—"}</span>
+          <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.attributes?.handle || "—"}</span>
           <span style="font-size:8px;padding:2px 5px;border:1px solid ${c}44;color:${c};background:${c}11;text-transform:uppercase;">${rl}</span>
         </div>
-        <div style="color:#1e293b;font-size:8px;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
-        <div style="display:grid;grid-template-columns:repeat(${mode === "CLUSTER" ? 3 : 2}, 1fr);gap:3px;margin-bottom:8px;">
+        <div style="color:#64748b;font-size:8px;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:8px;">
           <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
-            <div style="color:#334155;font-size:7px;margin-bottom:2px;">RISK SCORE</div>
-            <div style="color:${isHigh ? "#ef4444" : "#22c55e"};font-weight:bold;font-size:13px;">${((ext.risk_score || 0) * 100).toFixed(0)}%</div>
+            <div style="color:#475569;font-size:7px;margin-bottom:2px;">RISK</div>
+            <div style="color:${isHigh ? "#ef4444" : "#22c55e"};font-weight:bold;font-size:13px;">${((n.risk_score || 0) * 100).toFixed(0)}%</div>
           </div>
-          ${
-            mode === "CLUSTER"
-              ? `
           <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
-            <div style="color:#334155;font-size:7px;margin-bottom:2px;">CLUSTER</div>
-            <div style="color:#64748b;font-weight:bold;font-size:13px;">#${ext.cluster_id ?? "-"}</div>
-          </div>`
-              : ""
-          }
+            <div style="color:#475569;font-size:7px;margin-bottom:2px;">CLUSTER</div>
+            <div style="color:#f1f5f9;font-weight:bold;font-size:13px;">#${clusterId ?? "-"}</div>
+          </div>
+          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+            <div style="color:#475569;font-size:7px;margin-bottom:2px;">TRUST</div>
+            <div style="color:#f1f5f9;font-size:11px;">${Number(n.attributes?.trust_score || 0).toFixed(1)}</div>
+          </div>
         </div>
         ${
           reasons.length > 0
             ? `
         <div style="border-top:1px solid #0f172a;padding-top:6px;">
-          <div style="color:#1e293b;font-size:7px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;">Detection Flags</div>
+          <div style="color:#64748b;font-size:7px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;">Detection Flags</div>
           <div style="display:flex;flex-wrap:wrap;gap:3px;">${reasons
             .slice(0, 3)
             .map(
               (r) =>
-                `<span style="background:#0f172a;border:1px solid #1e293b;padding:2px 5px;font-size:8px;color:#475569;">${r}</span>`
+                `<span style="background:#0f172a;border:1px solid #1e293b;padding:2px 5px;font-size:8px;color:#94a3b8;">${r}</span>`
             )
             .join("")}</div>
         </div>`
@@ -405,9 +381,9 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
 
   // ── Node click ──
   const handleNodeClick = useCallback(
-    (node: NodeObject<ExtendedNode>) => {
+    (node: NodeObject<EnrichedNode>) => {
       if (mode === "CLUSTER" && onClusterNodeClick) {
-        const cid = (node as ExtendedNode).cluster_id;
+        const cid = (node as EnrichedNode).cluster_id;
         if (cid !== undefined && cid !== null) {
           const clusterNodes = (allNodes || processedData.nodes).filter(
             (n) => (n as SybilNode).cluster_id === cid
@@ -432,12 +408,22 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   const zoomOut = () =>
     fgRef.current?.zoom((fgRef.current?.zoom() ?? 1) / 1.45, 200);
 
+  // Target node color for legend — read from enriched node
+  const targetColor = useMemo(() => {
+    if (!targetId) return LABEL_COLORS.BENIGN;
+    const found = processedData.nodes.find(
+      (n) => String(n.id) === String(targetId)
+    ) as EnrichedNode | undefined;
+    return found?.__color || LABEL_COLORS.BENIGN;
+  }, [processedData.nodes, targetId]);
+
   return (
     <div
       ref={containerRef}
       className="relative h-full min-h-[400px] w-full bg-[#050608]"
     >
       <ForceGraph2D
+        // ─── FIX: NO imagesLoaded in key — prevents remount that clears imgCache ───
         key={`fg-${mode}-${depthFilter}`}
         ref={fgRef}
         width={dimensions.width}
@@ -448,8 +434,9 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         nodeCanvasObjectMode={() => "always"}
         nodeLabel={nodeLabel}
         onNodeClick={handleNodeClick}
+        // ─── Directed arrows for Follow/Interact layers ───
         linkDirectionalArrowLength={(
-          link: LinkObject<ExtendedNode, AggregatedLink>
+          link: LinkObject<EnrichedNode, AggregatedLink>
         ) =>
           DIRECTED_EDGE_TYPES.has((link.edge_type as string) || "")
             ? mode === "EGO"
@@ -459,12 +446,12 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         }
         linkDirectionalArrowRelPos={0.95}
         linkDirectionalArrowColor={(
-          link: LinkObject<ExtendedNode, AggregatedLink>
+          link: LinkObject<EnrichedNode, AggregatedLink>
         ) =>
           RELATION_COLORS[(link.edge_type as string) || ""] ||
           RELATION_COLORS.UNKNOWN
         }
-        linkColor={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
+        linkColor={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           const t = (link.edge_type as string) || "";
           const base = RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
           if (mode === "CLUSTER") return base + "50";
@@ -475,34 +462,48 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
           const b = parseInt(base.slice(5, 7), 16);
           return `rgba(${r},${g},${b},${op})`;
         }}
-        linkWidth={(link: LinkObject<ExtendedNode, AggregatedLink>) =>
+        linkWidth={(link: LinkObject<EnrichedNode, AggregatedLink>) =>
           mode === "CLUSTER"
-            ? DEFAULT_LINK_WIDTH
+            ? MIN_LINK_WIDTH
             : Math.max(MIN_LINK_WIDTH, Math.sqrt(link.aggregated_weight || 1))
         }
         linkDirectionalParticles={(
-          link: LinkObject<ExtendedNode, AggregatedLink>
+          link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
-          if (mode === "CLUSTER") return 0;
+          if (mode === "EGO") return 0; // disabled for inspector
           if (!DIRECTED_EDGE_TYPES.has((link.edge_type as string) || ""))
             return 0;
           const w = link.aggregated_weight || 1;
           return w > 1 ? Math.min(Math.floor(Math.log2(w)) + 1, 4) : 0;
         }}
         linkDirectionalParticleWidth={() => 1.5}
-        linkCurvature={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
+        linkCurvature={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
           return (
             ((link.multiLinkIndex ?? 0) - (link.multiLinkCount - 1) / 2) * 0.18
           );
         }}
+        // ─── GAT weight labels (drawn AFTER default link) ───
+        linkCanvasObject={showWeights ? drawEdgeWeight : undefined}
+        linkCanvasObjectMode={showWeights ? () => "after" : undefined}
         cooldownTicks={120}
         d3AlphaDecay={0.018}
         d3VelocityDecay={0.35}
       />
 
-      {/* ── Zoom Controls ── */}
+      {/* ── Controls (zoom + weight toggle) ── */}
       <div className="absolute right-6 bottom-6 z-20 flex flex-col gap-1.5">
+        <button
+          onClick={() => setShowWeights((v) => !v)}
+          title={showWeights ? "Hide edge weights" : "Show edge weights"}
+          className={`flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95 ${
+            showWeights
+              ? "border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan"
+              : "hover:border-accent-cyan/30 hover:text-accent-cyan border-slate-700/80 bg-black/80 text-slate-500"
+          }`}
+        >
+          <Weight size={12} />
+        </button>
         <button
           onClick={zoomToFit}
           title="Zoom to fit"
@@ -526,6 +527,15 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         </button>
       </div>
 
+      {/* Weight info hint */}
+      {showWeights && (
+        <div className="border-accent-cyan/20 absolute bottom-6 left-4 z-10 border bg-black/80 px-3 py-1.5 font-mono text-[8px] text-slate-500 backdrop-blur-sm">
+          Showing semantic edge weights (1–5 scale)
+          <br />
+          <span className="text-slate-700">Zoom in to see labels on edges</span>
+        </div>
+      )}
+
       <GraphLegend
         graphData={depthFilteredData}
         extraItems={
@@ -534,13 +544,13 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
               <div
                 className="h-2.5 w-2.5 animate-pulse rounded-full"
                 style={{
-                  backgroundColor: targetNodeColor,
-                  boxShadow: `0 0 8px ${targetNodeColor}99`,
+                  backgroundColor: targetColor,
+                  boxShadow: `0 0 8px ${targetColor}99`,
                 }}
               />
               <span
                 className="font-mono text-[9px] font-bold uppercase italic"
-                style={{ color: targetNodeColor }}
+                style={{ color: targetColor }}
               >
                 Target Node
               </span>
@@ -550,6 +560,22 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       />
     </div>
   );
-};
+}
 
-export default UniversalGraph2D;
+// ─── Letter avatar (drawn within canvas clip context) ───
+function drawLetter(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  color: string,
+  handle: string
+) {
+  const letter = (handle || "?").charAt(0).toUpperCase();
+  const fs = Math.max(size * 0.85, 5);
+  ctx.font = `bold ${fs}px "JetBrains Mono",monospace`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = color + "cc";
+  ctx.fillText(letter, x, y);
+}
