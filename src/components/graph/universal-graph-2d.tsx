@@ -361,18 +361,28 @@ export default function UniversalGraph2D({
     [showAttention]
   );
 
-  // ── Tooltip ──
+  // ─── Tooltip ───
   const nodeLabel = useCallback(
     (node: NodeObject<EnrichedNode>) => {
       if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
       const n = node as EnrichedNode;
       const rl = getNodeRiskLabel(n);
       const c = n.__color || LABEL_COLORS.UNKNOWN;
-      const isHigh = rl === "MALICIOUS" || rl === "HIGH_RISK";
-      const reasons = (n.attributes?.reasons as string[]) || [];
       const handle = getNodeHandle(n);
 
-      // Explicit cluster_id access from root or attributes
+      if (mode === "EGO") {
+        return `
+        <div style="background:#020617;border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${handle}</span>
+            <span style="font-size:8px;padding:2px 5px;border:1px solid ${c}44;color:${c};background:${c}11;text-transform:uppercase;">${rl}</span>
+          </div>
+          <div style="color:#64748b;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
+        </div>`;
+      }
+
+      const isHigh = rl === "MALICIOUS" || rl === "HIGH_RISK";
+      const reasons = (n.attributes?.reasons as string[]) || [];
       const clusterId =
         n.cluster_id !== undefined && n.cluster_id !== null
           ? n.cluster_id
