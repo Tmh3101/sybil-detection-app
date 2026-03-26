@@ -78,36 +78,38 @@ function InspectorContent() {
     if (graphDepth === 2) return data.local_graph;
 
     // Depth 1: only nodes with a direct edge to/from the target
-    const directIds = new Set<string>([walletId]);
+    const tid = walletId.toLowerCase().trim();
+    const directIds = new Set<string>([tid]);
+
     data.local_graph.links.forEach((l) => {
       const s = String(
         typeof l.source === "object"
           ? (l.source as { id: string }).id
           : l.source
-      );
+      ).toLowerCase();
       const t = String(
         typeof l.target === "object"
           ? (l.target as { id: string }).id
           : l.target
-      );
-      if (s === walletId) directIds.add(t);
-      if (t === walletId) directIds.add(s);
+      ).toLowerCase();
+      if (s === tid) directIds.add(t);
+      if (t === tid) directIds.add(s);
     });
 
     const nodes = data.local_graph.nodes.filter((n) =>
-      directIds.has(String(n.id))
+      directIds.has(String(n.id).toLowerCase())
     );
     const links = data.local_graph.links.filter((l) => {
       const s = String(
         typeof l.source === "object"
           ? (l.source as { id: string }).id
           : l.source
-      );
+      ).toLowerCase();
       const t = String(
         typeof l.target === "object"
           ? (l.target as { id: string }).id
           : l.target
-      );
+      ).toLowerCase();
       return directIds.has(s) && directIds.has(t);
     });
     return { nodes, links };
@@ -345,7 +347,7 @@ function InspectorContent() {
           <UniversalGraph2D
             mode="EGO"
             graphData={displayGraphData}
-            targetId={walletId || ""}
+            targetId={data?.profile_info?.id || walletId || ""}
             risk_label={riskLabel as import("@/types/api").RiskClassification}
             depthFilter={graphDepth}
           />

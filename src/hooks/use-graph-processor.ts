@@ -36,6 +36,7 @@ export function useGraphProcessor(
       const isTarget = tid && n.id.toLowerCase() === tid;
       return {
         ...n,
+        id: n.id,
         fx: isTarget ? 0 : undefined,
         fy: isTarget ? 0 : undefined,
       } as SybilNode;

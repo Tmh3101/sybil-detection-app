@@ -77,6 +77,9 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
+  // THÊM: State này dùng để ép re-render component khi ảnh tải xong
+  const [, setAvatarTrigger] = useState(0);
+
   // ─── FIX 1: Image cache — stable ref, no state, reheat on load ───
   const imgCache = useRef<
     Record<string, HTMLImageElement | "error" | "pending">
@@ -130,9 +133,13 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   const targetNodeColor = useMemo(() => {
     if (!targetId) return LABEL_COLORS.BENIGN;
     const found = processedData.nodes.find(
-      (n) => String(n.id) === String(targetId)
+      // SỬA: Ép về chữ thường để so sánh an toàn ID và
+      (n) => String(n.id).toLowerCase() === String(targetId).toLowerCase()
     );
-    const rl = found?.risk_label || "UNKNOWN";
+    // SỬA: Loại bỏ khoảng trắng và in hoa risk_label để map đúng với LABEL_COLORS
+    const rl = String(found?.risk_label || "UNKNOWN")
+      .toUpperCase()
+      .trim();
     return LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
   }, [processedData.nodes, targetId]);
 
@@ -188,7 +195,8 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       img.crossOrigin = "anonymous";
       img.onload = () => {
         imgCache.current[url] = img;
-        // ─── FIX: Reheat instead of key-change remount ───
+        // THÊM: Kích hoạt React vẽ lại đồ thị với ảnh đã cache
+        setAvatarTrigger((prev) => prev + 1);
         fgRef.current?.d3ReheatSimulation();
       };
       img.onerror = () => {
@@ -209,10 +217,15 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       globalScale: number
     ) => {
       const ext = node as ExtendedNode;
-      // ─── FIX 4: Read risk_label correctly ───
-      const rl: string = ext.risk_label || "UNKNOWN";
+      // SỬA: Đảm bảo string chuẩn xác 100% (ví dụ: " MALICIOUS " -> "MALICIOUS")
+      const rl = String(ext.risk_label || "UNKNOWN")
+        .toUpperCase()
+        .trim();
+
+      // SỬA: Phải check !!targetId để tránh lỗi undefined
       const isTarget =
         mode === "EGO" &&
+        !!targetId &&
         String(node.id).toLowerCase() === String(targetId).toLowerCase();
       const isMalicious = rl === "MALICIOUS";
       const isHighRisk = rl === "HIGH_RISK";
@@ -336,7 +349,10 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     (node: NodeObject<ExtendedNode>) => {
       if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
       const ext = node as ExtendedNode;
-      const rl = ext.risk_label || "UNKNOWN";
+      // SỬA: Chuẩn hóa cho Tooltip
+      const rl = String(ext.risk_label || "UNKNOWN")
+        .toUpperCase()
+        .trim();
       const c = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
       const isHigh = rl === "MALICIOUS" || rl === "HIGH_RISK";
       const reasons = (ext.attributes?.reasons as string[]) || [];
