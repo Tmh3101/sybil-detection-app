@@ -71,7 +71,10 @@ function InspectorContent() {
   // ─── Depth toggle: 1 = direct neighbors only, 2 = full ego-graph ───
   const [graphDepth, setGraphDepth] = useState<1 | 2>(1);
 
-  const handleReset = () => router.push("/inspector");
+  const handleReset = () => {
+    // Clear all search params by navigating back to base /inspector
+    router.replace("/inspector");
+  };
 
   // ─── Compute filtered local_graph based on depth (frontend filtering) ───
   const displayGraphData = useMemo(() => {
@@ -214,7 +217,6 @@ function InspectorContent() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <SearchForm defaultValue={walletId || ""} />
           <button
             onClick={handleReset}
             className="text-accent-cyan rounded-sm border border-slate-700 bg-slate-800 px-5 py-2 text-xs font-black tracking-widest whitespace-nowrap uppercase italic shadow-lg transition-all hover:bg-slate-700 active:translate-y-0.5"
@@ -396,6 +398,12 @@ function InspectorContent() {
   );
 }
 
+function InspectorWrapper() {
+  const searchParams = useSearchParams();
+  const walletId = searchParams.get("wallet") || "idle";
+  return <InspectorContent key={walletId} />;
+}
+
 export default function InspectorPage() {
   return (
     <Suspense
@@ -408,7 +416,7 @@ export default function InspectorPage() {
         </div>
       }
     >
-      <InspectorContent />
+      <InspectorWrapper />
     </Suspense>
   );
 }

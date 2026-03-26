@@ -23,7 +23,7 @@ import {
 } from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
 import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
-import { Maximize2, ZoomIn, ZoomOut, Brain } from "lucide-react";
+import { Maximize2, ZoomIn, ZoomOut, Brain, Share2 } from "lucide-react";
 
 type EnrichedNode = SybilNode & {
   __color?: string;
@@ -79,49 +79,78 @@ export default function UniversalGraph2D({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [showAttention, setShowAttention] = useState(false);
+  const [showAllEdges, setShowAllEdges] = useState(false);
   const [, setImageVersion] = useState(0);
 
   const imgCache = useRef<
     Record<string, HTMLImageElement | "error" | "pending">
   >({});
 
-  // ─── Depth filter (frontend, EGO only) ───
-  const depthFilteredData = useMemo(() => {
-    if (mode !== "EGO" || depthFilter === 2 || !targetId) return graphData;
-    const direct = new Set<string>([String(targetId)]);
-    graphData.links.forEach((l) => {
-      const s = String(
-        typeof l.source === "object"
-          ? (l.source as { id: string }).id
-          : l.source
-      );
-      const t = String(
-        typeof l.target === "object"
-          ? (l.target as { id: string }).id
-          : l.target
-      );
-      if (s === String(targetId)) direct.add(t);
-      if (t === String(targetId)) direct.add(s);
-    });
-    return {
-      nodes: graphData.nodes.filter((n) => direct.has(String(n.id))),
-      links: graphData.links.filter((l) => {
+  // ─── Depth and Edge Filtering (frontend, EGO only) ───
+  const filteredData = useMemo(() => {
+    if (mode !== "EGO" || !targetId) return graphData;
+
+    const tid = String(targetId).toLowerCase();
+
+    // 1. Initial filter based on depth
+    let nodes = graphData.nodes;
+    let links = graphData.links;
+
+    if (depthFilter === 1) {
+      const direct = new Set<string>([tid]);
+      graphData.links.forEach((l) => {
         const s = String(
           typeof l.source === "object"
             ? (l.source as { id: string }).id
             : l.source
-        );
+        ).toLowerCase();
         const t = String(
           typeof l.target === "object"
             ? (l.target as { id: string }).id
             : l.target
-        );
+        ).toLowerCase();
+        if (s === tid) direct.add(t);
+        if (t === tid) direct.add(s);
+      });
+      nodes = graphData.nodes.filter((n) =>
+        direct.has(String(n.id).toLowerCase())
+      );
+      links = graphData.links.filter((l) => {
+        const s = String(
+          typeof l.source === "object"
+            ? (l.source as { id: string }).id
+            : l.source
+        ).toLowerCase();
+        const t = String(
+          typeof l.target === "object"
+            ? (l.target as { id: string }).id
+            : l.target
+        ).toLowerCase();
         return direct.has(s) && direct.has(t);
-      }),
-    };
-  }, [graphData, mode, depthFilter, targetId]);
+      });
+    }
 
-  const processedData = useGraphProcessor(depthFilteredData, {
+    // 2. Filter edges to target-only if not showAllEdges
+    if (!showAllEdges) {
+      links = links.filter((l) => {
+        const s = String(
+          typeof l.source === "object"
+            ? (l.source as { id: string }).id
+            : l.source
+        ).toLowerCase();
+        const t = String(
+          typeof l.target === "object"
+            ? (l.target as { id: string }).id
+            : l.target
+        ).toLowerCase();
+        return s === tid || t === tid;
+      });
+    }
+
+    return { nodes, links };
+  }, [graphData, mode, depthFilter, targetId, showAllEdges]);
+
+  const processedData = useGraphProcessor(filteredData, {
     targetId: mode === "EGO" ? targetId : undefined,
     aggregateEdges: true,
   });
@@ -557,6 +586,19 @@ export default function UniversalGraph2D({
 
       {/* ── Controls (zoom + weight toggle) ── */}
       <div className="absolute right-6 bottom-6 z-20 flex flex-col gap-1.5">
+        {mode === "EGO" && (
+          <button
+            onClick={() => setShowAllEdges((v) => !v)}
+            title={showAllEdges ? "Show Target Edges Only" : "Show All Edges"}
+            className={`flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95 ${
+              showAllEdges
+                ? "border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan"
+                : "hover:border-accent-cyan/30 hover:text-accent-cyan border-slate-700/80 bg-black/80 text-slate-500"
+            }`}
+          >
+            <Share2 size={12} />
+          </button>
+        )}
         <button
           onClick={() => setShowAttention((v) => !v)}
           title={showAttention ? "Hide AI Attention" : "Show AI Attention"}
@@ -601,7 +643,7 @@ export default function UniversalGraph2D({
       )}
 
       <GraphLegend
-        graphData={depthFilteredData}
+        graphData={filteredData}
         extraItems={
           mode === "EGO" ? (
             <div className="mb-2 flex items-center gap-3">
