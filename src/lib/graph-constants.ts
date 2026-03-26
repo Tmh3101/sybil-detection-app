@@ -1,19 +1,17 @@
-// FIX 2: Ensure LABEL_COLORS keys match exactly the RiskClassification enum values
-// from the API: "BENIGN" | "LOW_RISK" | "HIGH_RISK" | "MALICIOUS"
+import { SybilEdge } from "@/types/api";
+
 export const LABEL_COLORS: Record<string, string> = {
-  BENIGN: "#00f2ff", // Cyan  - clean/safe
-  LOW_RISK: "#4ade80", // Green - mild concern
-  HIGH_RISK: "#fb923c", // Orange - serious
-  MALICIOUS: "#ef4444", // Red   - dangerous
-  UNKNOWN: "#94a3b8", // Slate - unknown/unclassified
+  BENIGN: "#00f2ff",
+  LOW_RISK: "#4ade80",
+  HIGH_RISK: "#fb923c",
+  MALICIOUS: "#ef4444",
+  UNKNOWN: "#94a3b8",
 };
 
-// FIX 5: Edge types mapped to color. Grouped by relation layer.
 export const RELATION_COLORS: Record<string, string> = {
-  // Follow Layer (directed) - Blue
+  // Follow layer (directed) — blue
   FOLLOW: "#3b82f6",
-
-  // Interact Layer (directed) - Green/Teal
+  // Interact layer (directed) — emerald / cyan
   UPVOTE: "#10b981",
   REACTION: "#10b981",
   COMMENT: "#10b981",
@@ -22,26 +20,80 @@ export const RELATION_COLORS: Record<string, string> = {
   COLLECT: "#06b6d4",
   TIP: "#10b981",
   INTERACT: "#10b981",
-
-  // Co-Owner Layer (undirected) - Orange/Amber
+  // Co-Owner layer (undirected) — orange
   "CO-OWNER": "#f97316",
-
-  // Similarity Layer (undirected) - Purple/Violet
+  // Similarity layer (undirected) — violet
   SAME_AVATAR: "#a855f7",
-  FUZZY_HANDLE: "#a855f7",
+  FUZZY_HANDLE: "#8b5cf6",
   SIM_BIO: "#a855f7",
-  CLOSE_CREATION_TIME: "#8b5cf6",
+  CLOSE_CREATION_TIME: "#7c3aed",
   SIMILARITY: "#a855f7",
-
-  UNKNOWN: "#64748b",
+  UNKNOWN: "#475569",
 };
 
-export const RELATION_GROUPS = [
-  { label: "Co-Owner (undirected)", type: "CO-OWNER" },
-  { label: "Follow (directed)", type: "FOLLOW" },
-  { label: "Interact (directed)", type: "INTERACT" },
-  { label: "Similarity (undirected)", type: "SIMILARITY" },
+// Which edge_type values are DIRECTED (Follow + Interact layers)
+export const DIRECTED_EDGE_TYPES = new Set([
+  "FOLLOW",
+  "UPVOTE",
+  "REACTION",
+  "COMMENT",
+  "QUOTE",
+  "MIRROR",
+  "COLLECT",
+  "TIP",
+]);
+
+// Layer grouping for legend display
+export const EDGE_LAYERS: {
+  key: string;
+  label: string;
+  color: string;
+  directed: boolean;
+  types: string[];
+}[] = [
+  {
+    key: "CO-OWNER",
+    label: "Co-Owner",
+    color: RELATION_COLORS["CO-OWNER"],
+    directed: false,
+    types: ["CO-OWNER"],
+  },
+  {
+    key: "FOLLOW",
+    label: "Follow",
+    color: RELATION_COLORS["FOLLOW"],
+    directed: true,
+    types: ["FOLLOW"],
+  },
+  {
+    key: "INTERACT",
+    label: "Interact",
+    color: RELATION_COLORS["INTERACT"],
+    directed: true,
+    types: [
+      "UPVOTE",
+      "REACTION",
+      "COMMENT",
+      "QUOTE",
+      "MIRROR",
+      "COLLECT",
+      "TIP",
+    ],
+  },
+  {
+    key: "SIMILARITY",
+    label: "Similarity",
+    color: RELATION_COLORS["SIMILARITY"],
+    directed: false,
+    types: ["SAME_AVATAR", "FUZZY_HANDLE", "SIM_BIO", "CLOSE_CREATION_TIME"],
+  },
 ];
+
+// Legacy compat exports (some components import these)
+export const RELATION_GROUPS = EDGE_LAYERS.map(({ key, label }) => ({
+  type: key,
+  label,
+}));
 
 export const LABEL_GROUPS = [
   { label: "Benign", key: "BENIGN" },
@@ -54,15 +106,20 @@ export const MIN_LINK_WIDTH = 0.5;
 export const MAX_LINK_WIDTH = 5;
 export const DEFAULT_LINK_WIDTH = 1.5;
 
-// FIX 5: Edge direction classification
-export const DIRECTED_EDGE_LAYERS = new Set(["Follow", "Interact"]);
-export const DIRECTED_EDGE_TYPES = new Set([
-  "FOLLOW",
-  "UPVOTE",
-  "REACTION",
-  "COMMENT",
-  "QUOTE",
-  "MIRROR",
-  "COLLECT",
-  "TIP",
-]);
+// Compute edge counts per layer from a links array
+export function computeEdgeCounts(links: SybilEdge[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const link of links) {
+    const et = link.edge_type || "UNKNOWN";
+    // Map to layer key
+    let layerKey = "UNKNOWN";
+    for (const layer of EDGE_LAYERS) {
+      if (layer.types.includes(et)) {
+        layerKey = layer.key;
+        break;
+      }
+    }
+    counts[layerKey] = (counts[layerKey] || 0) + 1;
+  }
+  return counts;
+}

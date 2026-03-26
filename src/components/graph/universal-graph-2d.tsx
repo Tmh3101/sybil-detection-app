@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import * as d3 from "d3";
 import ForceGraph2D, {
   ForceGraphMethods,
@@ -13,248 +19,374 @@ import {
   LABEL_COLORS,
   RELATION_COLORS,
   MIN_LINK_WIDTH,
+  DIRECTED_EDGE_TYPES,
 } from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
 import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
+import { Maximize2, ZoomIn, ZoomOut } from "lucide-react";
 
-// Edge types that are directed (one-way)
-const DIRECTED_EDGE_TYPES = new Set([
-  "FOLLOW",
-  "UPVOTE",
-  "REACTION",
-  "COMMENT",
-  "QUOTE",
-  "MIRROR",
-  "COLLECT",
-  "TIP",
-]);
-
-interface ExtendedNode extends SybilNode {
-  __img?: HTMLImageElement;
-}
+type ExtendedNode = SybilNode;
 
 export interface UniversalGraph2DProps {
-  graphData: {
-    nodes: SybilNode[];
-    links: SybilEdge[];
-  };
+  graphData: { nodes: SybilNode[]; links: SybilEdge[] };
   mode: "EGO" | "CLUSTER";
   targetId?: string;
-  risk_label?: RiskClassification;
+  risk_label?: RiskClassification; // kept for compat, color derived from data
+  depthFilter?: 1 | 2;
+  onClusterNodeClick?: (clusterId: number, nodes: SybilNode[]) => void;
+  allNodes?: SybilNode[];
+}
+
+// ─── Letter-avatar: drawn directly on canvas, no CORS needed ───
+function drawLetterAvatar(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  color: string,
+  handle: string
+) {
+  ctx.fillStyle = color + "1a";
+  ctx.fill();
+  const letter = (handle || "?").charAt(0).toUpperCase();
+  const fs = Math.max(size * 0.85, 5);
+  ctx.font = `bold ${fs}px "JetBrains Mono",monospace`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = color + "bb";
+  ctx.fillText(letter, x, y);
 }
 
 const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   graphData,
   mode,
   targetId,
-  risk_label,
+  depthFilter = 2,
+  onClusterNodeClick,
+  allNodes,
 }) => {
   const fgRef = useRef<
     ForceGraphMethods<ExtendedNode, AggregatedLink> | undefined
   >(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [imagesLoaded, setImagesLoaded] = useState(0);
-  const imgCache = useRef<Record<string, HTMLImageElement>>({});
 
-  const processedData = useGraphProcessor(graphData, {
+  // ─── FIX 1: Image cache — stable ref, no state, reheat on load ───
+  const imgCache = useRef<
+    Record<string, HTMLImageElement | "error" | "pending">
+  >({});
+
+  // ─── Depth filter (frontend, EGO only) ───
+  const depthFilteredData = useMemo(() => {
+    if (mode !== "EGO" || depthFilter === 2 || !targetId) return graphData;
+    const direct = new Set<string>([targetId]);
+    graphData.links.forEach((l) => {
+      const s = String(
+        typeof l.source === "object"
+          ? (l.source as { id: string }).id
+          : l.source
+      );
+      const t = String(
+        typeof l.target === "object"
+          ? (l.target as { id: string }).id
+          : l.target
+      );
+      if (s === targetId) direct.add(t);
+      if (t === targetId) direct.add(s);
+    });
+    return {
+      nodes: graphData.nodes.filter((n) => direct.has(String(n.id))),
+      links: graphData.links.filter((l) => {
+        const s = String(
+          typeof l.source === "object"
+            ? (l.source as { id: string }).id
+            : l.source
+        );
+        const t = String(
+          typeof l.target === "object"
+            ? (l.target as { id: string }).id
+            : l.target
+        );
+        return direct.has(s) && direct.has(t);
+      }),
+    };
+  }, [graphData, mode, depthFilter, targetId]);
+
+  const processedData = useGraphProcessor(depthFilteredData, {
     targetId: mode === "EGO" ? targetId : undefined,
     aggregateEdges: true,
   });
 
+  // ─── FIX 2: Target color derived from data, not from prop ───
+  const targetNodeColor = useMemo(() => {
+    if (!targetId) return LABEL_COLORS.BENIGN;
+    const found = processedData.nodes.find(
+      (n) => String(n.id) === String(targetId)
+    );
+    return LABEL_COLORS[found?.risk_label || ""] || LABEL_COLORS.BENIGN;
+  }, [processedData.nodes, targetId]);
+
+  // Resize
   useEffect(() => {
     if (!containerRef.current) return;
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const { width, height } = e.contentRect;
         setDimensions({ width, height });
       }
     });
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
   }, []);
 
+  // Forces
   useEffect(() => {
     if (!fgRef.current) return;
-
     if (mode === "EGO") {
-      fgRef.current.d3Force("radial", d3.forceRadial(150, 0, 0));
-      const charge = fgRef.current.d3Force("charge");
-      if (charge) {
-        (charge as d3.ForceManyBody<ExtendedNode>).strength(-200);
-      }
+      fgRef.current.d3Force("radial", d3.forceRadial(190, 0, 0));
+      (
+        fgRef.current.d3Force("charge") as d3.ForceManyBody<ExtendedNode>
+      )?.strength(-260);
     } else {
       fgRef.current.d3Force("x", d3.forceX(0).strength(0.05));
       fgRef.current.d3Force("y", d3.forceY(0).strength(0.05));
       fgRef.current.d3Force("center", d3.forceCenter(0, 0));
-      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-100));
-      fgRef.current.d3Force("link")?.distance(30);
+      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-120));
+      fgRef.current.d3Force("link")?.distance(40);
     }
-
     fgRef.current.d3ReheatSimulation();
   }, [processedData, mode, dimensions.width, dimensions.height]);
 
-  const getTargetColor = useCallback(() => {
-    if (risk_label === "MALICIOUS" || risk_label === "HIGH_RISK")
-      return LABEL_COLORS["MALICIOUS"];
-    return LABEL_COLORS["BENIGN"];
-  }, [risk_label]);
+  // ─── FIX 3: Load image properly, reheat on success ───
+  const getOrLoadImage = useCallback(
+    (rawUrl: string | undefined): HTMLImageElement | null => {
+      if (!rawUrl) return null;
+      const url = resolvePictureUrl(rawUrl);
+      if (!url) return null;
 
-  // FIX 1: Use String() comparison to avoid type mismatch between string|number
-  const isTargetNode = useCallback(
-    (node: NodeObject<ExtendedNode>) => {
-      return mode === "EGO" && String(node.id) === String(targetId);
+      const cached = imgCache.current[url];
+      if (cached === "error" || cached === "pending") return null;
+      if (cached instanceof HTMLImageElement) {
+        return cached.complete && cached.naturalWidth > 0 ? cached : null;
+      }
+
+      // First request
+      imgCache.current[url] = "pending";
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        imgCache.current[url] = img;
+        // ─── FIX: Reheat instead of key-change remount ───
+        fgRef.current?.d3ReheatSimulation();
+      };
+      img.onerror = () => {
+        imgCache.current[url] = "error";
+      };
+      img.src = url;
+      return null;
     },
-    [mode, targetId]
+    []
   );
 
-  // FIX 2: Ensure risk_label is read correctly - fallback chain
-  const getNodeColor = useCallback((node: NodeObject<ExtendedNode>) => {
-    // risk_label is top-level on SybilNode, but NodeObject can shadow it
-    const label = (node as ExtendedNode).risk_label;
-    return (label && LABEL_COLORS[label]) || LABEL_COLORS.UNKNOWN;
-  }, []);
-
+  // ─── NODE CANVAS RENDERER ───
   const drawNode = useCallback(
     (
       node: NodeObject<ExtendedNode>,
       ctx: CanvasRenderingContext2D,
       globalScale: number
     ) => {
-      const isTarget = isTargetNode(node);
-      const isMalicious = (node as ExtendedNode).risk_label === "MALICIOUS";
-      const isHighRisk = (node as ExtendedNode).risk_label === "HIGH_RISK";
+      const ext = node as ExtendedNode;
+      // ─── FIX 4: Read risk_label correctly ───
+      const rl: string = ext.risk_label || "UNKNOWN";
+      const isTarget = mode === "EGO" && String(node.id) === String(targetId);
+      const isMalicious = rl === "MALICIOUS";
+      const isHighRisk = rl === "HIGH_RISK";
 
-      let size = 5;
-      if (mode === "EGO") {
-        // FIX 6: Target node is significantly larger for clear highlighting
-        size = isTarget ? 14 : 6;
-      } else {
-        size = isMalicious ? 8 : 5;
-      }
+      const size =
+        mode === "EGO"
+          ? isTarget
+            ? 14
+            : 6
+          : isMalicious
+            ? 9
+            : isHighRisk
+              ? 7
+              : 5;
 
       const x = node.x ?? 0;
       const y = node.y ?? 0;
-      const color = isTarget ? getTargetColor() : getNodeColor(node);
+      const color = isTarget
+        ? targetNodeColor
+        : LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
 
-      // FIX 6: Multi-ring glow for target node
+      // ── Glow aura ──
       if (isTarget) {
-        // Outer glow ring 3
+        ([size + 12, size + 7, size + 3] as number[]).forEach(
+          (r: number, i: number) => {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = color + (["0d", "1f", "38"] as string[])[i];
+            ctx.fill();
+          }
+        );
+      } else if (isMalicious && mode === "CLUSTER") {
         ctx.beginPath();
-        ctx.arc(x, y, size + 10, 0, 2 * Math.PI, false);
-        ctx.fillStyle = `${color}15`;
+        ctx.arc(x, y, size + 4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(239,68,68,0.22)";
         ctx.fill();
-        // Outer glow ring 2
+      } else if (isHighRisk && mode === "CLUSTER") {
         ctx.beginPath();
-        ctx.arc(x, y, size + 6, 0, 2 * Math.PI, false);
-        ctx.fillStyle = `${color}25`;
-        ctx.fill();
-        // Inner glow ring
-        ctx.beginPath();
-        ctx.arc(x, y, size + 3, 0, 2 * Math.PI, false);
-        ctx.fillStyle = `${color}40`;
-        ctx.fill();
-      } else if (mode === "CLUSTER" && (isMalicious || isHighRisk)) {
-        ctx.beginPath();
-        ctx.arc(x, y, size + 3, 0, 2 * Math.PI, false);
-        ctx.fillStyle = isMalicious
-          ? "rgba(239, 68, 68, 0.3)"
-          : "rgba(251, 146, 60, 0.2)";
+        ctx.arc(x, y, size + 3, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(251,146,60,0.18)";
         ctx.fill();
       }
 
-      // Avatar rendering
-      const skipImages = mode === "CLUSTER" && processedData.nodes.length > 500;
-      const rawImgUrl = (node as ExtendedNode).attributes?.picture_url;
-      const safeUrl = rawImgUrl ? resolvePictureUrl(String(rawImgUrl)) : "";
-      let img: HTMLImageElement | null = null;
-
-      if (!skipImages && safeUrl) {
-        if (imgCache.current[safeUrl]) {
-          img = imgCache.current[safeUrl];
-        } else {
-          const newImg = new Image();
-          newImg.crossOrigin = "anonymous"; // FIX 3: Enable CORS for canvas
-          newImg.src = safeUrl;
-          newImg.onload = () => {
-            imgCache.current[safeUrl] = newImg;
-            setImagesLoaded((prev) => prev + 1);
-          };
-          newImg.onerror = () => {
-            // Mark as failed so we don't retry
-            imgCache.current[safeUrl] = new Image(); // placeholder
-          };
-          imgCache.current[safeUrl] = newImg; // set before load to prevent duplicate requests
-        }
-      }
-
-      // Draw node base
+      // ── Node body ──
       ctx.save();
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+      ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.clip();
 
-      if (img && img.complete && img.naturalWidth > 0) {
+      const skipImg = mode === "CLUSTER" && processedData.nodes.length > 500;
+      const rawUrl = ext.attributes?.picture_url
+        ? String(ext.attributes.picture_url)
+        : undefined;
+      const handle = String(ext.attributes?.handle || node.id || "?");
+      const img = skipImg ? null : getOrLoadImage(rawUrl);
+
+      if (img) {
         try {
           ctx.drawImage(img, x - size, y - size, size * 2, size * 2);
         } catch {
-          ctx.fillStyle = "#1e293b";
-          ctx.fill();
+          drawLetterAvatar(ctx, x, y, size, color, handle);
         }
       } else {
-        // Fallback: fill with a darker version of the node color
-        ctx.fillStyle = isTarget ? "#0a0f1a" : "#1e293b";
-        ctx.fill();
+        drawLetterAvatar(ctx, x, y, size, color, handle);
       }
       ctx.restore();
 
-      // Border ring
+      // ── Border ring ──
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+      ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.strokeStyle = color;
-      ctx.lineWidth = isTarget ? 2.5 : isMalicious || isHighRisk ? 2 : 1;
+      ctx.lineWidth = isTarget ? 2.5 : isMalicious || isHighRisk ? 1.8 : 1;
       ctx.stroke();
 
-      // FIX 6: Cross marker on target node for extra visibility
+      // ── Target: dashed orbit ──
       if (isTarget) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.6;
-        // Dashed orbit circle
+        ctx.save();
+        ctx.strokeStyle = color + "70";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.setLineDash([3, 3]);
-        ctx.arc(x, y, size + 7, 0, 2 * Math.PI, false);
+        ctx.arc(x, y, size + 9, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
+        ctx.restore();
       }
 
-      // Labels
-      const extNode = node as ExtendedNode;
-      const label = extNode.attributes?.handle || String(node.id).slice(0, 8);
-      if (mode === "EGO" && (isTarget || globalScale > 2)) {
-        const fontSize = isTarget ? 11 / globalScale : 10 / globalScale;
-        ctx.font = `${isTarget ? "bold " : ""}${fontSize}px "JetBrains Mono", monospace`;
+      // ── Labels ──
+      const showLabel =
+        (mode === "EGO" && (isTarget || globalScale > 1.8)) ||
+        (mode === "CLUSTER" && globalScale > 2.8);
+
+      if (showLabel) {
+        const fs =
+          mode === "EGO" && isTarget ? 12 / globalScale : 9 / globalScale;
+        ctx.font = `${isTarget ? "bold " : ""}${Math.max(fs, 4)}px "JetBrains Mono",monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.fillStyle = color;
-        ctx.fillText(String(label), x, y + size + 2);
-      } else if (mode === "CLUSTER" && globalScale > 3) {
-        ctx.font = `${8 / globalScale}px monospace`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.fillStyle = color;
-        ctx.fillText(String(label).slice(0, 6), x, y + size + 1);
+        ctx.fillText(handle.slice(0, 14), x, y + size + 2);
       }
     },
     [
       mode,
-      isTargetNode,
-      getNodeColor,
-      getTargetColor,
+      targetId,
+      targetNodeColor,
       processedData.nodes.length,
+      getOrLoadImage,
     ]
   );
+
+  // ── Tooltip ──
+  const nodeLabel = useCallback(
+    (node: NodeObject<ExtendedNode>) => {
+      if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
+      const ext = node as ExtendedNode;
+      const rl = ext.risk_label || "UNKNOWN";
+      const c = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
+      const isHigh = rl === "MALICIOUS" || rl === "HIGH_RISK";
+      const reasons = (ext.attributes?.reasons as string[]) || [];
+
+      return `
+      <div style="background:#020617;border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:230px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ext.attributes?.handle || "—"}</span>
+          <span style="font-size:8px;padding:2px 5px;border:1px solid ${c}44;color:${c};background:${c}11;text-transform:uppercase;">${rl}</span>
+        </div>
+        <div style="color:#1e293b;font-size:8px;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:8px;">
+          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+            <div style="color:#334155;font-size:7px;margin-bottom:2px;">RISK SCORE</div>
+            <div style="color:${isHigh ? "#ef4444" : "#22c55e"};font-weight:bold;font-size:13px;">${((ext.risk_score || 0) * 100).toFixed(0)}%</div>
+          </div>
+          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+            <div style="color:#334155;font-size:7px;margin-bottom:2px;">CLUSTER</div>
+            <div style="color:#64748b;font-weight:bold;font-size:13px;">#${ext.cluster_id ?? "-"}</div>
+          </div>
+          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+            <div style="color:#334155;font-size:7px;margin-bottom:2px;">TRUST</div>
+            <div style="color:#64748b;font-size:11px;">${Number(ext.attributes?.trust_score || 0).toFixed(1)}</div>
+          </div>
+        </div>
+        ${
+          reasons.length > 0
+            ? `
+        <div style="border-top:1px solid #0f172a;padding-top:6px;">
+          <div style="color:#1e293b;font-size:7px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;">Detection Flags</div>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;">${reasons
+            .slice(0, 3)
+            .map(
+              (r) =>
+                `<span style="background:#0f172a;border:1px solid #1e293b;padding:2px 5px;font-size:8px;color:#475569;">${r}</span>`
+            )
+            .join("")}</div>
+        </div>`
+            : ""
+        }
+      </div>`;
+    },
+    [mode, processedData.nodes.length]
+  );
+
+  // ── Node click ──
+  const handleNodeClick = useCallback(
+    (node: NodeObject<ExtendedNode>) => {
+      if (mode === "CLUSTER" && onClusterNodeClick) {
+        const cid = (node as ExtendedNode).cluster_id;
+        if (cid !== undefined && cid !== null) {
+          const clusterNodes = (allNodes || processedData.nodes).filter(
+            (n) => (n as SybilNode).cluster_id === cid
+          ) as SybilNode[];
+          onClusterNodeClick(cid, clusterNodes);
+        }
+      } else if (
+        fgRef.current &&
+        node.x !== undefined &&
+        node.y !== undefined
+      ) {
+        fgRef.current.centerAt(node.x, node.y, 700);
+        fgRef.current.zoom(5, 700);
+      }
+    },
+    [mode, onClusterNodeClick, allNodes, processedData.nodes]
+  );
+
+  const zoomToFit = () => fgRef.current?.zoomToFit(400, 50);
+  const zoomIn = () =>
+    fgRef.current?.zoom((fgRef.current?.zoom() ?? 1) * 1.45, 200);
+  const zoomOut = () =>
+    fgRef.current?.zoom((fgRef.current?.zoom() ?? 1) / 1.45, 200);
 
   return (
     <div
@@ -262,7 +394,7 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       className="relative h-full min-h-[400px] w-full bg-[#050608]"
     >
       <ForceGraph2D
-        key={`fg-${imagesLoaded}-${mode}`}
+        key={`fg-${mode}-${depthFilter}`}
         ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
@@ -270,148 +402,102 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         backgroundColor="rgba(0,0,0,0)"
         nodeCanvasObject={drawNode}
         nodeCanvasObjectMode={() => "always"}
-        // FIX 5: Directed arrows for FOLLOW / INTERACT layer edges
+        nodeLabel={nodeLabel}
+        onNodeClick={handleNodeClick}
         linkDirectionalArrowLength={(
           link: LinkObject<ExtendedNode, AggregatedLink>
-        ) => {
-          const edgeType = link.edge_type as string;
-          if (DIRECTED_EDGE_TYPES.has(edgeType)) {
-            return mode === "EGO" ? 5 : 3;
-          }
-          return 0; // No arrow for CO-OWNER and SIMILARITY (undirected)
-        }}
-        linkDirectionalArrowRelPos={1}
+        ) =>
+          DIRECTED_EDGE_TYPES.has((link.edge_type as string) || "")
+            ? mode === "EGO"
+              ? 5
+              : 3
+            : 0
+        }
+        linkDirectionalArrowRelPos={0.95}
         linkDirectionalArrowColor={(
           link: LinkObject<ExtendedNode, AggregatedLink>
-        ) => {
-          const edgeType = link.edge_type as string;
-          const baseColor =
-            (edgeType && RELATION_COLORS[edgeType]) || RELATION_COLORS.UNKNOWN;
-          return baseColor;
-        }}
+        ) =>
+          RELATION_COLORS[(link.edge_type as string) || ""] ||
+          RELATION_COLORS.UNKNOWN
+        }
         linkColor={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
-          const relationType = link.edge_type as string;
-          const baseColor =
-            (relationType && RELATION_COLORS[relationType]) ||
-            RELATION_COLORS.UNKNOWN;
-          const weight = link.aggregated_weight || 1;
-
-          if (mode === "EGO") {
-            const opacity = Math.min(0.4 + Math.log10(weight) * 0.2, 0.8);
-            const r = parseInt(baseColor.slice(1, 3), 16);
-            const g = parseInt(baseColor.slice(3, 5), 16);
-            const b = parseInt(baseColor.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-          } else {
-            return `${baseColor}66`;
-          }
+          const t = (link.edge_type as string) || "";
+          const base = RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
+          if (mode === "CLUSTER") return base + "50";
+          const w = link.aggregated_weight || 1;
+          const op = Math.min(0.35 + Math.log10(w) * 0.18, 0.8);
+          const r = parseInt(base.slice(1, 3), 16);
+          const g = parseInt(base.slice(3, 5), 16);
+          const b = parseInt(base.slice(5, 7), 16);
+          return `rgba(${r},${g},${b},${op})`;
         }}
-        linkWidth={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
-          if (mode === "CLUSTER") return MIN_LINK_WIDTH;
-          const weight = link.aggregated_weight || 1;
-          return Math.max(MIN_LINK_WIDTH, Math.sqrt(weight));
-        }}
+        linkWidth={(link: LinkObject<ExtendedNode, AggregatedLink>) =>
+          mode === "CLUSTER"
+            ? MIN_LINK_WIDTH
+            : Math.max(MIN_LINK_WIDTH, Math.sqrt(link.aggregated_weight || 1))
+        }
         linkDirectionalParticles={(
           link: LinkObject<ExtendedNode, AggregatedLink>
         ) => {
           if (mode === "CLUSTER") return 0;
-          const edgeType = link.edge_type as string;
-          // Only show particles for directed edges in EGO mode
-          if (!DIRECTED_EDGE_TYPES.has(edgeType)) return 0;
-          const weight = link.aggregated_weight || 1;
-          return weight > 1
-            ? Math.min(Math.floor(Math.log2(weight)) + 1, 4)
-            : 0;
+          if (!DIRECTED_EDGE_TYPES.has((link.edge_type as string) || ""))
+            return 0;
+          const w = link.aggregated_weight || 1;
+          return w > 1 ? Math.min(Math.floor(Math.log2(w)) + 1, 4) : 0;
         }}
-        linkDirectionalParticleWidth={(
-          link: LinkObject<ExtendedNode, AggregatedLink>
-        ) => {
-          const weight = link.aggregated_weight || 1;
-          return weight > 5 ? 2.2 : 1.2;
-        }}
+        linkDirectionalParticleWidth={() => 1.5}
         linkCurvature={(link: LinkObject<ExtendedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
-          const index = link.multiLinkIndex ?? 0;
-          const count = link.multiLinkCount;
-          return (index - (count - 1) / 2) * 0.15;
+          return (
+            ((link.multiLinkIndex ?? 0) - (link.multiLinkCount - 1) / 2) * 0.18
+          );
         }}
-        // FIX 1 & 7: node label hover tooltip with cluster_id
-        nodeLabel={(node: NodeObject<ExtendedNode>) => {
-          if (mode === "CLUSTER" && processedData.nodes.length > 500) return "";
-
-          const extNode = node as ExtendedNode;
-          const isTarget = isTargetNode(node);
-          const riskLabel = extNode.risk_label || "UNKNOWN";
-          const isHighRisk =
-            riskLabel === "MALICIOUS" || riskLabel === "HIGH_RISK";
-
-          // FIX 7: Added cluster_id display
-          return `
-            <div style="background:rgba(2,6,23,0.97);border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;box-shadow:0 4px 20px rgba(0,0,0,0.5);min-width:220px;max-width:320px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                <div style="color:#00f2ff;font-weight:bold;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">
-                  ${extNode.attributes?.handle || "Unknown"}
-                  ${isTarget ? '<span style="margin-left:6px;font-size:8px;padding:1px 4px;background:rgba(0,242,255,0.15);border:1px solid rgba(0,242,255,0.4);color:#00f2ff;">[TARGET]</span>' : ""}
-                </div>
-                <div style="font-size:8px;font-weight:bold;padding:2px 6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:${isHighRisk ? "#ef4444" : "#64748b"};text-transform:uppercase;">${riskLabel}</div>
-              </div>
-              <div style="color:#475569;margin-bottom:8px;font-size:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">ID: ${node.id}</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">
-                <div style="background:rgba(255,255,255,0.03);padding:4px 6px;border:1px solid #1e293b;">
-                  <div style="color:#475569;font-size:8px;margin-bottom:2px;">RISK SCORE</div>
-                  <div style="color:${isHighRisk ? "#ef4444" : "#22c55e"};font-weight:bold;font-size:13px;">${(extNode.risk_score || 0).toFixed(2)}</div>
-                </div>
-                <div style="background:rgba(255,255,255,0.03);padding:4px 6px;border:1px solid #1e293b;">
-                  <div style="color:#475569;font-size:8px;margin-bottom:2px;">CLUSTER ID</div>
-                  <div style="color:#94a3b8;font-weight:bold;font-size:13px;">#${extNode.cluster_id ?? "—"}</div>
-                </div>
-              </div>
-              ${
-                extNode.attributes?.trust_score !== undefined
-                  ? `
-              <div style="margin-bottom:8px;background:rgba(255,255,255,0.03);padding:4px 6px;border:1px solid #1e293b;">
-                <div style="color:#475569;font-size:8px;margin-bottom:2px;">TRUST SCORE</div>
-                <div style="color:#94a3b8;font-size:11px;">${Number(extNode.attributes.trust_score).toFixed(2)}</div>
-              </div>`
-                  : ""
-              }
-              ${
-                ((extNode.attributes?.reasons as string[]) || []).length > 0
-                  ? `
-              <div style="border-top:1px solid #1e293b;padding-top:6px;">
-                <div style="color:#334155;font-size:8px;font-weight:bold;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Detection Reasons</div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px;">
-                  ${((extNode.attributes?.reasons as string[]) || [])
-                    .slice(0, 4)
-                    .map(
-                      (r) =>
-                        `<span style="background:rgba(255,255,255,0.05);border:1px solid #1e293b;padding:2px 5px;font-size:8px;color:#94a3b8;text-transform:uppercase;">${r}</span>`
-                    )
-                    .join("")}
-                </div>
-              </div>`
-                  : ""
-              }
-            </div>
-          `;
-        }}
-        onNodeClick={(node: NodeObject<ExtendedNode>) => {
-          if (fgRef.current && node.x !== undefined && node.y !== undefined) {
-            fgRef.current.centerAt(node.x, node.y, 1000);
-            fgRef.current.zoom(4, 1000);
-          }
-        }}
-        cooldownTicks={100}
-        d3AlphaDecay={0.02}
-        d3VelocityDecay={0.3}
+        cooldownTicks={120}
+        d3AlphaDecay={0.018}
+        d3VelocityDecay={0.35}
       />
 
+      {/* ── Zoom Controls ── */}
+      <div className="absolute right-6 bottom-6 z-20 flex flex-col gap-1.5">
+        <button
+          onClick={zoomToFit}
+          title="Zoom to fit"
+          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+        >
+          <Maximize2 size={12} />
+        </button>
+        <button
+          onClick={zoomIn}
+          title="Zoom in"
+          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+        >
+          <ZoomIn size={12} />
+        </button>
+        <button
+          onClick={zoomOut}
+          title="Zoom out"
+          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+        >
+          <ZoomOut size={12} />
+        </button>
+      </div>
+
       <GraphLegend
+        graphData={depthFilteredData}
         extraItems={
           mode === "EGO" ? (
-            <div className="mb-1 flex items-center gap-3">
-              <div className="h-3 w-3 animate-pulse rounded-full bg-[#00f2ff] shadow-[0_0_8px_rgba(0,242,255,0.6)]" />
-              <span className="text-accent-cyan font-mono text-[9px] font-bold uppercase italic">
+            <div className="mb-2 flex items-center gap-3">
+              <div
+                className="h-2.5 w-2.5 animate-pulse rounded-full"
+                style={{
+                  backgroundColor: targetNodeColor,
+                  boxShadow: `0 0 8px ${targetNodeColor}99`,
+                }}
+              />
+              <span
+                className="font-mono text-[9px] font-bold uppercase italic"
+                style={{ color: targetNodeColor }}
+              >
                 Target Node
               </span>
             </div>
