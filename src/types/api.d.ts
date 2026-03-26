@@ -52,6 +52,7 @@ export interface SybilEdge {
   target: string;
   edge_type: "comment" | "follow" | "upvote" | "transfer" | string;
   weight: number;
+  gat_attention?: number;
 }
 
 export interface LocalGraph {

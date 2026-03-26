@@ -203,12 +203,7 @@ export default function UniversalGraph2D({
       const isMalicious = riskLabel === "MALICIOUS";
       const isHighRisk = riskLabel === "HIGH_RISK";
 
-      const size =
-        mode === "EGO"
-          ? isTarget
-            ? 12
-            : 6
-          : 6;
+      const size = mode === "EGO" ? (isTarget ? 12 : 6) : 6;
 
       const x = n.x ?? 0;
       const y = n.y ?? 0;
@@ -396,6 +391,27 @@ export default function UniversalGraph2D({
     [mode, processedData.nodes.length]
   );
 
+  const linkLabel = useCallback(
+    (link: LinkObject<EnrichedNode, AggregatedLink>) => {
+      const l = link as AggregatedLink;
+      const type = (l.edge_type as string) || "UNKNOWN";
+      const weight = l.aggregated_weight || 1;
+      const attention = l.gat_attention
+        ? `<br/><span style="color: #ef4444; font-weight: bold;">AI Attention: ${(
+            l.gat_attention * 100
+          ).toFixed(1)}%</span>`
+        : "";
+
+      return `<div style="background: rgba(2, 6, 23, 0.95); border: 1px solid #1e293b; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-family: 'JetBrains Mono', monospace; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+      <span style="color: #64748b; text-transform: uppercase; font-size: 8px;">Relationship</span>
+      <div style="color: #f1f5f9; margin-top: 2px;">Type: <span style="color: #00f2ff;">${type}</span></div>
+      <div style="color: #f1f5f9;">Weight: <span style="color: #00f2ff;">${weight}</span></div>
+      ${attention}
+    </div>`;
+    },
+    []
+  );
+
   // ── Node click ──
   const handleNodeClick = useCallback(
     (node: NodeObject<EnrichedNode>) => {
@@ -450,6 +466,7 @@ export default function UniversalGraph2D({
         nodeCanvasObject={drawNode}
         nodeCanvasObjectMode={() => "replace"}
         nodeLabel={nodeLabel}
+        linkLabel={linkLabel}
         onNodeClick={handleNodeClick}
         // ─── Directed arrows for Follow/Interact layers ───
         linkDirectionalArrowLength={(
@@ -479,21 +496,52 @@ export default function UniversalGraph2D({
           const b = parseInt(base.slice(5, 7), 16);
           return `rgba(${r},${g},${b},${op})`;
         }}
-        linkWidth={(link: LinkObject<EnrichedNode, AggregatedLink>) =>
-          mode === "CLUSTER"
-            ? MIN_LINK_WIDTH
-            : Math.max(MIN_LINK_WIDTH, Math.sqrt(link.aggregated_weight || 1))
-        }
+        linkWidth={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
+          const l = link as AggregatedLink;
+          const baseWidth =
+            mode === "CLUSTER"
+              ? MIN_LINK_WIDTH
+              : Math.max(MIN_LINK_WIDTH, Math.sqrt(l.aggregated_weight || 1));
+          const attentionBoost = (l.gat_attention || 0) * 8;
+          return baseWidth + attentionBoost;
+        }}
         linkDirectionalParticles={(
           link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
-          if (mode === "EGO") return 0; // disabled for inspector
-          if (!DIRECTED_EDGE_TYPES.has((link.edge_type as string) || ""))
-            return 0;
-          const w = link.aggregated_weight || 1;
+          const l = link as AggregatedLink;
+          // Combine original logic with GAT focus
+          const gatParticles = (l.gat_attention || 0) > 0.1 ? 3 : 0;
+          if (gatParticles > 0) return gatParticles;
+
+          if (mode === "EGO") return 0;
+          if (!DIRECTED_EDGE_TYPES.has((l.edge_type as string) || "")) return 0;
+          const w = l.aggregated_weight || 1;
           return w > 1 ? Math.min(Math.floor(Math.log2(w)) + 1, 4) : 0;
         }}
-        linkDirectionalParticleWidth={() => 1.5}
+        linkDirectionalParticleWidth={(
+          link: LinkObject<EnrichedNode, AggregatedLink>
+        ) => {
+          const l = link as AggregatedLink;
+          return (l.gat_attention || 0) > 0.1
+            ? 2 + (l.gat_attention || 0) * 4
+            : 1.5;
+        }}
+        linkDirectionalParticleSpeed={(
+          link: LinkObject<EnrichedNode, AggregatedLink>
+        ) => {
+          const l = link as AggregatedLink;
+          return (l.gat_attention || 0) > 0.1
+            ? 0.01 + (l.gat_attention || 0) * 0.05
+            : 0.01;
+        }}
+        linkDirectionalParticleColor={(
+          link: LinkObject<EnrichedNode, AggregatedLink>
+        ) => {
+          const l = link as AggregatedLink;
+          if ((l.gat_attention || 0) > 0.1) return "#ef4444";
+          const t = (l.edge_type as string) || "";
+          return RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
+        }}
         linkCurvature={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
           return (

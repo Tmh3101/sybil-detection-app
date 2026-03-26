@@ -15,14 +15,18 @@
 ## 🛠️ CORE MODULES
 
 ### 🔬 [Discovery Lab (Module 1)](/discovery)
+
 **Identify large-scale community clusters and fraudulent networks.**
+
 - **Batch Processing:** Trigger GAE training for massive dataset analysis.
 - **Task Polling:** Real-time job status tracking and diagnostic streaming.
 - **Cluster Visualization:** Mapping interconnected sybil groups at scale using 2D force-directed graphs.
 - **Dynamic Filtering:** Isolate clusters by risk level, size, or connectivity patterns.
 
 ### 🕵️ [Profile Inspector (Module 2)](/inspector)
+
 **Analyze individual wallets for sybil behavior and risk scoring.**
+
 - **Interactive 3D Ego-Graphs:** Visualize wallet networks with orbital controls using `react-force-graph-3d`.
 - **Heuristic Reasoning:** Detailed breakdown of suspicious activities through live terminal logs.
 - **Risk Assessment:** Dynamic "final_probability" scoring with cold-start handling for new profiles.
@@ -57,18 +61,21 @@
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/your-repo/sybil-detection-app.git
    cd sybil-detection-app
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment:**
    Create a `.env.local` file in the root directory:
+
    ```env
    NEXT_PUBLIC_API_URL=https://your-backend-api-url.com
    ```

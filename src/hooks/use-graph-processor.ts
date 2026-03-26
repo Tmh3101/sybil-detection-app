@@ -7,6 +7,7 @@ export interface AggregatedLink extends Omit<SybilEdge, "source" | "target"> {
   source: string | NodeObject<SybilNode>;
   target: string | NodeObject<SybilNode>;
   aggregated_weight?: number;
+  gat_attention?: number;
   multiLinkIndex?: number;
   multiLinkCount?: number;
 }
@@ -73,6 +74,10 @@ export function useGraphProcessor(
         const existing = linkMap.get(key)!;
         existing.aggregated_weight =
           (existing.aggregated_weight || 0) + (link.weight || 1);
+        existing.gat_attention = Math.max(
+          existing.gat_attention || 0,
+          link.gat_attention || 0
+        );
       } else {
         linkMap.set(key, {
           ...link,
@@ -80,6 +85,7 @@ export function useGraphProcessor(
           target: tId as string,
           aggregated_weight: link.weight || 1,
           edge_type: type,
+          gat_attention: link.gat_attention || 0,
         } as AggregatedLink);
       }
     });
