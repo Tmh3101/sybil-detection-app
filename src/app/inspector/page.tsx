@@ -347,7 +347,7 @@ function InspectorContent() {
           <UniversalGraph2D
             mode="EGO"
             graphData={displayGraphData}
-            targetId={data?.profile_info?.id || walletId || ""}
+            targetId={profile?.id || walletId || ""}
             risk_label={riskLabel as import("@/types/api").RiskClassification}
             depthFilter={graphDepth}
           />

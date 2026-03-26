@@ -76,16 +76,12 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   >(undefined);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [avatarTrigger, setAvatarTrigger] = useState(0);
 
-  // THÊM: State này dùng để ép re-render component khi ảnh tải xong
-  const [, setAvatarTrigger] = useState(0);
-
-  // ─── FIX 1: Image cache — stable ref, no state, reheat on load ───
   const imgCache = useRef<
     Record<string, HTMLImageElement | "error" | "pending">
   >({});
 
-  // ─── Depth filter (frontend, EGO only) ───
   const depthFilteredData = useMemo(() => {
     if (mode !== "EGO" || depthFilter === 2 || !targetId) return graphData;
     const tid = targetId.toLowerCase();
@@ -133,10 +129,9 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
   const targetNodeColor = useMemo(() => {
     if (!targetId) return LABEL_COLORS.BENIGN;
     const found = processedData.nodes.find(
-      // SỬA: Ép về chữ thường để so sánh an toàn ID và
       (n) => String(n.id).toLowerCase() === String(targetId).toLowerCase()
     );
-    // SỬA: Loại bỏ khoảng trắng và in hoa risk_label để map đúng với LABEL_COLORS
+
     const rl = String(found?.risk_label || "UNKNOWN")
       .toUpperCase()
       .trim();
@@ -174,7 +169,6 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     fgRef.current.d3ReheatSimulation();
   }, [processedData, mode, dimensions.width, dimensions.height]);
 
-  // ─── FIX 3: Load image properly, reheat on success ───
   const getOrLoadImage = useCallback(
     (rawUrl: string | undefined): HTMLImageElement | null => {
       if (!rawUrl) return null;
@@ -195,7 +189,6 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       img.crossOrigin = "anonymous";
       img.onload = () => {
         imgCache.current[url] = img;
-        // THÊM: Kích hoạt React vẽ lại đồ thị với ảnh đã cache
         setAvatarTrigger((prev) => prev + 1);
         fgRef.current?.d3ReheatSimulation();
       };
@@ -216,13 +209,14 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
       ctx: CanvasRenderingContext2D,
       globalScale: number
     ) => {
+      // Harmless usage to satisfy ESLint dependency check
+      void avatarTrigger;
+
       const ext = node as ExtendedNode;
-      // SỬA: Đảm bảo string chuẩn xác 100% (ví dụ: " MALICIOUS " -> "MALICIOUS")
       const rl = String(ext.risk_label || "UNKNOWN")
         .toUpperCase()
         .trim();
 
-      // SỬA: Phải check !!targetId để tránh lỗi undefined
       const isTarget =
         mode === "EGO" &&
         !!targetId &&
@@ -341,7 +335,7 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
         ctx.fillText(handle.slice(0, 14), x, y + size + 2);
       }
     },
-    [mode, targetId, processedData.nodes.length, getOrLoadImage]
+    [mode, targetId, processedData.nodes.length, getOrLoadImage, avatarTrigger]
   );
 
   // ── Tooltip ──
@@ -349,7 +343,6 @@ const UniversalGraph2D: React.FC<UniversalGraph2DProps> = ({
     (node: NodeObject<ExtendedNode>) => {
       if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
       const ext = node as ExtendedNode;
-      // SỬA: Chuẩn hóa cho Tooltip
       const rl = String(ext.risk_label || "UNKNOWN")
         .toUpperCase()
         .trim();
