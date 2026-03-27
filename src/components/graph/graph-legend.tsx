@@ -216,6 +216,17 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 undirected
               </span>
             </div>
+
+            {/* AI Attention Focus Key */}
+            <div className="mt-1 flex items-center gap-2">
+              <div className="relative flex h-2 w-14 items-center justify-center overflow-hidden">
+                <div className="absolute h-[1px] w-full bg-[#ef4444] opacity-40"></div>
+                <div className="absolute h-[4px] w-[4px] animate-ping rounded-full bg-[#ef4444] shadow-[0_0_8px_#ef4444]"></div>
+              </div>
+              <span className="font-mono text-[7px] font-bold text-[#ef4444]">
+                AI Focus (GAT)
+              </span>
+            </div>
           </div>
         </div>
       )}

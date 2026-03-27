@@ -577,16 +577,16 @@ export default function UniversalGraph2D({
             mode === "CLUSTER"
               ? MIN_LINK_WIDTH
               : Math.max(MIN_LINK_WIDTH, Math.sqrt(l.aggregated_weight || 1));
-          const attentionBoost = (l.gat_attention || 0) * 8;
-          return baseWidth + attentionBoost;
+          const att = l.gat_attention || 0;
+          // Only boost thickness if attention is significant
+          return baseWidth + (att > 0.1 ? att * 6 : 0);
         }}
         linkDirectionalParticles={(
           link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
           const l = link as AggregatedLink;
-          // Combine original logic with GAT focus
-          const gatParticles = (l.gat_attention || 0) > 0.1 ? 3 : 0;
-          if (gatParticles > 0) return gatParticles;
+          // Stricter threshold for depth-2 graph to avoid particle spam
+          if ((l.gat_attention || 0) > 0.15) return 3;
 
           if (mode === "EGO") return 0;
           if (!DIRECTED_EDGE_TYPES.has((l.edge_type as string) || "")) return 0;
@@ -597,23 +597,19 @@ export default function UniversalGraph2D({
           link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
           const l = link as AggregatedLink;
-          return (l.gat_attention || 0) > 0.1
-            ? 2 + (l.gat_attention || 0) * 4
-            : 1.5;
+          return 1.5 + (l.gat_attention || 0) * 4;
         }}
         linkDirectionalParticleSpeed={(
           link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
           const l = link as AggregatedLink;
-          return (l.gat_attention || 0) > 0.1
-            ? 0.01 + (l.gat_attention || 0) * 0.05
-            : 0.01;
+          return 0.01 + (l.gat_attention || 0) * 0.04;
         }}
         linkDirectionalParticleColor={(
           link: LinkObject<EnrichedNode, AggregatedLink>
         ) => {
           const l = link as AggregatedLink;
-          if ((l.gat_attention || 0) > 0.1) return "#ef4444";
+          if ((l.gat_attention || 0) > 0.15) return "#ef4444";
           const t = (l.edge_type as string) || "";
           return RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
         }}
