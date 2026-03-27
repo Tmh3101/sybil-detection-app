@@ -26,8 +26,8 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchValue.trim())
-      router.push(`/inspector?wallet=${searchValue.trim()}`);
+    const value = searchValue.toLocaleLowerCase().trim();
+    if (value) router.push(`/inspector?wallet=${value}`);
   };
 
   return (
