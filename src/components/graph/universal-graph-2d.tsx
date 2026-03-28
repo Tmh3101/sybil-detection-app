@@ -588,38 +588,6 @@ export default function UniversalGraph2D({
           // Only boost thickness if attention is significant
           return baseWidth + (att > 0.1 ? att * 6 : 0);
         }}
-        linkDirectionalParticles={(
-          link: LinkObject<EnrichedNode, AggregatedLink>
-        ) => {
-          const l = link as AggregatedLink;
-          // Stricter threshold for depth-2 graph to avoid particle spam
-          if ((l.gat_attention || 0) > 0.15) return 3;
-
-          if (mode === "EGO") return 0;
-          if (!DIRECTED_EDGE_TYPES.has((l.edge_type as string) || "")) return 0;
-          const w = l.aggregated_weight || 1;
-          return w > 1 ? Math.min(Math.floor(Math.log2(w)) + 1, 4) : 0;
-        }}
-        linkDirectionalParticleWidth={(
-          link: LinkObject<EnrichedNode, AggregatedLink>
-        ) => {
-          const l = link as AggregatedLink;
-          return 1.5 + (l.gat_attention || 0) * 4;
-        }}
-        linkDirectionalParticleSpeed={(
-          link: LinkObject<EnrichedNode, AggregatedLink>
-        ) => {
-          const l = link as AggregatedLink;
-          return 0.01 + (l.gat_attention || 0) * 0.04;
-        }}
-        linkDirectionalParticleColor={(
-          link: LinkObject<EnrichedNode, AggregatedLink>
-        ) => {
-          const l = link as AggregatedLink;
-          if ((l.gat_attention || 0) > 0.15) return "#ef4444";
-          const t = (l.edge_type as string) || "";
-          return RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
-        }}
         linkCurvature={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
           return (
