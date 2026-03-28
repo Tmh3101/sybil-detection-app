@@ -10,10 +10,6 @@ import {
   Shield,
   ShieldAlert,
   AlertTriangle,
-  Users,
-  MessageSquare,
-  Activity,
-  Calendar,
 } from "lucide-react";
 import { resolvePictureUrl } from "@/lib/utils";
 import Image from "next/image";
@@ -113,7 +109,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
         </div>
 
         {/* Stats Grid */}
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        {/* <div className="mb-6 grid grid-cols-2 gap-3">
           <div className="border border-slate-800 bg-slate-900/20 p-2.5">
             <div className="mb-1 flex items-center gap-1.5 text-slate-500">
               <Users size={10} />
@@ -150,7 +146,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
               {String(node.attributes?.account_age || "N/A")}
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Detection Reasons */}
         {((node.attributes?.reasons as string[]) || []).length > 0 && (
