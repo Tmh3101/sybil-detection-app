@@ -8,7 +8,9 @@ import { IndustrialCard } from "@/components/ui/industrial-card";
 import { BootSequenceLoader } from "@/components/ui/boot-sequence-loader";
 import { resolvePictureUrl } from "@/lib/utils";
 import { ProbabilityEqualizer } from "@/components/inspector/probability-equalizer";
+import NodeDetailPanel from "@/components/inspector/node-detail-panel";
 import { LABEL_COLORS } from "@/lib/graph-constants";
+import { SybilNode } from "@/types/api";
 import Image from "next/image";
 import {
   User,
@@ -16,15 +18,36 @@ import {
   Loader2,
   Radar,
   Search,
-  Network,
-  BarChart3,
   GitBranch,
-  Eye,
-  EyeOff,
 } from "lucide-react";
-import type { AttentionWeight } from "@/components/graph/universal-graph-2d";
 
-// ─── Dynamic imports ───
+const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState(defaultValue);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = searchValue.toLocaleLowerCase().trim();
+    if (value) router.push(`/inspector?wallet=${value}`);
+  };
+
+  return (
+    <form onSubmit={handleSearch} className="group relative w-full max-w-md">
+      <Search
+        className="group-focus-within:text-accent-cyan absolute top-1/2 left-3 -translate-y-1/2 text-slate-500 transition-colors"
+        size={16}
+      />
+      <input
+        type="text"
+        placeholder="ENTER PROFILE_ID..."
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
+        className="bg-background border-border focus:border-accent-cyan focus:ring-accent-cyan/20 w-full rounded-sm border px-10 py-2 font-mono text-xs tracking-widest uppercase transition-all placeholder:text-slate-600 focus:ring-1 focus:outline-none"
+      />
+    </form>
+  );
+};
+
 const UniversalGraph2D = dynamic(
   () => import("@/components/graph/universal-graph-2d"),
   {
@@ -33,95 +56,99 @@ const UniversalGraph2D = dynamic(
       <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[#050608]">
         <Loader2 className="text-accent-cyan animate-spin" size={32} />
         <span className="text-accent-cyan animate-pulse font-mono text-[10px] font-bold tracking-[0.2em] uppercase">
-          INITIALIZING RENDER ENGINE...
+          INITIALIZING 2D RENDER ENGINE...
         </span>
       </div>
     ),
   }
 );
 
-// ─── Search Form ───
-const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
-  const router = useRouter();
-  const [v, setV] = useState(defaultValue);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (v.trim()) router.push(`/inspector?wallet=${v.trim()}`);
-  };
-  return (
-    <form onSubmit={handleSubmit} className="group relative w-full max-w-md">
-      <Search
-        className="group-focus-within:text-accent-cyan absolute top-1/2 left-3 -translate-y-1/2 text-slate-500 transition-colors"
-        size={16}
-      />
-      <input
-        type="text"
-        placeholder="ENTER PROFILE_ID..."
-        value={v}
-        onChange={(e) => setV(e.target.value)}
-        className="bg-background border-border focus:border-accent-cyan focus:ring-accent-cyan/20 w-full rounded-sm border px-10 py-2 font-mono text-xs tracking-widest uppercase transition-all placeholder:text-slate-600 focus:ring-1 focus:outline-none"
-      />
-    </form>
-  );
-};
-
-type TabId = "graph" | "analytics";
-
-// ─── Main content ───
 function InspectorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const walletId = searchParams.get("wallet");
   const { data, isLoading, isError } = useInspectProfile(walletId);
 
-  const [activeTab, setActiveTab] = useState<TabId>("graph");
-  const [graphDepth, setGraphDepth] = useState<1 | 2>(2);
-  const [showAttentionLabels, setShowAttentionLabels] = useState(true);
+  // ─── Selected Node for Side Panel ───
+  const [selectedNode, setSelectedNode] = useState<SybilNode | null>(null);
 
-  // ── Parse attention weights from API response ──
-  // The API returns them in analysis.attention_weights
-  const attentionWeights: AttentionWeight[] = useMemo(
-    () =>
-      (data?.analysis as { attention_weights?: AttentionWeight[] })
-        ?.attention_weights || [],
-    [data?.analysis]
-  );
+  // ─── Depth toggle: 1 = direct neighbors only, 2 = full ego-graph ───
+  const [graphDepth, setGraphDepth] = useState<1 | 2>(1);
 
-  // ── Depth-filtered graph ──
+  const handleReset = () => {
+    // Clear all search params by navigating back to base /inspector
+    router.replace("/inspector");
+  };
+
+  // ─── Compute filtered local_graph based on depth (frontend filtering) ───
   const displayGraphData = useMemo(() => {
     if (!data?.local_graph || !walletId) return { nodes: [], links: [] };
-    if (graphDepth === 2) return data.local_graph;
-    const directIds = new Set<string>([walletId]);
-    data.local_graph.links.forEach((l) => {
+
+    const targetId = (data.profile_info?.id || walletId).toLowerCase().trim();
+    const nodesWithTargetPicture = data.local_graph.nodes.map(
+      (node): SybilNode => {
+        if (String(node.id).toLowerCase() !== targetId) return node;
+
+        const existingPicture =
+          typeof node.attributes?.picture_url === "string"
+            ? node.attributes.picture_url
+            : "";
+        if (existingPicture || !data.profile_info?.picture_url) return node;
+
+        return {
+          ...node,
+          attributes: {
+            ...node.attributes,
+            picture_url: data.profile_info.picture_url,
+            handle: node.attributes?.handle || data.profile_info.handle,
+          } as SybilNode["attributes"],
+        };
+      }
+    );
+
+    const graphData = {
+      ...data.local_graph,
+      nodes: nodesWithTargetPicture,
+    };
+
+    if (graphDepth === 2) return graphData;
+
+    // Depth 1: only nodes with a direct edge to/from the target
+    const tid = targetId;
+    const directIds = new Set<string>([tid]);
+
+    graphData.links.forEach((l) => {
       const s = String(
         typeof l.source === "object"
           ? (l.source as { id: string }).id
           : l.source
-      );
+      ).toLowerCase();
       const t = String(
         typeof l.target === "object"
           ? (l.target as { id: string }).id
           : l.target
-      );
-      if (s === walletId) directIds.add(t);
-      if (t === walletId) directIds.add(s);
+      ).toLowerCase();
+      if (s === tid) directIds.add(t);
+      if (t === tid) directIds.add(s);
     });
-    return {
-      nodes: data.local_graph.nodes.filter((n) => directIds.has(String(n.id))),
-      links: data.local_graph.links.filter((l) => {
-        const s = String(
-          typeof l.source === "object"
-            ? (l.source as { id: string }).id
-            : l.source
-        );
-        const t = String(
-          typeof l.target === "object"
-            ? (l.target as { id: string }).id
-            : l.target
-        );
-        return directIds.has(s) && directIds.has(t);
-      }),
-    };
+
+    const nodes = graphData.nodes.filter((n) =>
+      directIds.has(String(n.id).toLowerCase())
+    );
+    const links = graphData.links.filter((l) => {
+      const s = String(
+        typeof l.source === "object"
+          ? (l.source as { id: string }).id
+          : l.source
+      ).toLowerCase();
+      const t = String(
+        typeof l.target === "object"
+          ? (l.target as { id: string }).id
+          : l.target
+      ).toLowerCase();
+      return directIds.has(s) && directIds.has(t);
+    });
+    return { nodes, links };
   }, [data, graphDepth, walletId]);
 
   const analysis = data?.analysis;
@@ -129,12 +156,6 @@ function InspectorContent() {
   const riskLabel = analysis?.predict_label || "UNKNOWN";
   const riskColor = LABEL_COLORS[riskLabel] || LABEL_COLORS.UNKNOWN;
 
-  const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: "graph", label: "EGO GRAPH", icon: <Network size={11} /> },
-    { id: "analytics", label: "ANALYTICS", icon: <BarChart3 size={11} /> },
-  ];
-
-  // ── Standby state ──
   if (!walletId) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
@@ -173,11 +194,14 @@ function InspectorContent() {
   if (isError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6">
-        <div className="border-accent-red/20 bg-accent-red/5 max-w-lg rounded-lg border-2 p-8 text-center">
+        <div className="border-accent-red/20 bg-accent-red/5 max-w-lg rounded-lg border-2 p-8 text-center backdrop-blur-sm">
           <AlertTriangle className="text-accent-red mx-auto mb-4" size={48} />
-          <h2 className="text-accent-red mb-4 text-xl font-black uppercase italic">
+          <h2 className="text-accent-red mb-2 text-xl font-black tracking-tighter uppercase italic">
             [ERR] Failed to Fetch Target Data
           </h2>
+          <p className="text-subtle mb-6 font-mono text-sm leading-relaxed tracking-widest uppercase">
+            Verify the ID and try again.
+          </p>
           <SearchForm defaultValue={walletId || ""} />
         </div>
       </div>
@@ -185,10 +209,10 @@ function InspectorContent() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-5">
+    <div className="flex h-full flex-col gap-6">
       {/* ── Header ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col">
           <h2 className="text-foreground text-3xl font-black tracking-tighter uppercase italic">
             Profile <span className="text-accent-cyan">Inspector</span>
           </h2>
@@ -197,9 +221,8 @@ function InspectorContent() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <SearchForm defaultValue={walletId || ""} />
           <button
-            onClick={() => router.push("/inspector")}
+            onClick={handleReset}
             className="text-accent-cyan rounded-sm border border-slate-700 bg-slate-800 px-5 py-2 text-xs font-black tracking-widest whitespace-nowrap uppercase italic shadow-lg transition-all hover:bg-slate-700 active:translate-y-0.5"
           >
             RESET
@@ -207,9 +230,9 @@ function InspectorContent() {
         </div>
       </div>
 
-      {/* ── Info Cards ── */}
+      {/* ── Info Cards Row ── */}
       <div className="grid grid-cols-12 gap-5">
-        {/* Profile info */}
+        {/* Analysis Overview */}
         <div className="col-span-4">
           <IndustrialCard title="ANALYSIS OVERVIEW" className="h-full">
             <div className="flex flex-col gap-4">
@@ -218,7 +241,7 @@ function InspectorContent() {
                   className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-sm border-2"
                   style={{
                     borderColor: riskColor + "55",
-                    background: riskColor + "0a",
+                    backgroundColor: riskColor + "0a",
                   }}
                 >
                   {profile?.picture_url ? (
@@ -235,7 +258,7 @@ function InspectorContent() {
                   )}
                 </div>
                 <div className="flex min-w-0 flex-col">
-                  <span className="text-subtle text-[9px] uppercase">
+                  <span className="text-subtle text-[9px] tracking-tighter uppercase">
                     Handle
                   </span>
                   <span
@@ -246,23 +269,31 @@ function InspectorContent() {
                   </span>
                 </div>
               </div>
-              <div className="font-mono text-[9px] break-all">
+
+              <div className="font-mono text-[9px]">
                 <span className="text-slate-500">PROFILE ID:</span>
                 <br />
-                <span className="font-bold" style={{ color: riskColor + "cc" }}>
+                <span
+                  className="font-bold break-all"
+                  style={{ color: riskColor + "cc" }}
+                >
                   {walletId}
                 </span>
               </div>
+
               <div
                 className="flex items-center gap-2 rounded-sm border px-3 py-2"
                 style={{
                   borderColor: riskColor + "44",
-                  background: riskColor + "08",
+                  backgroundColor: riskColor + "08",
                 }}
               >
                 <div
                   className="h-2 w-2 flex-shrink-0 animate-pulse rounded-full"
-                  style={{ backgroundColor: riskColor }}
+                  style={{
+                    backgroundColor: riskColor,
+                    boxShadow: `0 0 6px ${riskColor}88`,
+                  }}
                 />
                 <span
                   className="text-base font-black italic"
@@ -270,17 +301,12 @@ function InspectorContent() {
                 >
                   {riskLabel}
                 </span>
-                {attentionWeights.length > 0 && (
-                  <span className="ml-auto font-mono text-[7px] text-slate-700">
-                    {attentionWeights.length} attn edges
-                  </span>
-                )}
               </div>
             </div>
           </IndustrialCard>
         </div>
 
-        {/* Probability */}
+        {/* Probability Distribution */}
         <div className="col-span-4">
           <ProbabilityEqualizer
             probabilities={analysis?.predict_proba || {}}
@@ -288,11 +314,11 @@ function InspectorContent() {
           />
         </div>
 
-        {/* Reasoning */}
+        {/* Detection Metrics */}
         <div className="col-span-4">
           <IndustrialCard title="DETECTION METRICS" className="h-full">
             <div className="flex flex-col gap-2">
-              <span className="text-subtle text-[9px] font-bold uppercase">
+              <span className="text-subtle px-1 text-[9px] font-bold uppercase">
                 Reasoning:
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -303,7 +329,7 @@ function InspectorContent() {
                     style={{
                       borderColor: riskColor + "33",
                       color: riskColor + "aa",
-                      background: riskColor + "08",
+                      backgroundColor: riskColor + "08",
                     }}
                   >
                     {r}
@@ -315,151 +341,82 @@ function InspectorContent() {
         </div>
       </div>
 
-      {/* ── Tab container ── */}
-      <div className="flex min-h-[700px] flex-1 flex-col">
-        {/* Tab bar */}
-        <div className="flex items-center gap-px border-b border-slate-800/80 bg-[#050608]">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 border-b-2 px-5 py-2.5 font-mono text-[10px] font-bold tracking-[0.15em] uppercase transition-all ${
-                activeTab === tab.id
-                  ? "border-accent-cyan text-accent-cyan"
-                  : "border-transparent text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-              {tab.id === "analytics" && attentionWeights.length > 0 && (
-                <span
-                  className="ml-1 rounded-sm px-1 font-mono text-[7px] font-bold"
+      {/* ── Graph Area ── */}
+      <div className="min-h-[800px] flex-1">
+        {/* ── FIX: Dark background matching Discovery page ── */}
+        <div className="relative h-full w-full overflow-hidden rounded-sm border border-slate-800/70 bg-[#050608] shadow-2xl">
+          {/* Subtle grid */}
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+          {/* ── Depth toggle overlay ── */}
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+            <div className="flex items-center gap-1.5 border border-slate-700/80 bg-black/80 px-1.5 py-1 backdrop-blur-sm">
+              <GitBranch size={10} className="text-slate-500" />
+              <span className="font-mono text-[8px] font-bold text-slate-500 uppercase">
+                Depth
+              </span>
+              {([1, 2] as const).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setGraphDepth(d)}
+                  className="px-2 py-0.5 font-mono text-[9px] font-bold transition-all"
                   style={{
-                    background: "#00f2ff22",
-                    color: "#00f2ff99",
-                    border: "1px solid #00f2ff33",
+                    color: graphDepth === d ? "#00f2ff" : "#334155",
+                    background:
+                      graphDepth === d ? "rgba(0,242,255,0.1)" : "transparent",
+                    border: `1px solid ${graphDepth === d ? "rgba(0,242,255,0.3)" : "transparent"}`,
                   }}
                 >
-                  {attentionWeights.length}
-                </span>
-              )}
-            </button>
-          ))}
-
-          {/* Graph controls (only on graph tab) */}
-          {activeTab === "graph" && (
-            <div className="mr-3 ml-auto flex items-center gap-2">
-              {/* Depth toggle */}
-              <div className="flex items-center gap-1.5 border border-slate-700/80 bg-black/60 px-2 py-1">
-                <GitBranch size={9} className="text-slate-600" />
-                <span className="font-mono text-[7px] text-slate-600 uppercase">
-                  Depth
-                </span>
-                {([1, 2] as const).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setGraphDepth(d)}
-                    className="px-1.5 py-0.5 font-mono text-[9px] font-bold transition-all"
-                    style={{
-                      color: graphDepth === d ? "#00f2ff" : "#334155",
-                      background:
-                        graphDepth === d
-                          ? "rgba(0,242,255,0.1)"
-                          : "transparent",
-                      border: `1px solid ${graphDepth === d ? "rgba(0,242,255,0.3)" : "transparent"}`,
-                    }}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-              {/* Attention toggle */}
-              {attentionWeights.length > 0 && (
-                <button
-                  onClick={() => setShowAttentionLabels((v) => !v)}
-                  className="flex items-center gap-1.5 border border-slate-700/80 bg-black/60 px-2 py-1 transition-all hover:border-slate-600"
-                  title={
-                    showAttentionLabels
-                      ? "Hide attention labels"
-                      : "Show attention labels"
-                  }
-                >
-                  {showAttentionLabels ? (
-                    <Eye size={9} className="text-accent-cyan" />
-                  ) : (
-                    <EyeOff size={9} className="text-slate-600" />
-                  )}
-                  <span
-                    className="font-mono text-[7px] font-bold uppercase"
-                    style={{
-                      color: showAttentionLabels ? "#00f2ff" : "#334155",
-                    }}
-                  >
-                    Attention
-                  </span>
+                  {d}
                 </button>
-              )}
+              ))}
             </div>
-          )}
-        </div>
+            <div className="border border-slate-700/70 bg-black/70 px-2.5 py-1 backdrop-blur-sm">
+              <span className="font-mono text-[8px] text-slate-600">
+                {displayGraphData.nodes.length} nodes ·{" "}
+                {displayGraphData.links.length} edges
+              </span>
+            </div>
+          </div>
 
-        {/* Tab content */}
-        <div className="relative flex-1 overflow-hidden rounded-b-sm border border-t-0 border-slate-800/70 bg-[#050608]">
-          {/* ── Graph tab ── */}
-          {activeTab === "graph" && (
-            <div className="relative h-full w-full">
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#1e293b10_1px,transparent_1px),linear-gradient(to_bottom,#1e293b10_1px,transparent_1px)] bg-[size:40px_40px]" />
+          <UniversalGraph2D
+            mode="EGO"
+            graphData={displayGraphData}
+            targetId={profile?.id || walletId || ""}
+            risk_label={riskLabel as import("@/types/api").RiskClassification}
+            depthFilter={graphDepth}
+            onNodeClick={setSelectedNode}
+          />
 
-              {/* Target badge */}
-              {walletId && (
-                <div className="pointer-events-none absolute top-4 left-4 z-10">
-                  <div
-                    className="flex items-center gap-2 border px-3 py-1.5 backdrop-blur-sm"
-                    style={{
-                      borderColor: riskColor + "33",
-                      background: "rgba(0,0,0,0.75)",
-                    }}
-                  >
-                    <div
-                      className="h-1.5 w-1.5 animate-pulse rounded-full"
-                      style={{ backgroundColor: riskColor }}
-                    />
-                    <span
-                      className="font-mono text-[8px] font-bold tracking-widest uppercase"
-                      style={{ color: riskColor }}
-                    >
-                      TARGET: {walletId.slice(0, 12)}…
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <UniversalGraph2D
-                mode="EGO"
-                graphData={displayGraphData}
-                targetId={walletId || ""}
-                attentionWeights={attentionWeights}
-                showAttention={showAttentionLabels}
+          {/* ── Node Detail Panel Overlay ── */}
+          {selectedNode && (
+            <div className="animate-in fade-in slide-in-from-right absolute top-0 right-0 bottom-0 z-30 w-[320px] duration-300">
+              <NodeDetailPanel
+                node={selectedNode}
+                onClose={() => setSelectedNode(null)}
               />
-
-              {/* Info overlay */}
-              <div className="pointer-events-none absolute right-16 bottom-6 flex flex-col items-end gap-0.5">
-                <span className="text-accent-cyan/50 font-mono text-[7px] uppercase">
-                  2D RENDER ENGINE ACTIVE
-                </span>
-                <span className="font-mono text-[7px] text-slate-800">
-                  Depth {graphDepth} · {displayGraphData.nodes.length} nodes ·{" "}
-                  {displayGraphData.links.length} edges
-                  {attentionWeights.length > 0 &&
-                    ` · ${attentionWeights.length} attn`}
-                </span>
-              </div>
             </div>
           )}
+
+          {/* Overlays bottom-right (handled by graph component's zoom controls) */}
+          <div className="pointer-events-none absolute right-16 bottom-6 flex flex-col items-end gap-1">
+            <span className="text-accent-cyan/60 font-mono text-[8px] font-bold uppercase">
+              [ 2D RENDER ENGINE ACTIVE ]
+            </span>
+            <span className="font-mono text-[8px] font-bold text-slate-700 uppercase">
+              Depth: {graphDepth} · {displayGraphData.nodes.length} nodes
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+function InspectorWrapper() {
+  const searchParams = useSearchParams();
+  const walletId = searchParams.get("wallet") || "idle";
+  return <InspectorContent key={walletId} />;
 }
 
 export default function InspectorPage() {
@@ -469,12 +426,12 @@ export default function InspectorPage() {
         <div className="flex h-full flex-col items-center justify-center gap-6">
           <Loader2 className="text-accent-cyan animate-spin" size={48} />
           <span className="text-accent-cyan animate-pulse font-mono text-sm font-bold tracking-[0.2em] uppercase">
-            INITIALIZING MODULE...
+            [SYS] INITIALIZING MODULE...
           </span>
         </div>
       }
     >
-      <InspectorContent />
+      <InspectorWrapper />
     </Suspense>
   );
 }

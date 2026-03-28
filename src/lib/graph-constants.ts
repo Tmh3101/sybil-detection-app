@@ -92,14 +92,10 @@ export const EDGE_LAYERS: {
 ];
 
 // ─── Legacy compat exports ───
-export const RELATION_GROUPS = EDGE_LAYERS.map(
-  ({ key, label, directed, color }) => ({
-    type: key,
-    label,
-    directed,
-    color,
-  })
-);
+export const RELATION_GROUPS = EDGE_LAYERS.map(({ key, label }) => ({
+  type: key,
+  label,
+}));
 
 export const LABEL_GROUPS = [
   { label: "Benign", key: "BENIGN" },
