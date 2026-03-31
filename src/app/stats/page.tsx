@@ -5,7 +5,6 @@ import { useStats } from "@/hooks/use-stats";
 import { KPICards } from "@/components/stats/kpi-cards";
 import { NetworkStructureChart } from "@/components/stats/network-structure-chart";
 import { RiskDistributionChart } from "@/components/stats/risk-distribution-chart";
-import { TrustScoreHistogram } from "@/components/stats/trust-score-histogram";
 import { BootSequenceLoader } from "@/components/ui/boot-sequence-loader";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
@@ -20,7 +19,7 @@ export default function StatsPage() {
     );
   }
 
-  if (isError || !data.overview) {
+  if (isError || !data.overview || !data.clusters) {
     return (
       <div className="flex h-[calc(100vh-64px)] w-full flex-col items-center justify-center gap-4 p-6 text-center">
         <div className="rounded-full bg-red-500/10 p-4 text-red-500">
@@ -44,7 +43,7 @@ export default function StatsPage() {
     );
   }
 
-  const { overview, risk, trust } = data;
+  const { overview, risk, clusters } = data;
 
   return (
     <div className="animate-in fade-in flex flex-col gap-8 p-8 duration-700">
@@ -65,8 +64,8 @@ export default function StatsPage() {
       <KPICards
         totalNodes={overview.total_nodes}
         totalEdges={overview.total_edges}
-        totalClusters={overview.total_clusters}
-        avgClusterSize={overview.avg_cluster_size}
+        totalClusters={clusters.total_clusters}
+        avgClusterSize={clusters.avg_cluster_size}
       />
 
       {/* Tier 2: Distribution Charts */}
@@ -77,21 +76,6 @@ export default function StatsPage() {
         {risk?.distribution && (
           <RiskDistributionChart data={risk.distribution} />
         )}
-      </div>
-
-      {/* Tier 3: Trust Score Histogram */}
-      {trust?.bins && (
-        <div className="w-full">
-          <TrustScoreHistogram data={trust.bins} />
-        </div>
-      )}
-
-      {/* System Footer Info */}
-      <div className="border-border border-t pt-4">
-        <div className="flex items-center justify-between font-mono text-[8px] tracking-[0.2em] text-slate-600 uppercase">
-          <span>Data Real-time Sync Active</span>
-          <span>Source: Sybil Engine Analytical Pipeline</span>
-        </div>
       </div>
     </div>
   );

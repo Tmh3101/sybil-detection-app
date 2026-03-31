@@ -21,14 +21,14 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    name: "DISCOVERY LAB",
-    href: "/discovery",
-    icon: FlaskConical,
-  },
-  {
     name: "INSPECTOR",
     href: "/inspector",
     icon: Search,
+  },
+  {
+    name: "DISCOVERY LAB",
+    href: "/discovery",
+    icon: FlaskConical,
   },
   {
     name: "STATISTICS",

@@ -2,12 +2,7 @@
 
 import { useQueries } from "@tanstack/react-query";
 import apiClient from "@/lib/api";
-import {
-  NetworkOverview,
-  RiskDistribution,
-  TrustScoreDistribution,
-  ClusterStats,
-} from "@/types/api";
+import { NetworkOverview, RiskDistribution, ClusterStats } from "@/types/api";
 
 /**
  * Unified hook to fetch all network statistics from the backend.
@@ -43,19 +38,6 @@ export const useStats = () => {
         },
       },
       {
-        queryKey: ["stats", "trust"],
-        queryFn: async () => {
-          try {
-            return await apiClient.get<TrustScoreDistribution>(
-              "/api/v1/stats/trust-scores"
-            );
-          } catch (error) {
-            console.error("Failed to fetch trust scores:", error);
-            return null;
-          }
-        },
-      },
-      {
         queryKey: ["stats", "clusters"],
         queryFn: async () => {
           try {
@@ -78,8 +60,7 @@ export const useStats = () => {
     data: {
       overview: results[0].data as NetworkOverview | null,
       risk: results[1].data as RiskDistribution | null,
-      trust: results[2].data as TrustScoreDistribution | null,
-      clusters: results[3].data as ClusterStats | null,
+      clusters: results[2].data as ClusterStats | null,
     },
     isLoading,
     isError,

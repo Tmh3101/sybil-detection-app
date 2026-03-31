@@ -132,7 +132,7 @@ export interface DiscoveryStatusResponse {
 
 // Statistics Types
 export interface EdgeDistributionItem {
-  type: string;
+  layer: string;
   count: number;
   percentage: number;
 }
@@ -146,7 +146,7 @@ export interface NetworkOverview {
 }
 
 export interface RiskDistributionItem {
-  category: RiskClassification;
+  label: RiskClassification;
   count: number;
 }
 
@@ -154,22 +154,9 @@ export interface RiskDistribution {
   distribution: RiskDistributionItem[];
 }
 
-export interface TrustScoreBin {
-  bin: string;
-  count: number;
-}
-
-export interface TrustScoreDistribution {
-  bins: TrustScoreBin[];
-}
-
-export interface ClusterSummary {
-  cluster_id: number;
-  size: number;
-  risk_score: number;
-  is_sybil_cluster: boolean;
-}
-
 export interface ClusterStats {
-  clusters: ClusterSummary[];
+  total_clusters: number;
+  avg_cluster_size: number;
+  largest_cluster: number;
+  smallest_cluster: number;
 }

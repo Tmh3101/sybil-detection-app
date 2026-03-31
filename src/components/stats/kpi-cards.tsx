@@ -19,28 +19,28 @@ export const KPICards: React.FC<KPICardsProps> = ({
 }) => {
   const kpis = [
     {
-      label: 'TOTAL NODES',
+      label: "TOTAL NODES",
       value: (totalNodes || 0).toLocaleString(),
       icon: Users,
-      color: 'text-accent-cyan',
+      color: "text-accent-cyan",
     },
     {
-      label: 'TOTAL EDGES',
+      label: "TOTAL EDGES",
       value: (totalEdges || 0).toLocaleString(),
       icon: Share2,
-      color: 'text-blue-500',
+      color: "text-blue-500",
     },
     {
-      label: 'TOTAL CLUSTERS',
+      label: "TOTAL CLUSTERS",
       value: (totalClusters || 0).toLocaleString(),
       icon: Box,
-      color: 'text-purple-500',
+      color: "text-purple-500",
     },
     {
-      label: 'AVG CLUSTER SIZE',
+      label: "AVG CLUSTER SIZE",
       value: (avgClusterSize || 0).toFixed(1),
       icon: TrendingUp,
-      color: 'text-accent-green',
+      color: "text-accent-green",
     },
   ];
 
