@@ -51,23 +51,55 @@ export function useGraphProcessor(
     });
 
     if (!aggregateEdges) {
-      return { nodes, links: graphData.links as unknown as AggregatedLink[] };
+      const processedLinks = graphData.links.map((link) => {
+        let sId =
+          typeof link.source === "object"
+            ? (link.source as NodeObject<SybilNode>).id
+            : (link.source as string);
+        let tId =
+          typeof link.target === "object"
+            ? (link.target as NodeObject<SybilNode>).id
+            : (link.target as string);
+
+        const type = link.edge_type || "UNKNOWN";
+        if (type.endsWith("_REV")) {
+          const temp = sId;
+          sId = tId;
+          tId = temp;
+        }
+
+        return {
+          ...link,
+          source: sId as string,
+          target: tId as string,
+        } as AggregatedLink;
+      });
+      return { nodes, links: processedLinks };
     }
 
     // 2. Aggregate links by source-target-type
     const linkMap = new Map<string, AggregatedLink>();
 
     graphData.links.forEach((link) => {
-      const sId =
+      let sId =
         typeof link.source === "object"
           ? (link.source as NodeObject<SybilNode>).id
           : (link.source as string);
-      const tId =
+      let tId =
         typeof link.target === "object"
           ? (link.target as NodeObject<SybilNode>).id
           : (link.target as string);
 
       const type = link.edge_type || "UNKNOWN";
+
+      // FIX: If it's a reverse edge, swap source and target so the arrow points correctly
+      // in the visualization (towards the actual target of the relationship).
+      if (type.endsWith("_REV")) {
+        const temp = sId;
+        sId = tId;
+        tId = temp;
+      }
+
       const key = `${sId}-${tId}-${type}`;
 
       if (linkMap.has(key)) {

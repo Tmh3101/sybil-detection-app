@@ -18,7 +18,6 @@ import { resolvePictureUrl } from "@/lib/utils";
 import {
   LABEL_COLORS,
   RELATION_COLORS,
-  DEFAULT_LINK_WIDTH,
   DIRECTED_EDGE_TYPES,
 } from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
@@ -92,10 +91,8 @@ export default function UniversalGraph2D({
 
   // ─── Depth and Edge Filtering (frontend, EGO only) ───
   const filteredData = useMemo(() => {
-    // 0. Preliminary filter: Always exclude reverse edges (_REV) to avoid visual clutter
-    const baseLinks = graphData.links.filter(
-      (l) => !(l.edge_type as string).endsWith("_REV")
-    );
+    // Keep all edges, including *_REV, so bidirectional relations are visible.
+    const baseLinks = graphData.links;
 
     if (mode !== "EGO" || !targetId) {
       return { nodes: graphData.nodes, links: baseLinks };
@@ -220,16 +217,19 @@ export default function UniversalGraph2D({
   useEffect(() => {
     if (!fgRef.current) return;
     if (mode === "EGO") {
-      fgRef.current.d3Force("radial", d3.forceRadial(190, 0, 0));
+      fgRef.current.d3Force("radial", d3.forceRadial(220, 0, 0));
       (
         fgRef.current.d3Force("charge") as d3.ForceManyBody<EnrichedNode>
-      )?.strength(-260);
+      )?.strength(-350);
+      fgRef.current.d3Force("link")?.distance(80);
     } else {
-      fgRef.current.d3Force("x", d3.forceX(0).strength(0.05));
-      fgRef.current.d3Force("y", d3.forceY(0).strength(0.05));
+      fgRef.current.d3Force("x", d3.forceX(0).strength(0.04));
+      fgRef.current.d3Force("y", d3.forceY(0).strength(0.04));
       fgRef.current.d3Force("center", d3.forceCenter(0, 0));
-      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-120));
-      fgRef.current.d3Force("link")?.distance(40);
+      // Push nodes further apart (anti-hairball)
+      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-200));
+      // Stretch the edges to prevent tight clustering
+      fgRef.current.d3Force("link")?.distance(60);
     }
     fgRef.current.d3ReheatSimulation();
   }, [processedData, mode, dimensions.width, dimensions.height]);
@@ -382,17 +382,44 @@ export default function UniversalGraph2D({
     ) => {
       if (!showAttention || globalScale < 2.5) return;
 
-      const l = link as AggregatedLink;
-      if (!l.gat_attention || l.gat_attention < 0.01) return;
+      if (!link.gat_attention || link.gat_attention < 0.01) return;
 
       const src = link.source as { x?: number; y?: number };
       const tgt = link.target as { x?: number; y?: number };
-      if (src.x === undefined || tgt.x === undefined) return;
+      if (
+        src.x === undefined ||
+        src.y === undefined ||
+        tgt.x === undefined ||
+        tgt.y === undefined
+      )
+        return;
 
-      const midX = ((src.x || 0) + (tgt.x || 0)) / 2;
-      const midY = ((src.y || 0) + (tgt.y || 0)) / 2;
+      // Tính vector hướng từ Nguồn đến Đích
+      const dx = tgt.x - src.x;
+      const dy = tgt.y - src.y;
 
-      const label = `${l.gat_attention.toFixed(4)}`;
+      // Tính trung điểm gốc của đường thẳng
+      let midX = src.x + dx / 2;
+      let midY = src.y + dy / 2;
+
+      // Tính toán độ lệch (offset) dựa trên curvature để text bám theo đường cong
+      const curvature =
+        link.multiLinkCount && link.multiLinkCount > 1
+          ? ((link.multiLinkIndex ?? 0) - (link.multiLinkCount - 1) / 2) * 0.18
+          : 0;
+
+      if (curvature !== 0) {
+        // Dịch chuyển trung điểm vuông góc với đường thẳng
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const nx = -dy / distance; // Normal vector X
+        const ny = dx / distance; // Normal vector Y
+
+        // Khoảng cách dịch chuyển phụ thuộc vào độ cong và chiều dài đoạn thẳng
+        midX += nx * curvature * distance;
+        midY += ny * curvature * distance;
+      }
+
+      const label = `${link.gat_attention?.toFixed(4) || "0.0000"}`;
 
       const fs = Math.max(2.5, 8 / globalScale);
       ctx.font = `bold ${fs}px "JetBrains Mono", monospace`;
@@ -599,15 +626,40 @@ export default function UniversalGraph2D({
         linkColor={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           const t = (link.edge_type as string) || "";
           const base = RELATION_COLORS[t] || RELATION_COLORS.UNKNOWN;
-          if (mode === "CLUSTER") return base + "50";
-          const w = link.aggregated_weight || 1;
-          const op = Math.min(0.35 + Math.log10(w) * 0.18, 0.8);
+          const w = (link as AggregatedLink).aggregated_weight || 1;
+
+          // Bumped opacity for better visibility
+          let alpha = 0.25;
+          if (
+            t === "CO-OWNER" ||
+            t.includes("SIMILARITY") ||
+            t === "SAME_AVATAR"
+          ) {
+            alpha = 0.5;
+          } else if (mode === "EGO") {
+            alpha = Math.min(0.25 + Math.log10(w) * 0.1, 0.55);
+          } else {
+            alpha = 0.18; // Cluster mode base alpha
+          }
+
           const r = parseInt(base.slice(1, 3), 16);
           const g = parseInt(base.slice(3, 5), 16);
           const b = parseInt(base.slice(5, 7), 16);
-          return `rgba(${r},${g},${b},${op})`;
+          return `rgba(${r},${g},${b},${alpha})`;
         }}
-        linkWidth={DEFAULT_LINK_WIDTH}
+        linkLineDash={(link: LinkObject<EnrichedNode, AggregatedLink>) =>
+          ((link.edge_type as string) || "").endsWith("_REV") ? [4, 3] : null
+        }
+        linkWidth={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
+          // Lấy đúng trường weight (fall back về aggregated_weight nếu cần)
+          const l = link;
+          const w = l.weight || l.aggregated_weight || 1;
+
+          // Tăng hệ số nhân và nới lỏng mức Max
+          return mode === "EGO"
+            ? Math.max(1.5, Math.min(w * 1.2, 8.0)) // Tăng từ 3.0 -> 8.0
+            : Math.max(0.8, Math.min(w * 0.8, 5.0)); // Tăng từ 1.8 -> 5.0
+        }}
         linkCurvature={(link: LinkObject<EnrichedNode, AggregatedLink>) => {
           if (!link.multiLinkCount || link.multiLinkCount <= 1) return 0;
           return (

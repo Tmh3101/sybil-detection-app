@@ -13,14 +13,22 @@ export const LABEL_COLORS: Record<string, string> = {
 export const RELATION_COLORS: Record<string, string> = {
   // Follow layer (directed) — blue
   FOLLOW: "#3b82f6",
+  FOLLOW_REV: "#3b82f6",
   // Interact layer (directed) — emerald / cyan
   UPVOTE: "#10b981",
+  UPVOTE_REV: "#10b981",
   REACTION: "#10b981",
+  REACTION_REV: "#10b981",
   COMMENT: "#10b981",
+  COMMENT_REV: "#10b981",
   QUOTE: "#10b981",
+  QUOTE_REV: "#10b981",
   MIRROR: "#06b6d4",
+  MIRROR_REV: "#06b6d4",
   COLLECT: "#06b6d4",
+  COLLECT_REV: "#06b6d4",
   TIP: "#10b981",
+  TIP_REV: "#10b981",
   INTERACT: "#10b981",
   // Co-Owner layer (undirected) — orange
   "CO-OWNER": "#f97316",
@@ -36,13 +44,21 @@ export const RELATION_COLORS: Record<string, string> = {
 // ─── Which edge_type values are DIRECTED (Follow + Interact layers) ───
 export const DIRECTED_EDGE_TYPES = new Set([
   "FOLLOW",
+  "FOLLOW_REV",
   "UPVOTE",
+  "UPVOTE_REV",
   "REACTION",
+  "REACTION_REV",
   "COMMENT",
+  "COMMENT_REV",
   "QUOTE",
+  "QUOTE_REV",
   "MIRROR",
+  "MIRROR_REV",
   "COLLECT",
+  "COLLECT_REV",
   "TIP",
+  "TIP_REV",
 ]);
 
 // ─── Layer grouping for legend ───
@@ -65,7 +81,7 @@ export const EDGE_LAYERS: {
     label: "Follow",
     color: RELATION_COLORS["FOLLOW"],
     directed: true,
-    types: ["FOLLOW"],
+    types: ["FOLLOW", "FOLLOW_REV"],
   },
   {
     key: "INTERACT",
@@ -74,12 +90,19 @@ export const EDGE_LAYERS: {
     directed: true,
     types: [
       "UPVOTE",
+      "UPVOTE_REV",
       "REACTION",
+      "REACTION_REV",
       "COMMENT",
+      "COMMENT_REV",
       "QUOTE",
+      "QUOTE_REV",
       "MIRROR",
+      "MIRROR_REV",
       "COLLECT",
+      "COLLECT_REV",
       "TIP",
+      "TIP_REV",
     ],
   },
   {
