@@ -159,10 +159,10 @@ function InspectorContent() {
   const analysis = data?.analysis;
   const profile = data?.profile_info;
   const riskLabel = analysis?.predict_label || "UNKNOWN";
-  const riskScore =
-    analysis?.predict_proba[
-      riskLabel as import("@/types/api").RiskClassification
-    ] || 0;
+  // const riskScore =
+  //   analysis?.predict_proba[
+  //     riskLabel as import("@/types/api").RiskClassification
+  //   ] || 0;
   const riskColor = LABEL_COLORS[riskLabel] || LABEL_COLORS.UNKNOWN;
 
   if (!walletId) {

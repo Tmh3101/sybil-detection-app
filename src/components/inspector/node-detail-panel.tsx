@@ -103,7 +103,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
               Risk Score
             </span>
             <span className="text-sm font-black tabular-nums" style={{ color }}>
-              {(node.risk_score * 100).toFixed(0)}%
+              {(node.risk_score * 100).toFixed(0)}
             </span>
           </div>
         </div>
@@ -149,6 +149,19 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
         </div> */}
 
         {/* Detection Reasons */}
+        {node.attributes?.reason && (
+          <div className="mb-6 flex flex-col gap-2">
+            <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
+              Primary Detection Reason
+            </span>
+            <div className="flex flex-col border border-slate-800 bg-slate-900/40 px-2 py-1.5">
+              <span className="text-[10px] leading-tight text-slate-300">
+                {String(node.attributes.reason)}
+              </span>
+            </div>
+          </div>
+        )}
+
         {((node.attributes?.reasons as unknown as string[]) || []).length >
           0 && (
           <div className="flex flex-col gap-2">
