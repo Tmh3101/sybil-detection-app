@@ -512,7 +512,6 @@ export default function UniversalGraph2D({
 
       const type = (l.edge_type as string) || "";
       const baseColor = RELATION_COLORS[type] || RELATION_COLORS.UNKNOWN;
-      const weight = l.aggregated_weight || 1;
 
       // ── Opacity Logic (Phase 2) ──
       let alpha = 0.25;
@@ -523,9 +522,7 @@ export default function UniversalGraph2D({
       ) {
         alpha = 0.5;
       } else if (mode === "EGO") {
-        alpha = Math.min(0.25 + Math.log10(weight) * 0.1, 0.55);
-      } else {
-        alpha = 0.18;
+        alpha = 0.8; // Uniform opacity for EGO mode
       }
 
       const isHovering = hoverNode !== null;
@@ -542,12 +539,12 @@ export default function UniversalGraph2D({
       const b = parseInt(baseColor.slice(5, 7), 16);
       const color = `rgba(${r},${g},${b},${alpha})`;
 
-      const width =
-        mode === "EGO"
-          ? Math.max(1.5, Math.min(weight * 1.2, 8.0))
-          : Math.max(0.8, Math.min(weight * 0.8, 5.0));
+      const width = 0.5; // Uniform thickness independent of weight
 
       ctx.save();
+      if (type.endsWith("_REV")) {
+        ctx.setLineDash([4, 3]);
+      }
       ctx.beginPath();
       ctx.strokeStyle = color;
       ctx.lineWidth = width;

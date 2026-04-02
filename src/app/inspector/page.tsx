@@ -318,28 +318,46 @@ function InspectorContent() {
         {/* Confidence Score */}
         <div className="col-span-4">
           <IndustrialCard title="CONFIDENCE SCORE" className="h-full">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-end justify-between px-1">
-                <span className="text-subtle text-[9px] font-bold uppercase">
-                  Probability
-                </span>
-                <span
-                  className="font-mono text-xl font-bold"
-                  style={{ color: riskColor }}
-                >
-                  {(riskScore * 100).toFixed(1)}%
-                </span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-800">
-                <div
-                  className="h-full transition-all duration-1000"
-                  style={{
-                    width: `${riskScore * 100}%`,
-                    backgroundColor: riskColor,
-                    boxShadow: `0 0 10px ${riskColor}66`,
-                  }}
-                />
-              </div>
+            <div className="flex flex-col gap-3">
+              {Object.entries(analysis?.predict_proba || {}).map(
+                ([lbl, prob]) => {
+                  const color =
+                    LABEL_COLORS[lbl as keyof typeof LABEL_COLORS] ||
+                    LABEL_COLORS.UNKNOWN;
+                  const isSelected = lbl === riskLabel;
+                  return (
+                    <div key={lbl} className="flex flex-col gap-1.5">
+                      <div className="flex items-end justify-between px-1">
+                        <span
+                          className="text-[9px] font-bold tracking-wider uppercase"
+                          style={{ color: isSelected ? color : "#64748b" }}
+                        >
+                          {lbl.replace("_", " ")}
+                        </span>
+                        <span
+                          className="font-mono text-[10px] font-bold"
+                          style={{ color: isSelected ? color : "#94a3b8" }}
+                        >
+                          {(prob * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800/50">
+                        <div
+                          className="h-full transition-all duration-1000"
+                          style={{
+                            width: `${prob * 100}%`,
+                            backgroundColor: color,
+                            opacity: isSelected ? 1 : 0.4,
+                            boxShadow: isSelected
+                              ? `0 0 8px ${color}66`
+                              : "none",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+              )}
             </div>
           </IndustrialCard>
         </div>
@@ -351,7 +369,7 @@ function InspectorContent() {
               <span className="text-subtle px-1 text-[9px] font-bold uppercase">
                 Reasoning:
               </span>
-              <div className="scrollbar-thin max-h-[100px] flex flex-col gap-1.5 overflow-y-auto px-1">
+              <div className="scrollbar-thin flex max-h-[100px] flex-col gap-1.5 overflow-y-auto px-1">
                 {(analysis?.reasoning || []).length > 0 ? (
                   analysis?.reasoning.map((r, i) => (
                     <p
@@ -362,7 +380,7 @@ function InspectorContent() {
                     </p>
                   ))
                 ) : (
-                  <p className="font-mono text-[9px] italic text-slate-500">
+                  <p className="font-mono text-[9px] text-slate-500 italic">
                     No detailed reasoning provided.
                   </p>
                 )}
