@@ -46,3 +46,11 @@ Thumbs.db
 # Gemini CLI / Agents (Optional: keep if you want to sync prompts, ignore if temp)
 # .agents/tasks/*.log
 # .agents/plans/*.log
+.gitnexus
+.gemini
+.claude
+.agents
+
+AGENTS.md
+CLAUDE.md
+GEMINI.md
