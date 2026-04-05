@@ -61,7 +61,9 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
                 stroke="#64748b"
                 fontSize={10}
                 fontFamily="monospace"
-                tickFormatter={(value) => (tRisk.has(value) ? tRisk(value) : value)}
+                tickFormatter={(value) =>
+                  tRisk.has(value) ? tRisk(value) : value
+                }
                 angle={-25}
                 textAnchor="end"
                 interval={0}
@@ -90,7 +92,9 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
                   )?.label;
                   const numericValue = typeof value === "number" ? value : 0;
                   const translatedLabel =
-                    label && tRisk.has(label) ? tRisk(label) : label || "UNKNOWN";
+                    label && tRisk.has(label)
+                      ? tRisk(label)
+                      : label || "UNKNOWN";
 
                   return [
                     <span
