@@ -159,22 +159,25 @@ export interface ClusterStats {
 
 // History Types
 export interface InspectorHistoryItem {
-  id: string;
+  id: number;
   timestamp: string;
-  target_wallet: string;
+  target_address: string;
   predict_label: RiskClassification;
-  confidence: number;
+  confidence_score: number;
+  depth_filter: number;
 }
 
 export type InspectorHistoryResponse = InspectorHistoryItem[];
 
 export interface DiscoveryHistoryItem {
-  id: string;
-  run_time: string;
-  analyzed_period: TimeRange;
-  clusters_found: number;
-  total_nodes: number;
-  total_edges: number;
+  id: number;
+  task_id: string;
+  timestamp: string;
+  start_date: string;
+  end_date: string;
+  cluster_count: number;
+  node_count: number;
+  edge_count: number;
   status: "COMPLETED" | "FAILED" | "PENDING";
 }
 

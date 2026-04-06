@@ -17,7 +17,7 @@ export const useInspectorHistory = () => {
   return useQuery<InspectorHistoryResponse, Error>({
     queryKey: ["inspector", "history"],
     queryFn: async () => {
-      return apiClient.get(`/api/v1/inspector/history`);
+      return apiClient.get(`/api/v1/history/inspector`);
     },
   });
 };

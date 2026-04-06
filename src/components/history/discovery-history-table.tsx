@@ -9,6 +9,11 @@ export function DiscoveryHistoryTable() {
   const { data, isLoading, isError } = useDiscoveryHistory();
 
   const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString || "---";
+    }
+
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "2-digit",
@@ -16,9 +21,8 @@ export function DiscoveryHistoryTable() {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-    }).format(new Date(dateString));
+    }).format(date);
   };
-
 
   if (isLoading) {
     return (
@@ -32,7 +36,7 @@ export function DiscoveryHistoryTable() {
 
   if (isError) {
     return (
-      <div className="flex h-64 items-center justify-center text-red-500 font-mono text-sm tracking-widest">
+      <div className="flex h-64 items-center justify-center font-mono text-sm tracking-widest text-red-500">
         [ERR] FAILED TO FETCH DISCOVERY HISTORY
       </div>
     );
@@ -40,7 +44,7 @@ export function DiscoveryHistoryTable() {
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-500 font-mono text-sm tracking-widest uppercase">
+      <div className="flex h-64 items-center justify-center font-mono text-sm tracking-widest text-slate-500 uppercase">
         {t("no_data")}
       </div>
     );
@@ -51,22 +55,22 @@ export function DiscoveryHistoryTable() {
       <table className="w-full text-left font-mono text-xs">
         <thead className="bg-surface-secondary border-border border-b">
           <tr>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_run_time")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_analyzed_period")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_clusters")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_nodes")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_edges")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400 text-right">
+            <th className="px-4 py-3 text-right font-bold tracking-widest text-slate-400 uppercase">
               Status
             </th>
           </tr>
@@ -79,28 +83,33 @@ export function DiscoveryHistoryTable() {
                 className="hover:bg-surface-secondary/50 transition-colors"
               >
                 <td className="px-4 py-3 text-slate-300">
-                  {formatDate(row.run_time)}
+                  {formatDate(row.timestamp)}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {row.analyzed_period.start_date} → {row.analyzed_period.end_date}
+                  {row.start_date && row.end_date ? (
+                    <>
+                      {formatDate(row.start_date)} →{" "}
+                      {formatDate(row.end_date)}
+                    </>
+                  ) : (
+                    "---"
+                  )}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {row.clusters_found}
+                  {row.cluster_count}
                 </td>
-                <td className="px-4 py-3 text-slate-300">
-                  {row.total_nodes}
-                </td>
-                <td className="px-4 py-3 text-slate-300">
-                  {row.total_edges}
-                </td>
+                <td className="px-4 py-3 text-slate-300">{row.node_count}</td>
+                <td className="px-4 py-3 text-slate-300">{row.edge_count}</td>
                 <td className="px-4 py-3 text-right">
-                  <span className={`px-2 py-1 text-[10px] font-bold tracking-widest uppercase rounded-sm border ${
-                    row.status === 'COMPLETED' 
-                      ? 'border-green-500/40 bg-green-500/10 text-green-400' 
-                      : row.status === 'FAILED'
-                      ? 'border-red-500/40 bg-red-500/10 text-red-400'
-                      : 'border-yellow-500/40 bg-yellow-500/10 text-yellow-400'
-                  }`}>
+                  <span
+                    className={`rounded-sm border px-2 py-1 text-[10px] font-bold tracking-widest uppercase ${
+                      row.status === "COMPLETED"
+                        ? "border-green-500/40 bg-green-500/10 text-green-400"
+                        : row.status === "FAILED"
+                          ? "border-red-500/40 bg-red-500/10 text-red-400"
+                          : "border-yellow-500/40 bg-yellow-500/10 text-yellow-400"
+                    }`}
+                  >
                     {row.status}
                   </span>
                 </td>

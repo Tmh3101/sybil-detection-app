@@ -50,8 +50,7 @@ export const useDiscoveryHistory = () => {
   return useQuery<DiscoveryHistoryResponse, Error>({
     queryKey: ["discovery", "history"],
     queryFn: async () => {
-      return apiClient.get(`/api/v1/sybil/discovery/history`);
+      return apiClient.get(`/api/v1/history/discovery`);
     },
   });
 };
-

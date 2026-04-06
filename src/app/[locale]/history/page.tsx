@@ -8,18 +8,18 @@ import { History, Search, FlaskConical } from "lucide-react";
 
 export default function HistoryPage() {
   const t = useTranslations("HistoryPage");
-  const [activeTab, setActiveTab] = useState<"inspector" | "discovery">("inspector");
+  const [activeTab, setActiveTab] = useState<"inspector" | "discovery">(
+    "inspector"
+  );
 
   return (
     <div className="flex h-full flex-col gap-6 p-6">
       {/* Header */}
       <div className="mb-2 flex flex-col">
-        <h2 className="text-foreground text-3xl font-black tracking-tighter uppercase italic flex items-center gap-3">
+        <h2 className="text-foreground flex items-center gap-3 text-3xl font-black tracking-tighter uppercase italic">
           <History className="text-accent-cyan" size={28} />
           {t("page_title")}{" "}
-          <span className="text-accent-cyan">
-            {t("page_title_highlight")}
-          </span>
+          <span className="text-accent-cyan">{t("page_title_highlight")}</span>
         </h2>
         <span className="text-subtle mt-1 font-mono text-xs tracking-widest">
           {t("page_subtitle")}
@@ -27,13 +27,13 @@ export default function HistoryPage() {
       </div>
 
       {/* Tabs Control */}
-      <div className="flex border-b border-border">
+      <div className="border-border flex border-b">
         <button
           onClick={() => setActiveTab("inspector")}
           className={`flex items-center gap-2 px-6 py-3 font-mono text-[11px] font-bold tracking-widest uppercase transition-all ${
             activeTab === "inspector"
-              ? "border-b-2 border-accent-cyan text-accent-cyan bg-surface-secondary/50"
-              : "text-slate-500 hover:bg-surface-secondary/30 hover:text-slate-300"
+              ? "border-accent-cyan text-accent-cyan bg-surface-secondary/50 border-b-2"
+              : "hover:bg-surface-secondary/30 text-slate-500 hover:text-slate-300"
           }`}
         >
           <Search size={14} />
@@ -43,8 +43,8 @@ export default function HistoryPage() {
           onClick={() => setActiveTab("discovery")}
           className={`flex items-center gap-2 px-6 py-3 font-mono text-[11px] font-bold tracking-widest uppercase transition-all ${
             activeTab === "discovery"
-              ? "border-b-2 border-accent-cyan text-accent-cyan bg-surface-secondary/50"
-              : "text-slate-500 hover:bg-surface-secondary/30 hover:text-slate-300"
+              ? "border-accent-cyan text-accent-cyan bg-surface-secondary/50 border-b-2"
+              : "hover:bg-surface-secondary/30 text-slate-500 hover:text-slate-300"
           }`}
         >
           <FlaskConical size={14} />

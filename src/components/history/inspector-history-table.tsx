@@ -14,6 +14,11 @@ export function InspectorHistoryTable() {
   const { data, isLoading, isError } = useInspectorHistory();
 
   const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString || "---";
+    }
+
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "2-digit",
@@ -22,9 +27,8 @@ export function InspectorHistoryTable() {
       minute: "2-digit",
       second: "2-digit",
       hour12: false,
-    }).format(new Date(dateString));
+    }).format(date);
   };
-
 
   if (isLoading) {
     return (
@@ -38,7 +42,7 @@ export function InspectorHistoryTable() {
 
   if (isError) {
     return (
-      <div className="flex h-64 items-center justify-center text-red-500 font-mono text-sm tracking-widest">
+      <div className="flex h-64 items-center justify-center font-mono text-sm tracking-widest text-red-500">
         [ERR] FAILED TO FETCH INSPECTOR HISTORY
       </div>
     );
@@ -46,7 +50,7 @@ export function InspectorHistoryTable() {
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-slate-500 font-mono text-sm tracking-widest uppercase">
+      <div className="flex h-64 items-center justify-center font-mono text-sm tracking-widest text-slate-500 uppercase">
         {t("no_data")}
       </div>
     );
@@ -57,27 +61,28 @@ export function InspectorHistoryTable() {
       <table className="w-full text-left font-mono text-xs">
         <thead className="bg-surface-secondary border-border border-b">
           <tr>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_timestamp")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_target_wallet")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_prediction")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400">
+            <th className="px-4 py-3 font-bold tracking-widest text-slate-400 uppercase">
               {t("th_confidence")}
             </th>
-            <th className="px-4 py-3 font-bold tracking-widest uppercase text-slate-400 text-right">
+            <th className="px-4 py-3 text-right font-bold tracking-widest text-slate-400 uppercase">
               {t("th_action")}
             </th>
           </tr>
         </thead>
         <tbody className="divide-border divide-y">
           {data.map((row) => {
-            const riskColor = LABEL_COLORS[row.predict_label] || LABEL_COLORS.UNKNOWN;
-            
+            const riskColor =
+              LABEL_COLORS[row.predict_label] || LABEL_COLORS.UNKNOWN;
+
             return (
               <tr
                 key={row.id}
@@ -86,8 +91,11 @@ export function InspectorHistoryTable() {
                 <td className="px-4 py-3 text-slate-300">
                   {formatDate(row.timestamp)}
                 </td>
-                <td className="px-4 py-3 text-slate-300 font-bold truncate max-w-[200px]" title={row.target_wallet}>
-                  {row.target_wallet}
+                <td
+                  className="max-w-[200px] truncate px-4 py-3 font-bold text-slate-300"
+                  title={row.target_address}
+                >
+                  {row.target_address}
                 </td>
                 <td className="px-4 py-3">
                   <div
@@ -113,12 +121,14 @@ export function InspectorHistoryTable() {
                   </div>
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {(row.confidence * 100).toFixed(1)}%
+                  {(row.confidence_score * 100).toFixed(1)}%
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button
-                    onClick={() => router.push(`/inspector?wallet=${row.target_wallet}`)}
-                    className="inline-flex items-center gap-2 rounded-sm border border-slate-700 bg-slate-800 px-3 py-1.5 text-[10px] font-black tracking-widest uppercase text-accent-cyan shadow-sm transition-all hover:bg-slate-700 active:translate-y-[1px]"
+                    onClick={() =>
+                      router.push(`/inspector?wallet=${row.target_address}`)
+                    }
+                    className="text-accent-cyan inline-flex items-center gap-2 rounded-sm border border-slate-700 bg-slate-800 px-3 py-1.5 text-[10px] font-black tracking-widest uppercase shadow-sm transition-all hover:bg-slate-700 active:translate-y-[1px]"
                   >
                     <Search size={12} />
                     {t("btn_investigate")}
