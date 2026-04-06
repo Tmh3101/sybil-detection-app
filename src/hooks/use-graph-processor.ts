@@ -51,7 +51,7 @@ export function useGraphProcessor(
     });
 
     if (!aggregateEdges) {
-      const processedLinks = graphData.links.map((link) => {
+      const processedLinks = graphData.links.map((link, index) => {
         let sId =
           typeof link.source === "object"
             ? (link.source as NodeObject<SybilNode>).id
@@ -70,6 +70,7 @@ export function useGraphProcessor(
 
         return {
           ...link,
+          id: link.id || `${sId}-${tId}-${type}-${index}`,
           source: sId as string,
           target: tId as string,
         } as AggregatedLink;
@@ -113,6 +114,7 @@ export function useGraphProcessor(
       } else {
         linkMap.set(key, {
           ...link,
+          id: link.id || key,
           source: sId as string,
           target: tId as string,
           aggregated_weight: link.weight || 1,
