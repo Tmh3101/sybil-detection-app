@@ -10,6 +10,7 @@ import {
   Moon,
   Sun,
   BarChart3,
+  History,
 } from "lucide-react";
 import { useThemeStore } from "@/store/theme-store";
 import { useEffect, useState } from "react";
@@ -36,7 +37,13 @@ const navItems = [
     href: "/stats",
     icon: BarChart3,
   },
+  {
+    key: "history",
+    href: "/history",
+    icon: History,
+  },
 ];
+
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -78,9 +85,10 @@ export const Sidebar = () => {
               <li key={item.key}>
                 <Link
                   href={
-                    item.href as "/" | "/inspector" | "/discovery" | "/stats"
+                    item.href as "/" | "/inspector" | "/discovery" | "/stats" | "/history"
                   }
                   className={`flex items-center gap-4 rounded-sm px-5 py-3 font-mono text-[9px] font-bold tracking-[0.2em] transition-all ${
+
                     isActive
                       ? "bg-surface-secondary text-accent-cyan border-accent-cyan border-l-2 shadow-inner"
                       : "hover:text-foreground hover:bg-surface-secondary/50 text-slate-500"

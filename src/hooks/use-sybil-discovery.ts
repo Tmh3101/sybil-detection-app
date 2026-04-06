@@ -4,6 +4,7 @@ import {
   DiscoveryStartRequest,
   DiscoveryStartResponse,
   DiscoveryStatusResponse,
+  DiscoveryHistoryResponse,
 } from "@/types/api";
 
 /**
@@ -41,3 +42,16 @@ export const useDiscoveryStatus = (taskId: string | null) => {
     placeholderData: (previousData) => previousData,
   });
 };
+
+/**
+ * Hook to fetch the history of Discovery jobs.
+ */
+export const useDiscoveryHistory = () => {
+  return useQuery<DiscoveryHistoryResponse, Error>({
+    queryKey: ["discovery", "history"],
+    queryFn: async () => {
+      return apiClient.get(`/api/v1/sybil/discovery/history`);
+    },
+  });
+};
+

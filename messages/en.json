@@ -4,6 +4,7 @@
     "inspector": "INSPECTOR",
     "discovery": "DISCOVERY LAB",
     "stats": "STATISTICS",
+    "history": "HISTORY",
     "language": "LANGUAGE"
   },
   "Sidebar": {
@@ -130,6 +131,26 @@
     "network_structure_title": "NETWORK STRUCTURE (EDGES)",
     "risk_distribution_title": "RISK DISTRIBUTION (NODES)",
     "unknown": "UNKNOWN"
+  },
+  "HistoryPage": {
+    "page_title": "Audit",
+    "page_title_highlight": "History",
+    "page_subtitle": "Prediction and network discovery execution logs",
+    "tab_inspector": "Inspector Logs",
+    "tab_discovery": "Discovery Logs",
+    "th_timestamp": "Timestamp",
+    "th_target_wallet": "Target Wallet",
+    "th_prediction": "Prediction",
+    "th_confidence": "Confidence",
+    "th_action": "Action",
+    "th_run_time": "Run Time",
+    "th_analyzed_period": "Analyzed Period",
+    "th_clusters": "Clusters",
+    "th_nodes": "Nodes",
+    "th_edges": "Edges",
+    "btn_investigate": "Investigate",
+    "btn_view": "View",
+    "no_data": "No history records found."
   },
   "EdgeLayers": {
     "CO-OWNER": "CO-OWNER",

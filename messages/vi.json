@@ -1,9 +1,10 @@
 {
   "Navigation": {
     "dashboard": "BẢNG ĐIỀU KHIỂN",
-    "inspector": "ĐIỀU TRA",
+    "inspector": "KIỂM TRA",
     "discovery": "PHÒNG THÍ NGHIỆM",
     "stats": "THỐNG KÊ",
+    "history": "LỊCH SỬ",
     "language": "NGÔN NGỮ"
   },
   "Sidebar": {
@@ -116,20 +117,40 @@
   "StatsPage": {
     "sys_error": "Lỗi hệ thống:",
     "analytics_offline": "Phân tích ngoại tuyến",
-    "error_desc": "Không thể thiết lập kết nối an toàn với công cụ thống kê. Vui lòng đảm bảo các dịch vụ phụ trợ đang hoạt động và thử lại.",
+    "error_desc": "Không thể thiết lập kết nối an toàn với máy chủ thống kê. Vui lòng đảm bảo các dịch vụ backend đang hoạt động và thử lại.",
     "btn_reinit": "Khởi tạo lại hệ thống",
-    "page_title": "Thống kê",
-    "page_title_highlight": "mạng",
-    "page_subtitle": "Phân tích cấu trúc và tổng quan về phân phối rủi ro theo suy nghiệm",
+    "page_title": "Thống Kê",
+    "page_title_highlight": "Mạng Lưới",
+    "page_subtitle": "Phân tích cấu trúc và tổng quan phân bố rủi ro theo suy luận",
     "kpi": {
       "total_nodes": "TỔNG SỐ NÚT",
       "total_edges": "TỔNG SỐ CẠNH",
       "total_clusters": "TỔNG SỐ CỤM",
-      "avg_cluster_size": "KÍCH THƯỚC CỤM TB"
+      "avg_cluster_size": "KÍCH THƯỚC CỤM TRUNG BÌNH"
     },
-    "network_structure_title": "CẤU TRÚC MẠNG (CẠNH)",
-    "risk_distribution_title": "PHÂN PHỐI RỦI RO (NÚT)",
+    "network_structure_title": "CẤU TRÚC MẠNG LƯỚI (CẠNH)",
+    "risk_distribution_title": "PHÂN BỐ RỦI RO (NÚT)",
     "unknown": "KHÔNG RÕ"
+  },
+  "HistoryPage": {
+    "page_title": "Lịch Sử",
+    "page_title_highlight": "Kiểm Tra",
+    "page_subtitle": "Nhật ký thực thi dự đoán và khám phá mạng lưới",
+    "tab_inspector": "Nhật ký kiểm tra",
+    "tab_discovery": "Nhật ký khám phá",
+    "th_timestamp": "Thời gian",
+    "th_target_wallet": "Ví Mục Tiêu",
+    "th_prediction": "Dự Đoán",
+    "th_confidence": "Độ Tin Cậy",
+    "th_action": "Hành Động",
+    "th_run_time": "Thời gian chạy",
+    "th_analyzed_period": "Khoảng thời gian",
+    "th_clusters": "Số Cụm",
+    "th_nodes": "Số Nút",
+    "th_edges": "Số Cạnh",
+    "btn_investigate": "Kiểm Tra",
+    "btn_view": "Xem",
+    "no_data": "Không tìm thấy dữ liệu lịch sử."
   },
   "EdgeLayers": {
     "CO-OWNER": "ĐỒNG SỞ HỮU",
