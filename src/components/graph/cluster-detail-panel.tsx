@@ -11,6 +11,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { resolvePictureUrl } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 interface ClusterDetailPanelProps {
@@ -31,6 +32,9 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
   nodes,
   onClose,
 }) => {
+  const t = useTranslations("DetailPanels.cluster");
+  const tRisk = useTranslations("RiskLabels");
+
   const stats = useMemo(() => {
     const counts: Record<string, number> = {};
     let totalRisk = 0;
@@ -75,7 +79,7 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
               }}
             />
             <span className="text-accent-cyan text-[10px] font-bold tracking-[0.18em] uppercase italic">
-              CLUSTER #{clusterId}
+              {t("title", { id: clusterId })}
             </span>
             <span
               className="ml-1 border px-1.5 py-0.5 text-[7px] font-bold tracking-widest uppercase"
@@ -85,14 +89,14 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
                 backgroundColor: dominantColor + "0a",
               }}
             >
-              {stats.dominantLabel.replace("_", " ")}
+              {tRisk(stats.dominantLabel)}
             </span>
           </div>
           <div className="flex items-center gap-2 text-[9px]">
             <span className="font-bold text-slate-200 tabular-nums">
               {nodes.length}{" "}
               <span className="font-medium tracking-tighter text-slate-600 uppercase">
-                accounts
+                {t("accounts")}
               </span>
             </span>
             <span className="h-2 w-[1px] bg-slate-800" />
@@ -101,7 +105,11 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
               style={{ color: dominantColor }}
             >
               {RISK_ICONS[stats.dominantLabel]}
-              <span>{(stats.avgRisk * 100).toFixed(0)} RISK SCORE</span>
+              <span>
+                {t("risk_score", {
+                  score: (stats.avgRisk * 100).toFixed(0),
+                })}
+              </span>
             </div>
           </div>
 
@@ -196,31 +204,6 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
                   <div className="mt-0.5 truncate text-[8px] text-slate-600">
                     {node.id}
                   </div>
-
-                  {/* Mini stats row */}
-                  {/* <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[7px] font-medium tracking-tight">
-                    <div className="flex items-center gap-1 border-r border-slate-800 pr-3 last:border-0">
-                      <Activity size={8} className="text-slate-500" />
-                      <span className="text-slate-600 uppercase">Trust:</span>
-                      <span className="text-slate-300 font-bold tabular-nums">
-                        {Number(node.attributes?.trust_score || 0).toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 border-r border-slate-800 pr-3 last:border-0">
-                      <Users size={8} className="text-slate-500" />
-                      <span className="text-slate-600 uppercase">Followers:</span>
-                      <span className="text-slate-300 font-bold tabular-nums">
-                        {node.attributes?.follower_count ?? 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MessageSquare size={8} className="text-slate-500" />
-                      <span className="text-slate-600 uppercase">Posts:</span>
-                      <span className="text-slate-300 font-bold tabular-nums">
-                        {node.attributes?.post_count ?? 0}
-                      </span>
-                    </div>
-                  </div> */}
                 </div>
               </div>
             </div>
@@ -231,7 +214,7 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
       {/* ── Footer ── */}
       <div className="flex-shrink-0 border-t border-slate-800/60 px-4 py-2">
         <span className="text-[8px] tracking-widest text-slate-700 uppercase">
-          Click node on graph to inspect
+          {t("footer_hint")}
         </span>
       </div>
     </div>

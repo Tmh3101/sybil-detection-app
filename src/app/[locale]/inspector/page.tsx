@@ -22,10 +22,12 @@ import {
   Search,
   GitBranch,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(defaultValue);
+  const t = useTranslations("InspectorPage");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
       />
       <input
         type="text"
-        placeholder="ENTER PROFILE_ID..."
+        placeholder={t("search_placeholder")}
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
         className="bg-background border-border focus:border-accent-cyan focus:ring-accent-cyan/20 w-full rounded-sm border px-10 py-2 font-mono text-xs tracking-widest uppercase transition-all placeholder:text-slate-600 focus:ring-1 focus:outline-none"
@@ -50,18 +52,23 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
   );
 };
 
+const LoadingFallback = () => {
+  const t = useTranslations("InspectorPage");
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[#050608]">
+      <Loader2 className="text-accent-cyan animate-spin" size={32} />
+      <span className="text-accent-cyan animate-pulse font-mono text-[10px] font-bold tracking-[0.2em] uppercase">
+        {t("initializing")}
+      </span>
+    </div>
+  );
+};
+
 const UniversalGraph2D = dynamic(
   () => import("@/components/graph/universal-graph-2d"),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[#050608]">
-        <Loader2 className="text-accent-cyan animate-spin" size={32} />
-        <span className="text-accent-cyan animate-pulse font-mono text-[10px] font-bold tracking-[0.2em] uppercase">
-          INITIALIZING 2D RENDER ENGINE...
-        </span>
-      </div>
-    ),
+    loading: () => <LoadingFallback />,
   }
 );
 
@@ -70,6 +77,7 @@ function InspectorContent() {
   const searchParams = useSearchParams();
   const walletId = searchParams.get("wallet");
   const { data, isLoading, isError } = useInspectProfile(walletId);
+  const t = useTranslations("InspectorPage");
 
   // ─── Selected Node for Side Panel ───
   const [selectedNode, setSelectedNode] = useState<SybilNode | null>(null);
@@ -180,13 +188,10 @@ function InspectorContent() {
               </div>
             </div>
             <div className="flex flex-col items-center text-center">
-              <h2 className="text-foreground/40 mb-2 text-2xl font-black tracking-tighter uppercase italic">
-                [ SYSTEM STANDBY ]
-              </h2>
               <div className="mb-6 flex items-center gap-3">
                 <span className="bg-border h-[1px] w-8" />
                 <p className="text-accent-cyan/60 font-mono text-xs tracking-[0.3em] uppercase">
-                  Awaiting Target Input
+                  {t("standby_desc")}
                 </p>
                 <span className="bg-border h-[1px] w-8" />
               </div>
@@ -206,10 +211,10 @@ function InspectorContent() {
         <div className="border-accent-red/20 bg-accent-red/5 max-w-lg rounded-lg border-2 p-8 text-center backdrop-blur-sm">
           <AlertTriangle className="text-accent-red mx-auto mb-4" size={48} />
           <h2 className="text-accent-red mb-2 text-xl font-black tracking-tighter uppercase italic">
-            [ERR] Failed to Fetch Target Data
+            {t("error_title")}
           </h2>
           <p className="text-subtle mb-6 font-mono text-sm leading-relaxed tracking-widest uppercase">
-            Verify the ID and try again.
+            {t("error_desc")}
           </p>
           <SearchForm defaultValue={walletId || ""} />
         </div>
@@ -223,18 +228,19 @@ function InspectorContent() {
       <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-col">
           <h2 className="text-foreground text-3xl font-black tracking-tighter uppercase italic">
-            Profile <span className="text-accent-cyan">Inspector</span>
+            {t("page_title")}{" "}
+            <span className="text-accent-cyan">
+              {t("page_title_highlight")}
+            </span>
           </h2>
-          <span className="text-subtle">
-            Target Identification & Risk Assessment Module
-          </span>
+          <span className="text-subtle">{t("page_subtitle")}</span>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleReset}
             className="text-accent-cyan rounded-sm border border-slate-700 bg-slate-800 px-5 py-2 text-xs font-black tracking-widest whitespace-nowrap uppercase italic shadow-lg transition-all hover:bg-slate-700 active:translate-y-0.5"
           >
-            RESET
+            {t("btn_reset")}
           </button>
         </div>
       </div>
@@ -243,7 +249,7 @@ function InspectorContent() {
       <div className="grid grid-cols-12 gap-5">
         {/* Analysis Overview */}
         <div className="col-span-4">
-          <IndustrialCard title="ANALYSIS OVERVIEW" className="h-full">
+          <IndustrialCard title={t("card_analysis")} className="h-full">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <div
@@ -268,19 +274,19 @@ function InspectorContent() {
                 </div>
                 <div className="flex min-w-0 flex-col">
                   <span className="text-subtle text-[9px] tracking-tighter uppercase">
-                    Handle
+                    {t("handle")}
                   </span>
                   <span
                     className="max-w-[180px] truncate text-lg font-black uppercase italic"
                     style={{ color: riskColor }}
                   >
-                    {profile?.handle || "UNKNOWN"}
+                    {profile?.handle || t("unknown")}
                   </span>
                 </div>
               </div>
 
               <div className="font-mono text-[9px]">
-                <span className="text-slate-500">PROFILE ID:</span>
+                <span className="text-slate-500">{t("profile_id")}</span>
                 <br />
                 <span
                   className="font-bold break-all"
@@ -317,7 +323,7 @@ function InspectorContent() {
 
         {/* Confidence Score */}
         <div className="col-span-4">
-          <IndustrialCard title="CONFIDENCE SCORE" className="h-full">
+          <IndustrialCard title={t("card_confidence")} className="h-full">
             <div className="flex flex-col gap-3">
               {Object.entries(analysis?.predict_proba || {}).map(
                 ([lbl, prob]) => {
@@ -364,10 +370,10 @@ function InspectorContent() {
 
         {/* Detection Reasoning */}
         <div className="col-span-4">
-          <IndustrialCard title="DETECTION REASONING" className="h-full">
+          <IndustrialCard title={t("card_reasoning")} className="h-full">
             <div className="flex flex-col gap-2">
               <span className="text-subtle px-1 text-[9px] font-bold uppercase">
-                Reasoning:
+                {t("reasoning_label")}
               </span>
               <div className="scrollbar-thin flex max-h-[100px] flex-col gap-1.5 overflow-y-auto px-1">
                 {(analysis?.reasoning || []).length > 0 ? (
@@ -381,7 +387,7 @@ function InspectorContent() {
                   ))
                 ) : (
                   <p className="font-mono text-[9px] text-slate-500 italic">
-                    No detailed reasoning provided.
+                    {t("reasoning_empty")}
                   </p>
                 )}
               </div>
@@ -402,7 +408,7 @@ function InspectorContent() {
             <div className="flex items-center gap-1.5 border border-slate-700/80 bg-black/80 px-1.5 py-1 backdrop-blur-sm">
               <GitBranch size={10} className="text-slate-500" />
               <span className="font-mono text-[8px] font-bold text-slate-500 uppercase">
-                Depth
+                {t("depth_label")}
               </span>
               {([1, 2] as const).map((d) => (
                 <button
@@ -422,8 +428,10 @@ function InspectorContent() {
             </div>
             <div className="border border-slate-700/70 bg-black/70 px-2.5 py-1 backdrop-blur-sm">
               <span className="font-mono text-[8px] text-slate-600">
-                {displayGraphData.nodes.length} nodes ·{" "}
-                {displayGraphData.links.length} edges
+                {t("nodes_edges", {
+                  nodes: displayGraphData.nodes.length,
+                  edges: displayGraphData.links.length,
+                })}
               </span>
             </div>
           </div>
@@ -467,10 +475,13 @@ function InspectorContent() {
           {/* Overlays bottom-right (handled by graph component's zoom controls) */}
           <div className="pointer-events-none absolute right-16 bottom-6 flex flex-col items-end gap-1">
             <span className="text-accent-cyan/60 font-mono text-[8px] font-bold uppercase">
-              [ 2D RENDER ENGINE ACTIVE ]
+              {t("render_engine_active")}
             </span>
             <span className="font-mono text-[8px] font-bold text-slate-700 uppercase">
-              Depth: {graphDepth} · {displayGraphData.nodes.length} nodes
+              {t("depth_nodes_info", {
+                depth: graphDepth,
+                nodes: displayGraphData.nodes.length,
+              })}
             </span>
           </div>
         </div>
@@ -486,13 +497,14 @@ function InspectorWrapper() {
 }
 
 export default function InspectorPage() {
+  const t = useTranslations("InspectorPage");
   return (
     <Suspense
       fallback={
         <div className="flex h-full flex-col items-center justify-center gap-6">
           <Loader2 className="text-accent-cyan animate-spin" size={48} />
           <span className="text-accent-cyan animate-pulse font-mono text-sm font-bold tracking-[0.2em] uppercase">
-            [SYS] INITIALIZING MODULE...
+            {t("sys_initializing")}
           </span>
         </div>
       }

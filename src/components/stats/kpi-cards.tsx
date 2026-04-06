@@ -3,6 +3,7 @@
 import React from "react";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { Users, Share2, Box, TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface KPICardsProps {
   totalNodes: number;
@@ -17,27 +18,28 @@ export const KPICards: React.FC<KPICardsProps> = ({
   totalClusters = 0,
   avgClusterSize = 0,
 }) => {
+  const t = useTranslations("StatsPage.kpi");
   const kpis = [
     {
-      label: "TOTAL NODES",
+      label: t("total_nodes"),
       value: (totalNodes || 0).toLocaleString(),
       icon: Users,
       color: "text-accent-cyan",
     },
     {
-      label: "TOTAL EDGES",
+      label: t("total_edges"),
       value: (totalEdges || 0).toLocaleString(),
       icon: Share2,
       color: "text-blue-500",
     },
     {
-      label: "TOTAL CLUSTERS",
+      label: t("total_clusters"),
       value: (totalClusters || 0).toLocaleString(),
       icon: Box,
       color: "text-purple-500",
     },
     {
-      label: "AVG CLUSTER SIZE",
+      label: t("avg_cluster_size"),
       value: (avgClusterSize || 0).toFixed(1),
       icon: TrendingUp,
       color: "text-accent-green",

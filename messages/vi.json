@@ -1,0 +1,186 @@
+{
+  "Navigation": {
+    "dashboard": "BẢNG ĐIỀU KHIỂN",
+    "inspector": "ĐIỀU TRA",
+    "discovery": "PHÒNG THÍ NGHIỆM",
+    "stats": "THỐNG KÊ",
+    "language": "NGÔN NGỮ"
+  },
+  "Sidebar": {
+    "system_interface": "Giao diện hệ thống",
+    "light_mode": "CHẾ ĐỘ SÁNG",
+    "dark_mode": "CHẾ ĐỘ TỐI",
+    "switch_theme": "Chuyển sang chế độ {theme}"
+  },
+  "Metadata": {
+    "title": "BẢNG ĐIỀU KHIỂN SYBILSIGNAL",
+    "description": "Nền tảng Tự động Phát hiện & Khám phá Sybil"
+  },
+  "Common": {
+    "loading": "Đang tải",
+    "terminal": {
+      "init": "[HỆ THỐNG] ĐANG KHỞI TẠO CORE OVERWATCH...",
+      "loading_adapter": "[KHỞI ĐỘNG] ĐANG TẢI BIGQUERY_ADAPTER_v2.4...",
+      "auth_handshake": "[XÁC THỰC] BẮT TAY AN TOÀN [TOKEN:88ab12e]",
+      "network_ready": "[MẠNG] TRÌNH PHÂN TÍCH CỤM ĐÃ SẴN SÀNG",
+      "ml_init": "[ML] ĐỘNG CƠ GAE ĐÃ KHỞI TẠO"
+    }
+  },
+  "HomePage": {
+    "title_system": "TỔNG QUAN",
+    "title_overview": "HỆ THỐNG",
+    "subtitle": "SybilSignal là một nền tảng phát hiện và khám phá mạng lưới hiệu suất cao, được thiết kế để xác định các cụm sybil quy mô lớn và đánh giá rủi ro hồ sơ cá nhân.",
+    "available_modules": "Các mô-đun khả dụng",
+    "inspector_title": "Điều tra hồ sơ",
+    "inspector_desc": "Phân tích các ví cá nhân về hành vi sybil và chấm điểm rủi ro.",
+    "discovery_title": "Phòng thí nghiệm",
+    "discovery_desc": "Xác định các cụm cộng đồng quy mô lớn và mạng lưới gian lận.",
+    "stats_title": "Thống kê mạng",
+    "stats_desc": "Phân tích cấu trúc và tổng quan về phân phối rủi ro theo suy nghiệm."
+  },
+  "InspectorPage": {
+    "search_placeholder": "NHẬP ID HỒ SƠ...",
+    "initializing": "ĐANG KHỞI TẠO CÔNG CỤ HIỂN THỊ 2D...",
+    "standby_desc": "Đang chờ nhập mục tiêu",
+    "error_title": "[LỖI] Không thể tải dữ liệu mục tiêu",
+    "error_desc": "Vui lòng kiểm tra ID và thử lại.",
+    "page_title": "Điều tra",
+    "page_title_highlight": "Hồ sơ",
+    "page_subtitle": "Mô-đun Nhận dạng Mục tiêu & Đánh giá Rủi ro",
+    "btn_reset": "ĐẶT LẠI",
+    "card_analysis": "TỔNG QUAN PHÂN TÍCH",
+    "handle": "Tên định danh",
+    "unknown": "KHÔNG RÕ",
+    "profile_id": "ID HỒ SƠ:",
+    "card_confidence": "ĐỘ TIN CẬY",
+    "card_reasoning": "LÝ DO PHÁT HIỆN",
+    "reasoning_label": "Lý do:",
+    "reasoning_empty": "Không có lý do chi tiết.",
+    "depth_label": "Độ sâu",
+    "nodes_edges": "{nodes} nút · {edges} cạnh",
+    "render_engine_active": "[ CÔNG CỤ HIỂN THỊ 2D ĐANG HOẠT ĐỘNG ]",
+    "depth_nodes_info": "Độ sâu: {depth} · {nodes} nút",
+    "sys_initializing": "[HỆ THỐNG] ĐANG KHỞI TẠO MÔ-ĐUN...",
+    "prob_equalizer_title": "BỘ CÂN BẰNG PHÂN PHỐI XÁC SUẤT",
+    "prob_labels": {
+      "BENIGN": "XÁC SUẤT LÀNH TÍNH",
+      "LOW_RISK": "XÁC SUẤT RỦI RO THẤP",
+      "HIGH_RISK": "XÁC SUẤT RỦI RO CAO",
+      "MALICIOUS": "XÁC SUẤT ĐỘC HẠI"
+    }
+  },
+  "DiscoveryPage": {
+    "engine_loading": "Đang tải công cụ bản đồ cụm...",
+    "page_title": "Phòng",
+    "page_title_highlight": "thí nghiệm",
+    "page_subtitle": "Phát hiện cụm quy mô lớn & Phân tích mạng",
+    "dataset": "Tập dữ liệu: lens-protocol-mainnet",
+    "card_parameters": "THÔNG SỐ KHÁM PHÁ",
+    "start_date": "Ngày bắt đầu",
+    "end_date": "Ngày kết thúc",
+    "max_nodes": "Số nút tối đa",
+    "btn_start": "BẮT ĐẦU KHÁM PHÁ",
+    "btn_processing": "ĐANG XỬ LÝ...",
+    "error_prefix": "[LỖI]",
+    "error_start_after_end": "Ngày bắt đầu không thể sau ngày kết thúc",
+    "error_range_exceeded": "Khoảng thời gian không được vượt quá 7 ngày",
+    "advanced_options": "Tùy chọn nâng cao",
+    "max_epochs": "Số epochs tối đa",
+    "patience": "Độ kiên nhẫn",
+    "learning_rate": "Tốc độ học",
+    "filter_risk_label": "Nhãn rủi ro",
+    "filter_cluster_id": "ID cụm",
+    "filter_all_clusters": "Tất cả cụm",
+    "filter_cluster_option": "Cụm #{id}",
+    "showing_nodes": "Hiển thị {filtered} / {total} nút",
+    "no_scan_data": "[ KHÔNG CÓ DỮ LIỆU ]",
+    "no_scan_desc": "Chọn khoảng thời gian & số nút tối đa để bắt đầu quét mạng.",
+    "scanning": "ĐANG QUÉT MẠNG...",
+    "awaiting": "ĐANG CHỜ GIAO THỨC...",
+    "progress": "Tiến trình: {progress}% | Bước: {step}",
+    "scan_stats": "Thống kê quét",
+    "clusters_count": "K (số cụm)",
+    "nodes_found": "Số nút tìm thấy",
+    "edges_found": "Số cạnh tìm thấy",
+    "viewing_cluster": "▶ Đang xem cụm #{id}",
+    "log_initialized": "[HỆ THỐNG] PHÒNG THÍ NGHIỆM ĐÃ KHỞI TẠO",
+    "log_config_time": "[CẤU HÌNH] THỜI GIAN: {start} ĐẾN {end}",
+    "log_config_nodes": "[CẤU HÌNH] SỐ NÚT TỐI ĐA: {max}",
+    "log_initiating": "[HÀNH ĐỘNG] ĐANG KHỞI CHẠY GIAO THỨC KHÁM PHÁ...",
+    "log_task_assigned": "[HÀNH ĐỘNG] ĐÃ GÁN TASK_ID: {taskId}",
+    "log_progress": "[{status}] TIẾN TRÌNH: {progress}% - {step}",
+    "log_message": "[TIN NHẮN] {message}",
+    "log_success": "[THÀNH CÔNG] GIAO THỨC KHÁM PHÁ HOÀN TẤT.",
+    "log_aborted": "[NGHIÊM TRỌNG] GIAO THỨC KHÁM PHÁ BỊ HỦY."
+  },
+  "StatsPage": {
+    "sys_error": "Lỗi hệ thống:",
+    "analytics_offline": "Phân tích ngoại tuyến",
+    "error_desc": "Không thể thiết lập kết nối an toàn với công cụ thống kê. Vui lòng đảm bảo các dịch vụ phụ trợ đang hoạt động và thử lại.",
+    "btn_reinit": "Khởi tạo lại hệ thống",
+    "page_title": "Thống kê",
+    "page_title_highlight": "mạng",
+    "page_subtitle": "Phân tích cấu trúc và tổng quan về phân phối rủi ro theo suy nghiệm",
+    "kpi": {
+      "total_nodes": "TỔNG SỐ NÚT",
+      "total_edges": "TỔNG SỐ CẠNH",
+      "total_clusters": "TỔNG SỐ CỤM",
+      "avg_cluster_size": "KÍCH THƯỚC CỤM TB"
+    },
+    "network_structure_title": "CẤU TRÚC MẠNG (CẠNH)",
+    "risk_distribution_title": "PHÂN PHỐI RỦI RO (NÚT)",
+    "unknown": "KHÔNG RÕ"
+  },
+  "EdgeLayers": {
+    "CO-OWNER": "ĐỒNG SỞ HỮU",
+    "FOLLOW": "THEO DÕI",
+    "INTERACT": "TƯƠNG TÁC",
+    "SIMILARITY": "TƯƠNG ĐỒNG",
+    "UNKNOWN": "KHÔNG RÕ"
+  },
+  "DetailPanels": {
+    "node": {
+      "unknown_handle": "Không rõ",
+      "risk_score_label": "Điểm rủi ro",
+      "primary_reason": "Lý do phát hiện chính",
+      "detection_flags": "Cờ phát hiện",
+      "cluster_id": "ID cụm: #{id}",
+      "id_prefix": "ID-{id}"
+    },
+    "edge": {
+      "relationship_detail": "Chi tiết mối quan hệ",
+      "source_label": "Nguồn",
+      "target_label": "Đích",
+      "intensity_label": "Cường độ",
+      "weight_label": "Trọng số",
+      "heuristic_violations": "Vi phạm suy nghiệm",
+      "similarity_constraints_info": "* Mối quan hệ này bị gắn cờ vì vi phạm ít nhất 2 trên 3 ràng buộc tương đồng.",
+      "no_violation_metadata": "Không có thông tin chi tiết về vi phạm.",
+      "direct_relationship_info": "Đây là mối quan hệ <highlight>{type}</highlight> trực tiếp giữa các tài khoản.",
+      "logic_info": "Logic: Ràng buộc tương đồng 2/3",
+      "link_prefix": "{type}-LNK"
+    },
+    "cluster": {
+      "title": "CỤM #{id}",
+      "accounts": "tài khoản",
+      "risk_score": "{score} ĐIỂM RỦI RO",
+      "footer_hint": "Nhấp vào nút trên đồ thị để kiểm tra"
+    }
+  },
+  "RiskLabels": {
+    "BENIGN": "LÀNH TÍNH",
+    "LOW_RISK": "RỦI RO THẤP",
+    "HIGH_RISK": "RỦI RO CAO",
+    "MALICIOUS": "ĐỘC HẠI"
+  },
+  "GraphLegend": {
+    "node_map": "Bản đồ nút",
+    "relation_layers": "Lớp quan hệ",
+    "nodes_count": "{count} nút",
+    "edges_count": "{count} cạnh",
+    "directed": "có hướng",
+    "undirected": "vô hướng",
+    "ai_focus": "AI Focus (GAT)",
+    "target_node": "Nút mục tiêu"
+  }
+}

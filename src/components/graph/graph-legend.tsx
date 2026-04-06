@@ -6,12 +6,15 @@ import {
   EDGE_LAYERS,
   computeEdgeCounts,
 } from "@/lib/graph-constants";
+import { useTranslations } from "next-intl";
 
 interface GraphLegendProps {
   showNodes?: boolean;
   showRelations?: boolean;
   extraItems?: React.ReactNode;
   graphData?: { nodes: SybilNode[]; links: SybilEdge[] };
+  visibleLayers?: string[];
+  onToggleLayer?: (layer: string) => void;
 }
 
 const GraphLegend: React.FC<GraphLegendProps> = ({
@@ -19,7 +22,11 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
   showRelations = true,
   extraItems,
   graphData,
+  visibleLayers = [],
+  onToggleLayer,
 }) => {
+  const t = useTranslations("GraphLegend");
+
   // Edge counts per layer
   const edgeCounts = useMemo(() => {
     if (!graphData?.links) return {};
@@ -47,11 +54,11 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
         <div className="flex flex-col gap-1.5">
           <div className="mb-1 flex items-center justify-between">
             <span className="font-mono text-[8px] font-bold tracking-[0.18em] text-slate-500 uppercase">
-              Node Map
+              {t("node_map")}
             </span>
             {totalNodes > 0 && (
               <span className="font-mono text-[8px] text-slate-600">
-                {totalNodes} nodes
+                {t("nodes_count", { count: totalNodes })}
               </span>
             )}
           </div>
@@ -103,23 +110,29 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
         >
           <div className="mb-1 flex items-center justify-between">
             <span className="font-mono text-[8px] font-bold tracking-[0.18em] text-slate-500 uppercase">
-              Relation Layers
+              {t("relation_layers")}
             </span>
             {totalEdges > 0 && (
               <span className="font-mono text-[8px] text-slate-600">
-                {totalEdges} edges
+                {t("edges_count", { count: totalEdges })}
               </span>
             )}
           </div>
 
           {EDGE_LAYERS.map((layer) => {
             const count = edgeCounts[layer.key] ?? 0;
+            const isVisible =
+              visibleLayers.length === 0 || visibleLayers.includes(layer.key);
+
             return (
-              <div
+              <button
                 key={layer.key}
-                className="flex items-center justify-between gap-2"
+                onClick={() => onToggleLayer?.(layer.key)}
+                className={`flex items-center justify-between gap-2 transition-all hover:translate-x-0.5 ${
+                  !isVisible ? "opacity-30 grayscale-[0.5]" : "opacity-100"
+                }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-left">
                   {/* Line + direction indicator */}
                   <div className="flex flex-shrink-0 items-center gap-0.5">
                     <div
@@ -173,7 +186,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 ) : (
                   <span className="font-mono text-[8px] text-slate-700">—</span>
                 )}
-              </div>
+              </button>
             );
           })}
 
@@ -192,7 +205,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 <polygon points="8,1.5 13,4 8,6.5" fill="#334155" />
               </svg>
               <span className="font-mono text-[7px] text-slate-600">
-                directed
+                {t("directed")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -213,7 +226,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 />
               </svg>
               <span className="font-mono text-[7px] text-slate-600">
-                undirected
+                {t("undirected")}
               </span>
             </div>
 
@@ -224,7 +237,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                 <div className="absolute h-[4px] w-[4px] animate-ping rounded-full bg-[#ef4444] shadow-[0_0_8px_#ef4444]"></div>
               </div>
               <span className="font-mono text-[7px] font-bold text-[#ef4444]">
-                AI Focus (GAT)
+                {t("ai_focus")}
               </span>
             </div>
           </div>

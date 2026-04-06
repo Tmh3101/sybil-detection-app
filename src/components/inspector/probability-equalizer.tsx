@@ -4,18 +4,12 @@ import React from "react";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { RiskClassification } from "@/types/api";
 import { LABEL_COLORS } from "@/lib/graph-constants";
+import { useTranslations } from "next-intl";
 
 interface ProbabilityEqualizerProps {
   probabilities: Record<string, number>;
   className?: string;
 }
-
-const CLASS_LABELS: Record<RiskClassification, string> = {
-  BENIGN: "BENIGN PROBABILITY",
-  LOW_RISK: "LOW_RISK PROBABILITY",
-  HIGH_RISK: "HIGH_RISK PROBABILITY",
-  MALICIOUS: "MALICIOUS PROBABILITY",
-};
 
 const CLASSES: RiskClassification[] = [
   "BENIGN",
@@ -28,15 +22,12 @@ export const ProbabilityEqualizer: React.FC<ProbabilityEqualizerProps> = ({
   probabilities,
   className = "",
 }) => {
+  const t = useTranslations("InspectorPage");
   return (
-    <IndustrialCard
-      title="PROBABILITY DISTRIBUTION EQUALIZER"
-      className={className}
-    >
+    <IndustrialCard title={t("prob_equalizer_title")} className={className}>
       <div className="space-y-4">
         {CLASSES.map((cls) => {
           const prob = probabilities[cls] || 0;
-          const label = CLASS_LABELS[cls];
           const color = LABEL_COLORS[cls];
           const percentage = Math.round(prob * 100);
 
@@ -44,7 +35,7 @@ export const ProbabilityEqualizer: React.FC<ProbabilityEqualizerProps> = ({
             <div key={cls} className="group flex flex-col gap-1.5">
               <div className="flex items-center justify-between font-mono text-[9px] font-bold tracking-widest uppercase">
                 <span className="text-slate-500 transition-colors group-hover:text-slate-300">
-                  {label}
+                  {t(`prob_labels.${cls}`)}
                 </span>
                 <span className="italic" style={{ color }}>
                   {percentage}%

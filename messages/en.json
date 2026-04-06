@@ -1,0 +1,186 @@
+{
+  "Navigation": {
+    "dashboard": "DASHBOARD",
+    "inspector": "INSPECTOR",
+    "discovery": "DISCOVERY LAB",
+    "stats": "STATISTICS",
+    "language": "LANGUAGE"
+  },
+  "Sidebar": {
+    "system_interface": "System Interface",
+    "light_mode": "LIGHT MODE",
+    "dark_mode": "DARK MODE",
+    "switch_theme": "Switch to {theme} mode"
+  },
+  "Metadata": {
+    "title": "SYBILSIGNAL DASHBOARD",
+    "description": "Autonomous Sybil Detection & Discovery Platform"
+  },
+  "Common": {
+    "loading": "Loading",
+    "terminal": {
+      "init": "[SYSTEM] INITIALIZING CORE OVERWATCH...",
+      "loading_adapter": "[BOOT] LOADING BIGQUERY_ADAPTER_v2.4...",
+      "auth_handshake": "[AUTH] HANDSHAKE SECURE [TOKEN:88ab12e]",
+      "network_ready": "[NETWORK] CLUSTER ANALYZER READY",
+      "ml_init": "[ML] GAE ENGINE INITIALIZED"
+    }
+  },
+  "HomePage": {
+    "title_system": "SYSTEM",
+    "title_overview": "OVERVIEW",
+    "subtitle": "SybilSignal is a high-performance detection and network discovery platform designed for large-scale sybil cluster identification and individual profile risk assessment.",
+    "available_modules": "Available Modules",
+    "inspector_title": "Profile Inspector",
+    "inspector_desc": "Analyze individual wallets for sybil behavior and risk scoring.",
+    "discovery_title": "Discovery Lab",
+    "discovery_desc": "Identify large scale community clusters and fraudulent networks.",
+    "stats_title": "Network Statistics",
+    "stats_desc": "Structural analysis and heuristic risk distribution overview."
+  },
+  "InspectorPage": {
+    "search_placeholder": "ENTER PROFILE_ID...",
+    "initializing": "INITIALIZING 2D RENDER ENGINE...",
+    "standby_desc": "Awaiting Target Input",
+    "error_title": "[ERR] Failed to Fetch Target Data",
+    "error_desc": "Verify the ID and try again.",
+    "page_title": "Profile",
+    "page_title_highlight": "Inspector",
+    "page_subtitle": "Target Identification & Risk Assessment Module",
+    "btn_reset": "RESET",
+    "card_analysis": "ANALYSIS OVERVIEW",
+    "handle": "Handle",
+    "unknown": "UNKNOWN",
+    "profile_id": "PROFILE ID:",
+    "card_confidence": "CONFIDENCE SCORE",
+    "card_reasoning": "DETECTION REASONING",
+    "reasoning_label": "Reasoning:",
+    "reasoning_empty": "No detailed reasoning provided.",
+    "depth_label": "Depth",
+    "nodes_edges": "{nodes} nodes · {edges} edges",
+    "render_engine_active": "[ 2D RENDER ENGINE ACTIVE ]",
+    "depth_nodes_info": "Depth: {depth} · {nodes} nodes",
+    "sys_initializing": "[SYS] INITIALIZING MODULE...",
+    "prob_equalizer_title": "PROBABILITY DISTRIBUTION EQUALIZER",
+    "prob_labels": {
+      "BENIGN": "BENIGN PROBABILITY",
+      "LOW_RISK": "LOW_RISK PROBABILITY",
+      "HIGH_RISK": "HIGH_RISK PROBABILITY",
+      "MALICIOUS": "MALICIOUS PROBABILITY"
+    }
+  },
+  "DiscoveryPage": {
+    "engine_loading": "Loading Cluster Map Engine...",
+    "page_title": "Discovery",
+    "page_title_highlight": "Lab",
+    "page_subtitle": "Large Scale Cluster Detection & Network Analysis",
+    "dataset": "Dataset: lens-protocol-mainnet",
+    "card_parameters": "DISCOVERY PARAMETERS",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "max_nodes": "Max Nodes",
+    "btn_start": "START DISCOVERY",
+    "btn_processing": "PROCESSING...",
+    "error_prefix": "[ERR]",
+    "error_start_after_end": "Start date cannot be after end date",
+    "error_range_exceeded": "Date range cannot exceed 7 days",
+    "advanced_options": "Advanced Options",
+    "max_epochs": "Max Epochs",
+    "patience": "Patience",
+    "learning_rate": "Learning Rate",
+    "filter_risk_label": "Risk Label",
+    "filter_cluster_id": "Cluster ID",
+    "filter_all_clusters": "All clusters",
+    "filter_cluster_option": "Cluster #{id}",
+    "showing_nodes": "Showing {filtered} / {total} nodes",
+    "no_scan_data": "[ NO SCAN DATA ]",
+    "no_scan_desc": "Select time range & max nodes to begin network scanning.",
+    "scanning": "SCANNING NETWORK...",
+    "awaiting": "AWAITING PROTOCOLS...",
+    "progress": "Progress: {progress}% | Step: {step}",
+    "scan_stats": "Scan Statistics",
+    "clusters_count": "K (clusters)",
+    "nodes_found": "Nodes Found",
+    "edges_found": "Edges Found",
+    "viewing_cluster": "▶ Viewing cluster #{id}",
+    "log_initialized": "[SYSTEM] DISCOVERY LAB INITIALIZED",
+    "log_config_time": "[CONFIG] TIME_RANGE: {start} TO {end}",
+    "log_config_nodes": "[CONFIG] MAX_NODES: {max}",
+    "log_initiating": "[ACTION] INITIATING START DISCOVERY PROTOCOL...",
+    "log_task_assigned": "[ACTION] TASK_ID ASSIGNED: {taskId}",
+    "log_progress": "[{status}] PROGRESS: {progress}% - {step}",
+    "log_message": "[MESSAGE] {message}",
+    "log_success": "[SUCCESS] DISCOVERY PROTOCOL COMPLETED.",
+    "log_aborted": "[CRITICAL] DISCOVERY PROTOCOL ABORTED."
+  },
+  "StatsPage": {
+    "sys_error": "System Error:",
+    "analytics_offline": "Analytics Offline",
+    "error_desc": "Failed to establish a secure connection with the statistics engine. Please ensure the backend services are operational and try again.",
+    "btn_reinit": "Re-initialize System",
+    "page_title": "Network",
+    "page_title_highlight": "Statistics",
+    "page_subtitle": "Structural analysis and heuristic risk distribution overview",
+    "kpi": {
+      "total_nodes": "TOTAL NODES",
+      "total_edges": "TOTAL EDGES",
+      "total_clusters": "TOTAL CLUSTERS",
+      "avg_cluster_size": "AVG CLUSTER SIZE"
+    },
+    "network_structure_title": "NETWORK STRUCTURE (EDGES)",
+    "risk_distribution_title": "RISK DISTRIBUTION (NODES)",
+    "unknown": "UNKNOWN"
+  },
+  "EdgeLayers": {
+    "CO-OWNER": "CO-OWNER",
+    "FOLLOW": "FOLLOW",
+    "INTERACT": "INTERACT",
+    "SIMILARITY": "SIMILARITY",
+    "UNKNOWN": "UNKNOWN"
+  },
+  "DetailPanels": {
+    "node": {
+      "unknown_handle": "Unknown",
+      "risk_score_label": "Risk Score",
+      "primary_reason": "Primary Detection Reason",
+      "detection_flags": "Detection Flags",
+      "cluster_id": "Cluster ID: #{id}",
+      "id_prefix": "ID-{id}"
+    },
+    "edge": {
+      "relationship_detail": "Relationship Detail",
+      "source_label": "Source",
+      "target_label": "Target",
+      "intensity_label": "Intensity",
+      "weight_label": "Weight",
+      "heuristic_violations": "Heuristic Violations",
+      "similarity_constraints_info": "* This relationship is flagged because it violates at least 2 out of 3 similarity constraints.",
+      "no_violation_metadata": "No specific violation metadata available.",
+      "direct_relationship_info": "This is a direct <highlight>{type}</highlight> relationship between accounts.",
+      "logic_info": "Logic: 2/3 Similarity Constraint",
+      "link_prefix": "{type}-LNK"
+    },
+    "cluster": {
+      "title": "CLUSTER #{id}",
+      "accounts": "accounts",
+      "risk_score": "{score} RISK SCORE",
+      "footer_hint": "Click node on graph to inspect"
+    }
+  },
+  "RiskLabels": {
+    "BENIGN": "BENIGN",
+    "LOW_RISK": "LOW RISK",
+    "HIGH_RISK": "HIGH RISK",
+    "MALICIOUS": "MALICIOUS"
+  },
+  "GraphLegend": {
+    "node_map": "Node Map",
+    "relation_layers": "Relation Layers",
+    "nodes_count": "{count} nodes",
+    "edges_count": "{count} edges",
+    "directed": "directed",
+    "undirected": "undirected",
+    "ai_focus": "AI Focus (GAT)",
+    "target_node": "Target Node"
+  }
+}

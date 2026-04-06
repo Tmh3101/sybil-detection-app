@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { resolvePictureUrl } from "@/lib/utils";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface NodeDetailPanelProps {
   node: SybilNode;
@@ -27,12 +28,15 @@ const RISK_ICONS: Record<string, React.ReactNode> = {
 };
 
 const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
+  const t = useTranslations("DetailPanels.node");
   const rl = node.risk_label || "UNKNOWN";
   const color = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
   const pictureUrl = node.attributes?.picture_url
     ? resolvePictureUrl(String(node.attributes.picture_url))
     : "";
-  const handle = String(node.attributes?.handle || node.id || "Unknown");
+  const handle = String(
+    node.attributes?.handle || node.id || t("unknown_handle")
+  );
 
   return (
     <div className="flex h-full flex-col overflow-hidden border-l border-slate-800/80 bg-[#050810] font-mono shadow-2xl">
@@ -100,7 +104,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
           </div>
           <div className="flex flex-col items-end">
             <span className="text-[8px] text-slate-500 uppercase">
-              Risk Score
+              {t("risk_score_label")}
             </span>
             <span className="text-sm font-black tabular-nums" style={{ color }}>
               {(node.risk_score * 100).toFixed(0)}
@@ -152,7 +156,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
         {node.attributes?.reason && (
           <div className="mb-6 flex flex-col gap-2">
             <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
-              Primary Detection Reason
+              {t("primary_reason")}
             </span>
             <div className="flex flex-col border border-slate-800 bg-slate-900/40 px-2 py-1.5">
               <span className="text-[10px] leading-tight text-slate-300">
@@ -166,7 +170,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
           0 && (
           <div className="flex flex-col gap-2">
             <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
-              Detection Flags
+              {t("detection_flags")}
             </span>
             <div className="flex flex-col gap-1.5">
               {(node.attributes.reasons as unknown as string[]).map((r, i) => {
@@ -222,10 +226,10 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
       <div className="border-t border-slate-800/60 px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-[8px] font-bold tracking-widest text-slate-600 uppercase">
-            Cluster ID: #{node.cluster_id ?? "N/A"}
+            {t("cluster_id", { id: node.cluster_id ?? "N/A" })}
           </span>
           <span className="text-[8px] text-slate-700 tabular-nums">
-            ID-{(node.id || "000").slice(-4).toUpperCase()}
+            {t("id_prefix", { id: (node.id || "000").slice(-4).toUpperCase() })}
           </span>
         </div>
       </div>

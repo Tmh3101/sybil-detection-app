@@ -7,9 +7,11 @@ import { NetworkStructureChart } from "@/components/stats/network-structure-char
 import { RiskDistributionChart } from "@/components/stats/risk-distribution-chart";
 import { BootSequenceLoader } from "@/components/ui/boot-sequence-loader";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function StatsPage() {
   const { data, isLoading, isError } = useStats();
+  const t = useTranslations("StatsPage");
 
   if (isLoading) {
     return (
@@ -26,18 +28,18 @@ export default function StatsPage() {
           <AlertCircle size={48} />
         </div>
         <h2 className="text-foreground font-mono text-xl font-black tracking-widest uppercase italic">
-          System Error: <span className="text-red-500">Analytics Offline</span>
+          {t("sys_error")}{" "}
+          <span className="text-red-500">{t("analytics_offline")}</span>
         </h2>
         <p className="max-w-md font-mono text-xs leading-relaxed text-slate-500">
-          Failed to establish a secure connection with the statistics engine.
-          Please ensure the backend services are operational and try again.
+          {t("error_desc")}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="bg-surface border-border hover:border-accent-cyan/50 mt-4 flex items-center gap-2 rounded-sm border px-6 py-2 font-mono text-[10px] font-bold tracking-[0.2em] uppercase italic transition-all"
         >
           <RefreshCw size={14} className="text-accent-cyan" />
-          Re-initialize System
+          {t("btn_reinit")}
         </button>
       </div>
     );
@@ -52,11 +54,14 @@ export default function StatsPage() {
         <div className="flex items-center gap-3">
           <div className="bg-accent-cyan h-4 w-1 rounded-full shadow-[0_0_8px_rgba(var(--accent-cyan),0.6)]" />
           <h1 className="text-foreground font-mono text-2xl font-black tracking-tighter uppercase italic">
-            Network <span className="text-accent-cyan">Statistics</span>
+            {t("page_title")}{" "}
+            <span className="text-accent-cyan">
+              {t("page_title_highlight")}
+            </span>
           </h1>
         </div>
         <p className="font-mono text-[10px] tracking-widest text-slate-500 uppercase">
-          Structural analysis and heuristic risk distribution overview
+          {t("page_subtitle")}
         </p>
       </div>
 

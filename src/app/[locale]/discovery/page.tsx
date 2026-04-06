@@ -22,19 +22,25 @@ import {
 } from "@/hooks/use-sybil-discovery";
 import { SybilNode, RiskClassification } from "@/types/api";
 import { LABEL_COLORS } from "@/lib/graph-constants";
+import { useTranslations } from "next-intl";
+
+const LoadingFallback = () => {
+  const t = useTranslations("DiscoveryPage");
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className="text-accent-cyan animate-spin" size={40} />
+      <span className="animate-pulse font-mono text-xs tracking-widest text-slate-500 uppercase italic">
+        {t("engine_loading")}
+      </span>
+    </div>
+  );
+};
 
 const UniversalGraph2D = dynamic(
   () => import("@/components/graph/universal-graph-2d"),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="text-accent-cyan animate-spin" size={40} />
-        <span className="animate-pulse font-mono text-xs tracking-widest text-slate-500 uppercase italic">
-          Loading Cluster Map Engine...
-        </span>
-      </div>
-    ),
+    loading: () => <LoadingFallback />,
   }
 );
 
@@ -64,6 +70,8 @@ export default function DiscoveryPage() {
   const startPickerRef = useRef<HTMLInputElement>(null);
   const endPickerRef = useRef<HTMLInputElement>(null);
 
+  const t = useTranslations("DiscoveryPage");
+
   // ─── Filter state ───
   const [activeLabels, setActiveLabels] = useState<Set<RiskClassification>>(
     new Set(ALL_LABELS)
@@ -91,9 +99,9 @@ export default function DiscoveryPage() {
   const validateDateRange = (start: string, end: string): string | null => {
     const s = new Date(start),
       e = new Date(end);
-    if (s > e) return "Start date cannot be after end date";
+    if (s > e) return t("error_start_after_end");
     const diffDays = Math.ceil(Math.abs(e.getTime() - s.getTime()) / 86400000);
-    if (diffDays > 7) return "Date range cannot exceed 7 days";
+    if (diffDays > 7) return t("error_range_exceeded");
     return null;
   };
 
@@ -226,22 +234,24 @@ export default function DiscoveryPage() {
 
   const logs = useMemo(() => {
     const base = [
-      "[SYSTEM] DISCOVERY LAB INITIALIZED",
-      `[CONFIG] TIME_RANGE: ${startDate} TO ${endDate}`,
-      `[CONFIG] MAX_NODES: ${maxNodes}`,
+      t("log_initialized"),
+      t("log_config_time", { start: startDate, end: endDate }),
+      t("log_config_nodes", { max: maxNodes }),
     ];
-    if (startDiscovery.isPending)
-      base.push("[ACTION] INITIATING START DISCOVERY PROTOCOL...");
-    if (taskId) base.push(`[ACTION] TASK_ID ASSIGNED: ${taskId}`);
+    if (startDiscovery.isPending) base.push(t("log_initiating"));
+    if (taskId) base.push(t("log_task_assigned", { taskId }));
     if (statusData) {
       base.push(
-        `[${statusData.status}] PROGRESS: ${statusData.progress}% - ${statusData.current_step}`
+        t("log_progress", {
+          status: statusData.status,
+          progress: statusData.progress,
+          step: statusData.current_step,
+        })
       );
-      if (statusData.message) base.push(`[MESSAGE] ${statusData.message}`);
-      if (statusData.status === "COMPLETED")
-        base.push("[SUCCESS] DISCOVERY PROTOCOL COMPLETED.");
-      else if (statusData.status === "FAILED")
-        base.push("[CRITICAL] DISCOVERY PROTOCOL ABORTED.");
+      if (statusData.message)
+        base.push(t("log_message", { message: statusData.message }));
+      if (statusData.status === "COMPLETED") base.push(t("log_success"));
+      else if (statusData.status === "FAILED") base.push(t("log_aborted"));
     }
     return base;
   }, [
@@ -251,6 +261,7 @@ export default function DiscoveryPage() {
     startDiscovery.isPending,
     taskId,
     statusData,
+    t,
   ]);
 
   const isProcessing =
@@ -267,28 +278,29 @@ export default function DiscoveryPage() {
       <div className="mb-2 flex items-center justify-between">
         <div className="flex flex-col">
           <h2 className="text-foreground text-3xl font-black tracking-tighter uppercase italic">
-            Discovery <span className="text-accent-cyan">Lab</span>
+            {t("page_title")}{" "}
+            <span className="text-accent-cyan">
+              {t("page_title_highlight")}
+            </span>
           </h2>
-          <span className="text-subtle">
-            Large Scale Cluster Detection & Network Analysis
-          </span>
+          <span className="text-subtle">{t("page_subtitle")}</span>
         </div>
         <div className="bg-surface border-border flex items-center gap-2 rounded-sm border px-4 py-2">
           <Database size={14} className="text-accent-cyan" />
           <span className="font-mono text-[10px] font-bold tracking-widest text-slate-500 uppercase italic">
-            Dataset: lens-protocol-mainnet
+            {t("dataset")}
           </span>
         </div>
       </div>
 
       {/* ── Discovery Parameters ── */}
-      <IndustrialCard title="DISCOVERY PARAMETERS">
+      <IndustrialCard title={t("card_parameters")}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-end gap-6">
             {/* Start Date */}
             <div className="flex flex-col gap-2">
               <label className="flex items-center gap-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                <Calendar size={12} /> Start Date
+                <Calendar size={12} /> {t("start_date")}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -328,7 +340,7 @@ export default function DiscoveryPage() {
             {/* End Date */}
             <div className="flex flex-col gap-2">
               <label className="flex items-center gap-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                <Calendar size={12} /> End Date
+                <Calendar size={12} /> {t("end_date")}
               </label>
               <div className="relative flex items-center">
                 <input
@@ -364,7 +376,7 @@ export default function DiscoveryPage() {
             {/* Max Nodes */}
             <div className="flex flex-col gap-2">
               <label className="flex items-center gap-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                <Filter size={12} /> Max Nodes
+                <Filter size={12} /> {t("max_nodes")}
               </label>
               <input
                 type="number"
@@ -389,12 +401,12 @@ export default function DiscoveryPage() {
                   <Play size={18} fill="currentColor" />
                 )}
                 <span className="tracking-[0.2em] uppercase italic">
-                  {isProcessing ? "PROCESSING..." : "START DISCOVERY"}
+                  {isProcessing ? t("btn_processing") : t("btn_start")}
                 </span>
               </button>
               {dateError && (
                 <span className="text-accent-red font-mono text-[10px] font-bold uppercase italic">
-                  [ERR] {dateError}
+                  {t("error_prefix")} {dateError}
                 </span>
               )}
             </div>
@@ -411,25 +423,25 @@ export default function DiscoveryPage() {
               ) : (
                 <ChevronDown size={12} />
               )}
-              Advanced Options
+              {t("advanced_options")}
             </button>
             {showAdvanced && (
               <div className="mt-4 grid grid-cols-3 gap-6">
                 {[
                   {
-                    label: "Max Epochs",
+                    label: t("max_epochs"),
                     val: maxEpochs,
                     set: setMaxEpochs,
                     step: undefined,
                   },
                   {
-                    label: "Patience",
+                    label: t("patience"),
                     val: patience,
                     set: setPatience,
                     step: undefined,
                   },
                   {
-                    label: "Learning Rate",
+                    label: t("learning_rate"),
                     val: learningRate,
                     set: setLearningRate,
                     step: 0.0001,
@@ -486,7 +498,7 @@ export default function DiscoveryPage() {
                   {/* Risk label filter */}
                   <div>
                     <div className="mb-2 font-mono text-[8px] font-bold tracking-[0.15em] text-slate-500 uppercase">
-                      Risk Label
+                      {t("filter_risk_label")}
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {ALL_LABELS.map((rl) => {
@@ -539,7 +551,7 @@ export default function DiscoveryPage() {
                   {/* Cluster filter */}
                   <div>
                     <div className="mb-2 flex items-center gap-1 font-mono text-[8px] font-bold tracking-[0.15em] text-slate-500 uppercase">
-                      <Layers size={9} /> Cluster ID
+                      <Layers size={9} /> {t("filter_cluster_id")}
                     </div>
                     <div className="flex gap-2">
                       <select
@@ -547,10 +559,10 @@ export default function DiscoveryPage() {
                         onChange={(e) => setFilterClusterId(e.target.value)}
                         className="focus:border-accent-cyan/50 flex-1 border border-slate-700 bg-black/80 px-2 py-1 font-mono text-[9px] text-slate-300 outline-none"
                       >
-                        <option value="">All clusters</option>
+                        <option value="">{t("filter_all_clusters")}</option>
                         {allClusterIds.map((id) => (
                           <option key={id} value={String(id)}>
-                            Cluster #{id}
+                            {t("filter_cluster_option", { id })}
                           </option>
                         ))}
                       </select>
@@ -567,8 +579,10 @@ export default function DiscoveryPage() {
 
                   {/* Results count */}
                   <div className="border-t border-slate-800 pt-2 font-mono text-[8px] text-slate-600">
-                    Showing {filteredGraphData?.nodes.length ?? 0} /{" "}
-                    {statusData?.graph_data?.nodes.length ?? 0} nodes
+                    {t("showing_nodes", {
+                      filtered: filteredGraphData?.nodes.length ?? 0,
+                      total: statusData?.graph_data?.nodes.length ?? 0,
+                    })}
                   </div>
                 </div>
               )}
@@ -592,10 +606,10 @@ export default function DiscoveryPage() {
                     <Database size={40} />
                   </div>
                   <h2 className="mb-2 text-xl font-black tracking-tighter text-slate-500 uppercase italic">
-                    [ NO SCAN DATA ]
+                    {t("no_scan_data")}
                   </h2>
                   <p className="max-w-xs font-mono text-[10px] leading-relaxed tracking-widest text-slate-600 uppercase">
-                    Select time range & max nodes to begin network scanning.
+                    {t("no_scan_desc")}
                   </p>
                 </div>
               ) : (
@@ -614,14 +628,14 @@ export default function DiscoveryPage() {
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-accent-cyan font-mono text-sm font-bold tracking-[0.3em] uppercase italic">
-                      {isProcessing
-                        ? "SCANNING NETWORK..."
-                        : "AWAITING PROTOCOLS..."}
+                      {isProcessing ? t("scanning") : t("awaiting")}
                     </span>
                     {statusData && (
                       <span className="font-mono text-[10px] text-slate-500 uppercase">
-                        Progress: {statusData.progress}% | Step:{" "}
-                        {statusData.current_step}
+                        {t("progress", {
+                          progress: statusData.progress,
+                          step: statusData.current_step,
+                        })}
                       </span>
                     )}
                   </div>
@@ -640,23 +654,23 @@ export default function DiscoveryPage() {
               }}
             >
               <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
-                Scan Statistics
+                {t("scan_stats")}
               </div>
               {[
                 {
-                  label: "K (clusters)",
+                  label: t("clusters_count"),
                   value: statusData.graph_data.cluster_count,
                   color: "text-accent-cyan",
                 },
                 {
-                  label: "Nodes Found",
+                  label: t("nodes_found"),
                   value:
                     filteredGraphData?.nodes.length ??
                     statusData.graph_data.num_nodes,
                   color: "text-white",
                 },
                 {
-                  label: "Edges Found",
+                  label: t("edges_found"),
                   value:
                     filteredGraphData?.links.length ??
                     statusData.graph_data.num_edges,
@@ -678,7 +692,7 @@ export default function DiscoveryPage() {
               {selectedCluster && (
                 <div className="border-accent-cyan/20 mt-1 border-t pt-2">
                   <span className="text-accent-cyan font-mono text-[9px]">
-                    ▶ Viewing cluster #{selectedCluster.clusterId}
+                    {t("viewing_cluster", { id: selectedCluster.clusterId })}
                   </span>
                 </div>
               )}

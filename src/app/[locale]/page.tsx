@@ -2,25 +2,27 @@
 
 import { Radar, FlaskConical, BarChart3 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function HomePage() {
+  const t = useTranslations("HomePage");
+
   return (
     <div className="flex flex-col gap-10 pt-8">
       <div className="flex flex-col gap-2">
         <h2 className="text-foreground text-5xl font-black tracking-tighter uppercase italic">
-          SYSTEM <span className="text-accent-cyan">OVERVIEW</span>
+          {t("title_system")}{" "}
+          <span className="text-accent-cyan">{t("title_overview")}</span>
         </h2>
         <p className="max-w-2xl font-mono text-sm leading-relaxed font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-          SybilSignal is a high-performance detection and network discovery
-          platform designed for large-scale sybil cluster identification and
-          individual profile risk assessment.
+          {t("subtitle")}
         </p>
       </div>
 
       <div className="mt-4 grid gap-8">
         <div className="flex flex-col gap-4">
           <h3 className="text-subtle border-border border-b pb-2 font-bold">
-            Available Modules
+            {t("available_modules")}
           </h3>
           <div className="grid grid-cols-1 gap-4">
             <Link href="/inspector">
@@ -29,11 +31,10 @@ export default function HomePage() {
                   <Radar size={32} />
                 </div>
                 <h4 className="text-foreground group-hover:text-accent-cyan text-xl font-bold tracking-widest uppercase italic transition-colors">
-                  Profile Inspector
+                  {t("inspector_title")}
                 </h4>
                 <p className="mt-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                  Analyze individual wallets for sybil behavior and risk
-                  scoring.
+                  {t("inspector_desc")}
                 </p>
               </div>
             </Link>
@@ -43,11 +44,10 @@ export default function HomePage() {
                   <FlaskConical size={32} />
                 </div>
                 <h4 className="text-foreground group-hover:text-accent-cyan text-xl font-bold tracking-widest uppercase italic transition-colors">
-                  Discovery Lab
+                  {t("discovery_title")}
                 </h4>
                 <p className="mt-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                  Identify large scale community clusters and fraudulent
-                  networks.
+                  {t("discovery_desc")}
                 </p>
               </div>
             </Link>
@@ -57,10 +57,10 @@ export default function HomePage() {
                   <BarChart3 size={32} />
                 </div>
                 <h4 className="text-foreground group-hover:text-accent-cyan text-xl font-bold tracking-widest uppercase italic transition-colors">
-                  Network Statistics
+                  {t("stats_title")}
                 </h4>
                 <p className="mt-2 font-mono text-[10px] font-bold text-slate-500 uppercase">
-                  Structural analysis and heuristic risk distribution overview.
+                  {t("stats_desc")}
                 </p>
               </div>
             </Link>

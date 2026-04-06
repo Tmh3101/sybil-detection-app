@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Search,
@@ -13,25 +13,26 @@ import {
 } from "lucide-react";
 import { useThemeStore } from "@/store/theme-store";
 import { useEffect, useState } from "react";
+import { LanguageSwitcher } from "./language-switcher";
 
 const navItems = [
   {
-    name: "DASHBOARD",
+    key: "dashboard",
     href: "/",
     icon: LayoutDashboard,
   },
   {
-    name: "INSPECTOR",
+    key: "inspector",
     href: "/inspector",
     icon: Search,
   },
   {
-    name: "DISCOVERY LAB",
+    key: "discovery",
     href: "/discovery",
     icon: FlaskConical,
   },
   {
-    name: "STATISTICS",
+    key: "stats",
     href: "/stats",
     icon: BarChart3,
   },
@@ -41,6 +42,8 @@ export const Sidebar = () => {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
+  const t = useTranslations("Navigation");
+  const tSidebar = useTranslations("Sidebar");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -63,13 +66,6 @@ export const Sidebar = () => {
               <span className="text-accent-cyan">SYBIL</span>SIGNAL
             </h1>
           </div>
-
-          {/* <div className="bg-surface-secondary/50 flex items-center gap-2 rounded-sm border border-dashed border-slate-700/30 px-3 py-1.5">
-            <div className="bg-accent-green h-1 w-1 animate-pulse rounded-full shadow-[0_0_3px_var(--accent-green)]" />
-            <span className="font-mono text-[7px] tracking-[0.2em] text-slate-500 uppercase">
-              Global Discovery Active
-            </span>
-          </div> */}
         </div>
       </div>
 
@@ -79,9 +75,11 @@ export const Sidebar = () => {
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <li key={item.name}>
+              <li key={item.key}>
                 <Link
-                  href={item.href}
+                  href={
+                    item.href as "/" | "/inspector" | "/discovery" | "/stats"
+                  }
                   className={`flex items-center gap-4 rounded-sm px-5 py-3 font-mono text-[9px] font-bold tracking-[0.2em] transition-all ${
                     isActive
                       ? "bg-surface-secondary text-accent-cyan border-accent-cyan border-l-2 shadow-inner"
@@ -89,7 +87,7 @@ export const Sidebar = () => {
                   } `}
                 >
                   <item.icon size={14} />
-                  {item.name}
+                  {t(item.key)}
                 </Link>
               </li>
             );
@@ -102,35 +100,35 @@ export const Sidebar = () => {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <span className="font-mono text-[7px] font-bold tracking-widest text-slate-500 uppercase">
-              System Interface
+              {tSidebar("system_interface")}
             </span>
             <span className="text-accent-cyan font-mono text-[8px] font-bold uppercase italic">
-              {theme === "light" ? "LIGHT MODE" : "DARK MODE"}
+              {mounted
+                ? theme === "light"
+                  ? tSidebar("light_mode")
+                  : tSidebar("dark_mode")
+                : "..."}
             </span>
           </div>
 
           {mounted && (
-            <button
-              onClick={toggleTheme}
-              className="border-border bg-background hover:bg-surface-secondary text-foreground rounded-sm border p-2 shadow-sm transition-all"
-              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-            >
-              {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
-            </button>
+            <div className="flex gap-2">
+              <LanguageSwitcher />
+              <button
+                onClick={toggleTheme}
+                className="border-border bg-background hover:bg-surface-secondary text-foreground rounded-sm border p-2 shadow-sm transition-all"
+                title={tSidebar("switch_theme", {
+                  theme:
+                    theme === "light"
+                      ? tSidebar("dark_mode").toLowerCase()
+                      : tSidebar("light_mode").toLowerCase(),
+                })}
+              >
+                {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+              </button>
+            </div>
           )}
         </div>
-
-        {/* <div className="flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="font-mono text-[7px] text-slate-500 uppercase">
-              v2.4.1-STABLE
-            </span>
-            <span className="text-accent-cyan font-mono text-[7px]">68%</span>
-          </div>
-          <div className="bg-background border-border h-1 w-full overflow-hidden rounded-full border">
-            <div className="bg-accent-cyan h-full w-2/3 animate-pulse opacity-50" />
-          </div>
-        </div> */}
       </div>
     </aside>
   );

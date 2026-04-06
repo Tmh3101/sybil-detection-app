@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { RiskDistributionItem } from "@/types/api";
+import { useTranslations } from "next-intl";
 
 interface RiskDistributionChartProps {
   data: RiskDistributionItem[];
@@ -28,6 +29,7 @@ const RISK_COLORS: Record<string, string> = {
 export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
   data,
 }) => {
+  const t = useTranslations("StatsPage");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
   }, []);
 
   return (
-    <IndustrialCard title="RISK DISTRIBUTION (NODES)" className="h-[400px]">
+    <IndustrialCard title={t("risk_distribution_title")} className="h-[400px]">
       <div className="h-full w-full flex-1">
         {mounted && (
           <ResponsiveContainer width="100%" height="100%" minHeight={300}>
@@ -58,7 +60,7 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
                 stroke="#64748b"
                 fontSize={10}
                 fontFamily="monospace"
-                tickFormatter={(value) => value?.replace("_", " ")}
+                tickFormatter={(value) => String(value || "").replace("_", " ")}
                 angle={-25}
                 textAnchor="end"
                 interval={0}
@@ -86,14 +88,20 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
                     props?.payload as RiskDistributionItem | undefined
                   )?.label;
                   const numericValue = typeof value === "number" ? value : 0;
-                  return (
+                  const displayLabel = String(label || "UNKNOWN").replace(
+                    "_",
+                    " "
+                  );
+
+                  return [
                     <span
                       key={label ?? "unknown"}
                       style={{ color: label ? RISK_COLORS[label] : "#64748b" }}
                     >
                       {numericValue.toLocaleString()}
-                    </span>
-                  );
+                    </span>,
+                    displayLabel.toUpperCase(),
+                  ];
                 }}
               />
               <Bar dataKey="count" radius={[2, 2, 0, 0]}>

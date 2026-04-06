@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { IndustrialCard } from "@/components/ui/industrial-card";
 import { EdgeDistributionItem } from "@/types/api";
+import { useTranslations } from "next-intl";
 
 interface NetworkStructureChartProps {
   data: EdgeDistributionItem[];
@@ -21,6 +22,7 @@ const COLORS = ["#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899", "#f97316"];
 export const NetworkStructureChart: React.FC<NetworkStructureChartProps> = ({
   data,
 }) => {
+  const t = useTranslations("StatsPage");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export const NetworkStructureChart: React.FC<NetworkStructureChartProps> = ({
   }, []);
 
   return (
-    <IndustrialCard title="NETWORK STRUCTURE (EDGES)" className="h-[400px]">
+    <IndustrialCard title={t("network_structure_title")} className="h-[400px]">
       <div className="h-full w-full flex-1">
         {mounted && (
           <ResponsiveContainer width="100%" height="100%" minHeight={300}>
@@ -62,9 +64,16 @@ export const NetworkStructureChart: React.FC<NetworkStructureChartProps> = ({
                     (props?.payload as EdgeDistributionItem | undefined)
                       ?.percentage ?? 0;
                   const numValue = typeof value === "number" ? value : 0;
+
+                  // Clean up potential raw translation keys or namespaces from backend
+                  const label =
+                    String(name ?? "UNKNOWN")
+                      .split(".")
+                      .pop() || "UNKNOWN";
+
                   return [
                     `${numValue.toLocaleString()} (${percentage}%)`,
-                    String(name ?? "unknown").toUpperCase(),
+                    label.replace("_", " ").toUpperCase(),
                   ];
                 }}
                 contentStyle={{
@@ -81,9 +90,12 @@ export const NetworkStructureChart: React.FC<NetworkStructureChartProps> = ({
                 verticalAlign="bottom"
                 height={36}
                 formatter={(value) => {
+                  // Clean up potential raw translation keys or namespaces from backend
+                  const label = String(value).split(".").pop() || "UNKNOWN";
+
                   return (
                     <span className="font-mono text-[9px] font-bold tracking-[0.1em] text-slate-400 uppercase">
-                      {value}
+                      {label.replace("_", " ")}
                     </span>
                   );
                 }}

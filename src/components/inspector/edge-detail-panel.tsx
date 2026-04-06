@@ -6,6 +6,7 @@ import { RELATION_COLORS } from "@/lib/graph-constants";
 import { X, Link as LinkIcon, AlertCircle, Info } from "lucide-react";
 import { NodeObject } from "react-force-graph-2d";
 import { SybilNode } from "@/types/api";
+import { useTranslations } from "next-intl";
 
 interface EdgeDetailPanelProps {
   link: AggregatedLink;
@@ -13,6 +14,7 @@ interface EdgeDetailPanelProps {
 }
 
 const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
+  const t = useTranslations("DetailPanels.edge");
   const type = (link.edge_type as string) || "UNKNOWN";
   const color = RELATION_COLORS[type] || RELATION_COLORS.UNKNOWN;
   const weight = link.aggregated_weight || 1;
@@ -50,7 +52,7 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
               {type.replace("_", " ")}
             </span>
             <span className="text-[9px] text-slate-500 uppercase">
-              Relationship Detail
+              {t("relationship_detail")}
             </span>
           </div>
         </div>
@@ -68,7 +70,7 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
         <div className="mb-6 flex flex-col gap-3">
           <div className="flex flex-col gap-1 border border-slate-800/50 bg-slate-900/20 p-3">
             <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
-              Source
+              {t("source_label")}
             </span>
             <span className="text-[10px] break-all text-slate-300">
               {sourceId}
@@ -79,7 +81,7 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
           </div>
           <div className="flex flex-col gap-1 border border-slate-800/50 bg-slate-900/20 p-3">
             <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
-              Target
+              {t("target_label")}
             </span>
             <span className="text-[10px] break-all text-slate-300">
               {targetId}
@@ -101,11 +103,13 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
               className="text-xs font-bold tracking-widest uppercase"
               style={{ color }}
             >
-              Intensity
+              {t("intensity_label")}
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[8px] text-slate-500 uppercase">Weight</span>
+            <span className="text-[8px] text-slate-500 uppercase">
+              {t("weight_label")}
+            </span>
             <span className="text-sm font-black tabular-nums" style={{ color }}>
               {weight.toFixed(2)}
             </span>
@@ -118,7 +122,7 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
             <div className="flex items-center gap-2">
               <AlertCircle size={12} className="text-accent-red" />
               <span className="text-[9px] font-bold tracking-widest text-slate-400 uppercase">
-                Heuristic Violations
+                {t("heuristic_violations")}
               </span>
             </div>
 
@@ -137,15 +141,14 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
                 ))}
                 <div className="mt-2 border-t border-slate-800 pt-2">
                   <p className="text-[8px] leading-relaxed text-slate-500 uppercase italic">
-                    * This relationship is flagged because it violates at least
-                    2 out of 3 similarity constraints.
+                    {t("similarity_constraints_info")}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="border border-slate-800 bg-slate-900/20 px-3 py-4 text-center">
                 <span className="text-[9px] text-slate-600 uppercase italic">
-                  No specific violation metadata available.
+                  {t("no_violation_metadata")}
                 </span>
               </div>
             )}
@@ -156,8 +159,10 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
         {type !== "SIMILARITY" && (
           <div className="border border-slate-800 bg-slate-900/20 p-4 text-center">
             <p className="text-[9px] leading-relaxed text-slate-500 uppercase">
-              This is a direct <span style={{ color }}>{type}</span>{" "}
-              relationship between accounts.
+              {t.rich("direct_relationship_info", {
+                type: type,
+                highlight: (chunks) => <span style={{ color }}>{chunks}</span>,
+              })}
             </p>
           </div>
         )}
@@ -167,10 +172,10 @@ const EdgeDetailPanel: React.FC<EdgeDetailPanelProps> = ({ link, onClose }) => {
       <div className="border-t border-slate-800/60 px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-[8px] font-bold tracking-widest text-slate-600 uppercase italic">
-            Logic: 2/3 Similarity Constraint
+            {t("logic_info")}
           </span>
           <span className="text-[8px] text-slate-700 tabular-nums">
-            {type.slice(0, 3).toUpperCase()}-LNK
+            {t("link_prefix", { type: type.slice(0, 3).toUpperCase() })}
           </span>
         </div>
       </div>
