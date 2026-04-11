@@ -1,8 +1,8 @@
 {
   "Navigation": {
     "dashboard": "BẢNG ĐIỀU KHIỂN",
-    "inspector": "KIỂM TRA",
-    "discovery": "PHÒNG THÍ NGHIỆM",
+    "inspector": "XÁC MINH THỰC THỂ",
+    "discovery": "KHÁM PHÁ MẠNG LƯỚI",
     "stats": "THỐNG KÊ",
     "history": "LỊCH SỬ",
     "language": "NGÔN NGỮ"
@@ -32,9 +32,9 @@
     "title_overview": "HỆ THỐNG",
     "subtitle": "SybilSignal là một nền tảng phát hiện và khám phá mạng lưới hiệu suất cao, được thiết kế để xác định các cụm sybil quy mô lớn và đánh giá rủi ro hồ sơ cá nhân.",
     "available_modules": "Các mô-đun khả dụng",
-    "inspector_title": "Điều tra hồ sơ",
+    "inspector_title": "Xác minh thực thể",
     "inspector_desc": "Phân tích các ví cá nhân về hành vi sybil và chấm điểm rủi ro.",
-    "discovery_title": "Phòng thí nghiệm",
+    "discovery_title": "Khám phá mạng lưới",
     "discovery_desc": "Xác định các cụm cộng đồng quy mô lớn và mạng lưới gian lận.",
     "stats_title": "Thống kê mạng",
     "stats_desc": "Phân tích cấu trúc và tổng quan về phân phối rủi ro theo suy nghiệm."
@@ -45,8 +45,8 @@
     "standby_desc": "Đang chờ nhập mục tiêu",
     "error_title": "[LỖI] Không thể tải dữ liệu mục tiêu",
     "error_desc": "Vui lòng kiểm tra ID và thử lại.",
-    "page_title": "Điều tra",
-    "page_title_highlight": "Hồ sơ",
+    "page_title": "Xác minh",
+    "page_title_highlight": "Thực thể",
     "page_subtitle": "Mô-đun Nhận dạng Mục tiêu & Đánh giá Rủi ro",
     "btn_reset": "ĐẶT LẠI",
     "card_analysis": "TỔNG QUAN PHÂN TÍCH",
@@ -72,8 +72,8 @@
   },
   "DiscoveryPage": {
     "engine_loading": "Đang tải công cụ bản đồ cụm...",
-    "page_title": "Phòng",
-    "page_title_highlight": "thí nghiệm",
+    "page_title": "Khám phá",
+    "page_title_highlight": "Mạng lưới",
     "page_subtitle": "Phát hiện cụm quy mô lớn & Phân tích mạng",
     "dataset": "Tập dữ liệu: lens-protocol-mainnet",
     "card_parameters": "THÔNG SỐ KHÁM PHÁ",

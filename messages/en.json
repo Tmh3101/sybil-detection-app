@@ -1,8 +1,8 @@
 {
   "Navigation": {
     "dashboard": "DASHBOARD",
-    "inspector": "INSPECTOR",
-    "discovery": "DISCOVERY LAB",
+    "inspector": "ENTITY VERIFICATION",
+    "discovery": "NETWORK EXPLORATION",
     "stats": "STATISTICS",
     "history": "HISTORY",
     "language": "LANGUAGE"
@@ -32,9 +32,9 @@
     "title_overview": "OVERVIEW",
     "subtitle": "SybilSignal is a high-performance detection and network discovery platform designed for large-scale sybil cluster identification and individual profile risk assessment.",
     "available_modules": "Available Modules",
-    "inspector_title": "Profile Inspector",
+    "inspector_title": "Entity Verification",
     "inspector_desc": "Analyze individual wallets for sybil behavior and risk scoring.",
-    "discovery_title": "Discovery Lab",
+    "discovery_title": "Network Exploration",
     "discovery_desc": "Identify large scale community clusters and fraudulent networks.",
     "stats_title": "Network Statistics",
     "stats_desc": "Structural analysis and heuristic risk distribution overview."
@@ -45,8 +45,8 @@
     "standby_desc": "Awaiting Target Input",
     "error_title": "[ERR] Failed to Fetch Target Data",
     "error_desc": "Verify the ID and try again.",
-    "page_title": "Profile",
-    "page_title_highlight": "Inspector",
+    "page_title": "Entity",
+    "page_title_highlight": "Verification",
     "page_subtitle": "Target Identification & Risk Assessment Module",
     "btn_reset": "RESET",
     "card_analysis": "ANALYSIS OVERVIEW",
@@ -72,8 +72,8 @@
   },
   "DiscoveryPage": {
     "engine_loading": "Loading Cluster Map Engine...",
-    "page_title": "Discovery",
-    "page_title_highlight": "Lab",
+    "page_title": "Network",
+    "page_title_highlight": "Exploration",
     "page_subtitle": "Large Scale Cluster Detection & Network Analysis",
     "dataset": "Dataset: lens-protocol-mainnet",
     "card_parameters": "DISCOVERY PARAMETERS",
