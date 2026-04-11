@@ -21,7 +21,7 @@ import {
   useDiscoveryStatus,
 } from "@/hooks/use-sybil-discovery";
 import { SybilNode, RiskClassification } from "@/types/api";
-import { LABEL_COLORS } from "@/lib/graph-constants";
+import { LABEL_COLORS, EDGE_LAYERS } from "@/lib/graph-constants";
 import { useTranslations } from "next-intl";
 
 const LoadingFallback = () => {
@@ -230,15 +230,30 @@ export default function DiscoveryPage() {
   const edgeDistributionData = useMemo<EdgeDistributionItem[]>(() => {
     if (!filteredGraphData?.links) return [];
 
-    const counts: Record<string, number> = {};
+    const counts: Record<string, number> = {
+      FOLLOW: 0,
+      INTERACT: 0,
+      SIMILARITY: 0,
+      "CO-OWNER": 0,
+    };
     let totalEdges = 0;
 
     filteredGraphData.links.forEach((l) => {
       const type = l.edge_type || "UNKNOWN";
       if (type.endsWith("_REV")) return;
 
-      counts[type] = (counts[type] || 0) + 1;
-      totalEdges++;
+      let matchedLayer: string | null = null;
+      for (const layer of EDGE_LAYERS) {
+        if (layer.types.includes(type)) {
+          matchedLayer = layer.key;
+          break;
+        }
+      }
+
+      if (matchedLayer && counts[matchedLayer] !== undefined) {
+        counts[matchedLayer]++;
+        totalEdges++;
+      }
     });
 
     return Object.entries(counts)
