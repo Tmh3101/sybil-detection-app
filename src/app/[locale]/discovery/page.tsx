@@ -236,7 +236,7 @@ export default function DiscoveryPage() {
     filteredGraphData.links.forEach((l) => {
       const type = l.edge_type || "UNKNOWN";
       if (type.endsWith("_REV")) return;
-      
+
       counts[type] = (counts[type] || 0) + 1;
       totalEdges++;
     });
