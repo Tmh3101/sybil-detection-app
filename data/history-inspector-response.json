@@ -1,0 +1,18 @@
+[
+  {
+    "confidence_score": 0.62,
+    "target_address": "0x46b3d29599783e53a6c0eda8193dda70035cabe8",
+    "predict_label": "BENIGN",
+    "id": 2,
+    "timestamp": "2026-04-06T09:05:19.006928",
+    "depth_filter": 2
+  },
+  {
+    "confidence_score": 0.96,
+    "target_address": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+    "predict_label": "LOW_RISK",
+    "id": 1,
+    "timestamp": "2026-04-06T09:02:27.814785",
+    "depth_filter": 2
+  }
+]

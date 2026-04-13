@@ -156,3 +156,29 @@ export interface ClusterStats {
   largest_cluster: number;
   smallest_cluster: number;
 }
+
+// History Types
+export interface InspectorHistoryItem {
+  id: number;
+  timestamp: string;
+  target_address: string;
+  predict_label: RiskClassification;
+  confidence_score: number;
+  depth_filter: number;
+}
+
+export type InspectorHistoryResponse = InspectorHistoryItem[];
+
+export interface DiscoveryHistoryItem {
+  id: number;
+  task_id: string;
+  timestamp: string;
+  start_date: string;
+  end_date: string;
+  cluster_count: number;
+  node_count: number;
+  edge_count: number;
+  status: "COMPLETED" | "FAILED" | "PENDING";
+}
+
+export type DiscoveryHistoryResponse = DiscoveryHistoryItem[];

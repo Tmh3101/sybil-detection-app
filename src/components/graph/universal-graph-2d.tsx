@@ -313,13 +313,13 @@ export default function UniversalGraph2D({
       )?.strength(-350);
       fgRef.current.d3Force("link")?.distance(80);
     } else {
-      fgRef.current.d3Force("x", d3.forceX(0).strength(0.04));
-      fgRef.current.d3Force("y", d3.forceY(0).strength(0.04));
+      fgRef.current.d3Force("x", d3.forceX(0).strength(0.1));
+      fgRef.current.d3Force("y", d3.forceY(0).strength(0.1));
       fgRef.current.d3Force("center", d3.forceCenter(0, 0));
       // Push nodes further apart (anti-hairball)
-      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-200));
+      fgRef.current.d3Force("charge", d3.forceManyBody().strength(-150));
       // Stretch the edges to prevent tight clustering
-      fgRef.current.d3Force("link")?.distance(60);
+      fgRef.current.d3Force("link")?.distance(50);
     }
     fgRef.current.d3ReheatSimulation();
   }, [processedData, mode, dimensions.width, dimensions.height]);
@@ -371,7 +371,7 @@ export default function UniversalGraph2D({
       const isMalicious = riskLabel === "MALICIOUS";
       const isHighRisk = riskLabel === "HIGH_RISK";
 
-      const size = mode === "EGO" ? (isTarget ? 12 : 6) : 6;
+      const size = mode === "EGO" ? (isTarget ? 10 : 6) : 6;
 
       const x = n.x ?? 0;
       const y = n.y ?? 0;
@@ -385,10 +385,10 @@ export default function UniversalGraph2D({
 
       // ── Glow aura ──
       if (isTarget) {
-        ([size + 12, size + 7, size + 3] as number[]).forEach((r, i) => {
+        ([size + 8, size + 4] as number[]).forEach((r, i) => {
           ctx.beginPath();
           ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.fillStyle = color + (["0d", "20", "38"] as string[])[i];
+          ctx.fillStyle = color + (["0a", "18"] as string[])[i];
           ctx.fill();
         });
       } else if (mode === "CLUSTER" && isMalicious) {
@@ -438,20 +438,8 @@ export default function UniversalGraph2D({
       ctx.beginPath();
       ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.strokeStyle = color;
-      ctx.lineWidth = isTarget ? 2.5 : isMalicious || isHighRisk ? 1.8 : 1;
+      ctx.lineWidth = isTarget ? 2 : isMalicious || isHighRisk ? 1.8 : 1;
       ctx.stroke();
-
-      // ── Target: dashed orbit ──
-      if (isTarget) {
-        ctx.save();
-        ctx.strokeStyle = color + "70";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.arc(x, y, size + 9, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
 
       // ── Labels ──
       const showLabel =
@@ -460,7 +448,7 @@ export default function UniversalGraph2D({
 
       if (showLabel) {
         const fs =
-          mode === "EGO" && isTarget ? 12 / globalScale : 9 / globalScale;
+          mode === "EGO" && isTarget ? 11 / globalScale : 9 / globalScale;
         ctx.font = `${isTarget ? "bold " : ""}${Math.max(fs, 4)}px "JetBrains Mono",monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
@@ -628,16 +616,14 @@ export default function UniversalGraph2D({
           ctx.quadraticCurveTo(cp.x, cp.y, tgt.x, tgt.y);
         }
         ctx.stroke();
-
-        // ── Ultra-High Detail: Text Labels (Phase 3) ──
-        const isDeepZoom = globalScale > 3.0;
-        const shouldDrawTextHover =
-          !hoverNode || highlightLinks.has(l.id || "");
-
-        if (isDeepZoom && shouldDrawTextHover) {
-          drawEdgeAttention(l, ctx, globalScale);
-        }
       }
+
+      // ── Text Labels: Always show when feature is enabled ──
+      const shouldDrawTextHover = !hoverNode || highlightLinks.has(l.id || "");
+      if (shouldDrawTextHover) {
+        drawEdgeAttention(l, ctx, globalScale);
+      }
+
       ctx.restore();
     },
     [mode, hoverNode, highlightLinks, drawEdgeAttention]
@@ -966,9 +952,11 @@ export default function UniversalGraph2D({
       {/* Weight info hint */}
       {showAttention && (
         <div className="border-accent-red/20 absolute bottom-6 left-4 z-10 border bg-black/80 px-3 py-1.5 font-mono text-[8px] text-slate-500 backdrop-blur-sm">
-          Showing GAT Attention Weights (Explainable AI)
+          {tLegend("attention_weights_title")}
           <br />
-          <span className="text-slate-700">Zoom in to see labels on edges</span>
+          <span className="text-slate-700">
+            {tLegend("attention_weights_desc")}
+          </span>
         </div>
       )}
 

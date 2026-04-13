@@ -36,7 +36,7 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
   };
 
   return (
-    <form onSubmit={handleSearch} className="group relative w-full max-w-md">
+    <form onSubmit={handleSearch} className="group relative w-full">
       <Search
         className="group-focus-within:text-accent-cyan absolute top-1/2 left-3 -translate-y-1/2 text-slate-500 transition-colors"
         size={16}
@@ -46,7 +46,7 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
         placeholder={t("search_placeholder")}
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
-        className="bg-background border-border focus:border-accent-cyan focus:ring-accent-cyan/20 w-full rounded-sm border px-10 py-2 font-mono text-xs tracking-widest uppercase transition-all placeholder:text-slate-600 focus:ring-1 focus:outline-none"
+        className="bg-background border-border focus:border-accent-cyan focus:ring-accent-cyan/20 w-full rounded-sm border px-10 py-2 font-mono text-xs tracking-tighter uppercase transition-all placeholder:text-slate-600 focus:ring-1 focus:outline-none"
       />
     </form>
   );
@@ -180,14 +180,14 @@ function InspectorContent() {
           <div className="absolute inset-0 opacity-10">
             <div className="h-full w-full bg-[radial-gradient(circle_at_center,var(--accent-cyan)_0%,transparent_70%)]" />
           </div>
-          <div className="relative flex flex-col items-center gap-8">
+          <div className="relative flex w-full flex-col items-center gap-8 px-32">
             <div className="relative">
               <Radar className="text-slate-700" size={120} strokeWidth={1} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-accent-cyan/40 h-2 w-2 animate-ping rounded-full" />
               </div>
             </div>
-            <div className="flex flex-col items-center text-center">
+            <div className="flex w-full flex-col items-center text-center">
               <div className="mb-6 flex items-center gap-3">
                 <span className="bg-border h-[1px] w-8" />
                 <p className="text-accent-cyan/60 font-mono text-xs tracking-[0.3em] uppercase">
@@ -208,7 +208,7 @@ function InspectorContent() {
   if (isError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-6">
-        <div className="border-accent-red/20 bg-accent-red/5 max-w-lg rounded-lg border-2 p-8 text-center backdrop-blur-sm">
+        <div className="border-accent-red/20 bg-accent-red/5 w-full max-w-4xl rounded-lg border-2 p-8 text-center backdrop-blur-sm">
           <AlertTriangle className="text-accent-red mx-auto mb-4" size={48} />
           <h2 className="text-accent-red mb-2 text-xl font-black tracking-tighter uppercase italic">
             {t("error_title")}
@@ -216,7 +216,9 @@ function InspectorContent() {
           <p className="text-subtle mb-6 font-mono text-sm leading-relaxed tracking-widest uppercase">
             {t("error_desc")}
           </p>
-          <SearchForm defaultValue={walletId || ""} />
+          <div className="flex justify-center">
+            <SearchForm defaultValue={walletId || ""} />
+          </div>
         </div>
       </div>
     );

@@ -1,9 +1,10 @@
 {
   "Navigation": {
     "dashboard": "DASHBOARD",
-    "inspector": "INSPECTOR",
-    "discovery": "DISCOVERY LAB",
+    "inspector": "ENTITY VERIFICATION",
+    "discovery": "NETWORK EXPLORATION",
     "stats": "STATISTICS",
+    "history": "HISTORY",
     "language": "LANGUAGE"
   },
   "Sidebar": {
@@ -31,9 +32,9 @@
     "title_overview": "OVERVIEW",
     "subtitle": "SybilSignal is a high-performance detection and network discovery platform designed for large-scale sybil cluster identification and individual profile risk assessment.",
     "available_modules": "Available Modules",
-    "inspector_title": "Profile Inspector",
+    "inspector_title": "Entity Verification",
     "inspector_desc": "Analyze individual wallets for sybil behavior and risk scoring.",
-    "discovery_title": "Discovery Lab",
+    "discovery_title": "Network Exploration",
     "discovery_desc": "Identify large scale community clusters and fraudulent networks.",
     "stats_title": "Network Statistics",
     "stats_desc": "Structural analysis and heuristic risk distribution overview."
@@ -44,8 +45,8 @@
     "standby_desc": "Awaiting Target Input",
     "error_title": "[ERR] Failed to Fetch Target Data",
     "error_desc": "Verify the ID and try again.",
-    "page_title": "Profile",
-    "page_title_highlight": "Inspector",
+    "page_title": "Entity",
+    "page_title_highlight": "Verification",
     "page_subtitle": "Target Identification & Risk Assessment Module",
     "btn_reset": "RESET",
     "card_analysis": "ANALYSIS OVERVIEW",
@@ -71,8 +72,8 @@
   },
   "DiscoveryPage": {
     "engine_loading": "Loading Cluster Map Engine...",
-    "page_title": "Discovery",
-    "page_title_highlight": "Lab",
+    "page_title": "Network",
+    "page_title_highlight": "Exploration",
     "page_subtitle": "Large Scale Cluster Detection & Network Analysis",
     "dataset": "Dataset: lens-protocol-mainnet",
     "card_parameters": "DISCOVERY PARAMETERS",
@@ -131,6 +132,26 @@
     "risk_distribution_title": "RISK DISTRIBUTION (NODES)",
     "unknown": "UNKNOWN"
   },
+  "HistoryPage": {
+    "page_title": "Audit",
+    "page_title_highlight": "History",
+    "page_subtitle": "Prediction and network discovery execution logs",
+    "tab_inspector": "Inspector Logs",
+    "tab_discovery": "Discovery Logs",
+    "th_timestamp": "Timestamp",
+    "th_target_wallet": "Target Wallet",
+    "th_prediction": "Prediction",
+    "th_confidence": "Confidence",
+    "th_action": "Action",
+    "th_run_time": "Run Time",
+    "th_analyzed_period": "Analyzed Period",
+    "th_clusters": "Clusters",
+    "th_nodes": "Nodes",
+    "th_edges": "Edges",
+    "btn_investigate": "Investigate",
+    "btn_view": "View",
+    "no_data": "No history records found."
+  },
   "EdgeLayers": {
     "CO-OWNER": "CO-OWNER",
     "FOLLOW": "FOLLOW",
@@ -181,6 +202,8 @@
     "directed": "directed",
     "undirected": "undirected",
     "ai_focus": "AI Focus (GAT)",
-    "target_node": "Target Node"
+    "target_node": "Target Node",
+    "attention_weights_title": "Showing GAT Attention Weights (Explainable AI)",
+    "attention_weights_desc": "Weights are visible on relationship edges"
   }
 }
