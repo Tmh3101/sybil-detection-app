@@ -1,206 +1,30 @@
 {
   "profile_info": {
-    "id": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-    "handle": "louisacay",
-    "picture_url": "https://ik.imagekit.io/lens/f0862cb2d14b83b3d934509d023c05e67494eed48f595b6c207dd952743904e7_SfRY9kY77q.png",
-    "owned_by": "0x3672821dd5f28fb8fc7d752b4371550b2adc5794"
+    "id": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+    "handle": "thuannm",
+    "picture_url": "",
+    "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6"
   },
   "analysis": {
     "predict_label": "LOW_RISK",
     "predict_proba": {
-      "BENIGN": 0.0,
-      "LOW_RISK": 1.0,
-      "HIGH_RISK": 0.0,
+      "BENIGN": 0.03,
+      "LOW_RISK": 0.91,
+      "HIGH_RISK": 0.06,
       "MALICIOUS": 0.0
     },
     "reasoning": [
-      "AI model identified suspicious patterns (Confidence: 100.0%).",
+      "AI model identified suspicious patterns (Confidence: 91.0%).",
       "Risk-associated connections: 12x CO-OWNER."
     ]
   },
   "local_graph": {
     "nodes": [
       {
-        "id": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "thuannm_tester",
-          "trust_score": 0.33,
-          "follower_count": 0,
-          "following_count": 2,
-          "post_count": 2,
-          "picture_url": "",
-          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "tester_thuan",
-          "trust_score": 0.26,
-          "follower_count": 0,
-          "following_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
-        "risk_label": "HIGH_RISK",
-        "risk_score": 0.7,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "slide-admin",
-          "trust_score": 0.23,
-          "follower_count": 0,
-          "following_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x3413b49e2a4cd83a20d9941764f3c4b983983b80",
-          "reason": "Labeled as HIGH_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "slice_admin",
-          "trust_score": 67.12,
-          "follower_count": 4,
-          "following_count": 1,
-          "post_count": 1,
-          "picture_url": "https://ik.imagekit.io/lens/ae302e5d744a4dc858d050c306e91dd68c57d3d52a442cdc057efc61c346fbd8_wfe3xCvV4.webp",
-          "owned_by": "0x3413b49e2a4cd83a20d9941764f3c4b983983b80",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0xc46ca569bfea6efd7dae218cfdb9f6c7bb29e4af",
-        "risk_label": "BENIGN",
-        "risk_score": 0.0,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "louisakai",
-          "trust_score": 0.25,
-          "follower_count": 0,
-          "following_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0x3672821dd5f28fb8fc7d752b4371550b2adc5794",
-          "reason": "Labeled as BENIGN in Backbone."
-        }
-      },
-      {
-        "id": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "truyennm",
-          "trust_score": 17.41,
-          "follower_count": 0,
-          "following_count": 3,
-          "post_count": 1,
-          "picture_url": "lens://fa7ba3ee3165886f6a889ed500e4c081de5fb5b103ca7ff8b9d7cb040605b0fc",
-          "owned_by": "0x11b7c8a375a953458faa0fcc8f44cda63c9adbad",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0xfab04904d422cf793847cc5edbc3246275d9760e",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "stephenngo09",
-          "trust_score": 0.29,
-          "follower_count": 0,
-          "following_count": 0,
-          "post_count": 0,
-          "picture_url": "",
-          "owned_by": "0xc5c1d8cb351bb0d2028668c55f24c5ba434532e2",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "risk_label": "LOW_RISK",
-        "risk_score": 1.0,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "louisacay",
-          "trust_score": 21.92,
-          "follower_count": 3,
-          "following_count": 4,
-          "post_count": 1,
-          "picture_url": "https://ik.imagekit.io/lens/f0862cb2d14b83b3d934509d023c05e67494eed48f595b6c207dd952743904e7_SfRY9kY77q.png",
-          "owned_by": "0x3672821dd5f28fb8fc7d752b4371550b2adc5794",
-          "reason": "AI model identified suspicious patterns (Confidence: 100.0%).; Risk-associated connections: 12x CO-OWNER."
-        }
-      },
-      {
-        "id": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "stephenngo",
-          "trust_score": 13.95,
-          "follower_count": 3,
-          "following_count": 4,
-          "post_count": 2,
-          "picture_url": "https://ik.imagekit.io/lens/39edd786e03912856c223b216061b7380cc0f60b914d8823ceb06a4f3676f409_caao2qCXR.png",
-          "owned_by": "0xc5c1d8cb351bb0d2028668c55f24c5ba434532e2",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "thuannm",
-          "trust_score": 1.02,
-          "follower_count": 3,
-          "following_count": 4,
-          "post_count": 1,
-          "picture_url": "",
-          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
-        "id": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
-        "attributes": {
-          "handle": "tmh3101",
-          "trust_score": 25.47,
-          "follower_count": 4,
-          "following_count": 4,
-          "post_count": 5,
-          "picture_url": "lens://a06a90e1aa7bbee9eaf9e767a31a504b7ab4441bd23362822827f7145b66ae66",
-          "owned_by": "0x7d5a4032104c0a3690eb3f41776afb0d5cc6f960",
-          "reason": "Labeled as LOW_RISK in Backbone."
-        }
-      },
-      {
         "id": "0x8dd7934e3d3ab8bcb4134635fa8b46cd287cdfad",
         "risk_label": "HIGH_RISK",
         "risk_score": 0.7,
-        "cluster_id": 0,
+        "cluster_id": 171,
         "attributes": {
           "handle": "b2207546",
           "trust_score": 7.43,
@@ -209,14 +33,110 @@
           "post_count": 2,
           "picture_url": "lens://7500d1af2b20b3726879037bb1ccdb3b402e7cde16449e86bc1e4d8b25fae5b5",
           "owned_by": "0x8364251b51f9af77e0b52880894e1e27ff06a362",
-          "reason": "Labeled as HIGH_RISK in Backbone."
+          "reason": "Co-owner (92.1%) [+40] | Low Social (0.4%) [+10] | Extremely Low Trust (2.38) [+20]"
+        }
+      },
+      {
+        "id": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "louisacay",
+          "trust_score": 21.92,
+          "follower_count": 3,
+          "following_count": 4,
+          "post_count": 1,
+          "picture_url": "https://ik.imagekit.io/lens/f0862cb2d14b83b3d934509d023c05e67494eed48f595b6c207dd952743904e7_SfRY9kY77q.png",
+          "owned_by": "0x3672821dd5f28fb8fc7d752b4371550b2adc5794",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "slice_admin",
+          "trust_score": 67.12,
+          "follower_count": 4,
+          "following_count": 1,
+          "post_count": 1,
+          "picture_url": "https://ik.imagekit.io/lens/ae302e5d744a4dc858d050c306e91dd68c57d3d52a442cdc057efc61c346fbd8_wfe3xCvV4.webp",
+          "owned_by": "0x3413b49e2a4cd83a20d9941764f3c4b983983b80",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0xc46ca569bfea6efd7dae218cfdb9f6c7bb29e4af",
+        "risk_label": "BENIGN",
+        "risk_score": 0.2,
+        "cluster_id": 48,
+        "attributes": {
+          "handle": "louisakai",
+          "trust_score": 0.25,
+          "follower_count": 0,
+          "following_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x3672821dd5f28fb8fc7d752b4371550b2adc5794",
+          "reason": "Extremely Low Trust (4.83) [+20]"
+        }
+      },
+      {
+        "id": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
+        "risk_label": "HIGH_RISK",
+        "risk_score": 0.7,
+        "cluster_id": 171,
+        "attributes": {
+          "handle": "slide-admin",
+          "trust_score": 0.23,
+          "follower_count": 0,
+          "following_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0x3413b49e2a4cd83a20d9941764f3c4b983983b80",
+          "reason": "Co-owner (92.1%) [+40] | Low Social (0.4%) [+10] | Extremely Low Trust (2.38) [+20]"
+        }
+      },
+      {
+        "id": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "tester_thuan",
+          "trust_score": 0.26,
+          "follower_count": 0,
+          "following_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "tmh3101",
+          "trust_score": 25.47,
+          "follower_count": 4,
+          "following_count": 4,
+          "post_count": 5,
+          "picture_url": "lens://a06a90e1aa7bbee9eaf9e767a31a504b7ab4441bd23362822827f7145b66ae66",
+          "owned_by": "0x7d5a4032104c0a3690eb3f41776afb0d5cc6f960",
+          "reason": "Co-owner (60.2%) [+40]"
         }
       },
       {
         "id": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "risk_label": "LOW_RISK",
-        "risk_score": 0.3,
-        "cluster_id": 0,
+        "risk_score": 0.4,
+        "cluster_id": 69,
         "attributes": {
           "handle": "phuocpham",
           "trust_score": 1.49,
@@ -225,543 +145,624 @@
           "post_count": 1,
           "picture_url": "",
           "owned_by": "0xdb13502362b4d53eae8edfdad7334dcfa27dcb08",
-          "reason": "Labeled as LOW_RISK in Backbone."
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "thuannm_tester",
+          "trust_score": 0.33,
+          "follower_count": 0,
+          "following_count": 2,
+          "post_count": 2,
+          "picture_url": "",
+          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "stephenngo",
+          "trust_score": 13.95,
+          "follower_count": 3,
+          "following_count": 4,
+          "post_count": 2,
+          "picture_url": "https://ik.imagekit.io/lens/39edd786e03912856c223b216061b7380cc0f60b914d8823ceb06a4f3676f409_caao2qCXR.png",
+          "owned_by": "0xc5c1d8cb351bb0d2028668c55f24c5ba434532e2",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.5,
+        "cluster_id": 79,
+        "attributes": {
+          "handle": "truyennm",
+          "trust_score": 17.41,
+          "follower_count": 0,
+          "following_count": 3,
+          "post_count": 1,
+          "picture_url": "lens://fa7ba3ee3165886f6a889ed500e4c081de5fb5b103ca7ff8b9d7cb040605b0fc",
+          "owned_by": "0x11b7c8a375a953458faa0fcc8f44cda63c9adbad",
+          "reason": "Co-owner (93.0%) [+40] | Low Social (7.0%) [+10]"
+        }
+      },
+      {
+        "id": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.91,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "thuannm",
+          "trust_score": 1.02,
+          "follower_count": 3,
+          "following_count": 4,
+          "post_count": 1,
+          "picture_url": "",
+          "owned_by": "0xd84f8bb075132ebefe07507c815c6d2967a099f6",
+          "reason": "Co-owner (60.2%) [+40]"
+        }
+      },
+      {
+        "id": "0xfab04904d422cf793847cc5edbc3246275d9760e",
+        "risk_label": "LOW_RISK",
+        "risk_score": 0.4,
+        "cluster_id": 69,
+        "attributes": {
+          "handle": "stephenngo09",
+          "trust_score": 0.29,
+          "follower_count": 0,
+          "following_count": 0,
+          "post_count": 0,
+          "picture_url": "",
+          "owned_by": "0xc5c1d8cb351bb0d2028668c55f24c5ba434532e2",
+          "reason": "Co-owner (60.2%) [+40]"
         }
       }
     ],
     "links": [
       {
-        "source": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
-        "target": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.32791921496391296
-      },
-      {
-        "source": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
-        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.060087889432907104
-      },
-      {
-        "source": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
-        "target": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.32371699810028076
-      },
-      {
-        "source": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
-        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.05888534337282181
-      },
-      {
-        "source": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
+        "source": "0x8dd7934e3d3ab8bcb4134635fa8b46cd287cdfad",
         "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.10525381565093994
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x8dd7934e3d3ab8bcb4134635fa8b46cd287cdfad",
-        "edge_type": "TIP",
-        "weight": 4.0,
-        "gat_attention": 0.49906718730926514
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.31568223237991333
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
-        "edge_type": "UPVOTE_REV",
-        "weight": 0.5,
-        "gat_attention": 0.31568223237991333
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.09343472123146057
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.08043503016233444
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.079799123108387
-      },
-      {
-        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "target": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.49703890085220337
-      },
-      {
-        "source": "0xc46ca569bfea6efd7dae218cfdb9f6c7bb29e4af",
-        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.06053607910871506
-      },
-      {
-        "source": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
-        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.2046220600605011
-      },
-      {
-        "source": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
-        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "UPVOTE",
-        "weight": 1.0,
-        "gat_attention": 0.2046220600605011
-      },
-      {
-        "source": "0xfab04904d422cf793847cc5edbc3246275d9760e",
-        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "edge_type": "CO-OWNER",
-        "weight": 10.0,
-        "gat_attention": 0.08587630838155746
+        "edge_type": "TIP_REV",
+        "weight": 2.0,
+        "gat_attention": 0.1028507873415947
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.09796091169118881
+        "gat_attention": 0.09747679531574249
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.1000814288854599
+        "gat_attention": 0.10002791881561279
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.15019993484020233
+        "gat_attention": 0.14890293776988983
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.05590619891881943
+        "gat_attention": 0.05633470416069031
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "COMMENT",
         "weight": 2.0,
-        "gat_attention": 0.056036144495010376
+        "gat_attention": 0.05631755292415619
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "UPVOTE",
         "weight": 1.0,
-        "gat_attention": 0.05590619891881943
+        "gat_attention": 0.05633470416069031
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.05692890286445618
+        "gat_attention": 0.05775722861289978
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "UPVOTE_REV",
         "weight": 0.5,
-        "gat_attention": 0.05692890286445618
+        "gat_attention": 0.05775722861289978
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.09116052091121674
+        "gat_attention": 0.09099847823381424
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.09354635328054428
+        "gat_attention": 0.09338007122278214
       },
       {
         "source": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "target": "0xc46ca569bfea6efd7dae218cfdb9f6c7bb29e4af",
         "edge_type": "CO-OWNER",
         "weight": 10.0,
-        "gat_attention": 0.5520254373550415
+        "gat_attention": 0.5510992407798767
       },
       {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.10789436101913452
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x8dd7934e3d3ab8bcb4134635fa8b46cd287cdfad",
+        "edge_type": "TIP",
+        "weight": 4.0,
+        "gat_attention": 0.49288398027420044
       },
       {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.10745417326688766
+        "gat_attention": 0.3149676024913788
       },
       {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.10471443086862564
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.10374733060598373
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.14057950675487518
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.04962196573615074
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "COMMENT",
-        "weight": 2.0,
-        "gat_attention": 0.0478999987244606
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "UPVOTE",
-        "weight": 1.0,
-        "gat_attention": 0.04962196573615074
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.051796793937683105
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "COMMENT_REV",
-        "weight": 1.4771212339401245,
-        "gat_attention": 0.04809589311480522
-      },
-      {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
         "edge_type": "UPVOTE_REV",
-        "weight": 0.6505150198936462,
-        "gat_attention": 0.05106356739997864
+        "weight": 0.5,
+        "gat_attention": 0.3149676024913788
       },
       {
-        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "target": "0xfab04904d422cf793847cc5edbc3246275d9760e",
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.09344248473644257
+      },
+      {
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.08028833568096161
+      },
+      {
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.08006973564624786
+      },
+      {
+        "source": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "target": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
         "edge_type": "CO-OWNER",
         "weight": 10.0,
-        "gat_attention": 0.6451308131217957
+        "gat_attention": 0.4959578812122345
       },
       {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "source": "0xc46ca569bfea6efd7dae218cfdb9f6c7bb29e4af",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.10228265076875687
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.06213650852441788
       },
       {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.1015918105840683
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.04834621772170067
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "COMMENT",
-        "weight": 2.0,
-        "gat_attention": 0.04485365375876427
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "UPVOTE",
-        "weight": 1.0,
-        "gat_attention": 0.04834621772170067
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.047817084938287735
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
-        "edge_type": "UPVOTE_REV",
-        "weight": 0.5,
-        "gat_attention": 0.047817084938287735
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "source": "0x1f50ad2530b4749971feb5114d7d65e8d68b5673",
         "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.1268826127052307
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.10813748836517334
       },
       {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "edge_type": "FOLLOW",
-        "weight": 1.0,
-        "gat_attention": 0.09803738445043564
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
-        "edge_type": "FOLLOW_REV",
-        "weight": 0.5,
-        "gat_attention": 0.09779349714517593
-      },
-      {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "source": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
         "target": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
         "edge_type": "CO-OWNER",
         "weight": 10.0,
-        "gat_attention": 0.7684932351112366
+        "gat_attention": 0.32335734367370605
       },
       {
-        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
-        "target": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
+        "source": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
+        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "CO-OWNER",
         "weight": 10.0,
-        "gat_attention": 0.7684932351112366
+        "gat_attention": 0.059519704431295395
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.20586661994457245
+        "gat_attention": 0.20505395531654358
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "edge_type": "COMMENT",
         "weight": 2.0,
-        "gat_attention": 0.19319675862789154
+        "gat_attention": 0.19426557421684265
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "edge_type": "UPVOTE",
         "weight": 1.0,
-        "gat_attention": 0.20586661994457245
+        "gat_attention": 0.20505395531654358
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.21585175395011902
+        "gat_attention": 0.21787288784980774
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.07647799700498581
+        "gat_attention": 0.0764465257525444
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "UPVOTE",
         "weight": 1.0,
-        "gat_attention": 0.07647799700498581
+        "gat_attention": 0.0764465257525444
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.07987822592258453
+        "gat_attention": 0.0815076008439064
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "COMMENT_REV",
         "weight": 1.0,
-        "gat_attention": 0.07647799700498581
+        "gat_attention": 0.0764465257525444
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
         "edge_type": "UPVOTE_REV",
         "weight": 0.5,
-        "gat_attention": 0.07987822592258453
+        "gat_attention": 0.0815076008439064
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.07120020687580109
+        "gat_attention": 0.07105174660682678
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "COMMENT",
         "weight": 2.954242467880249,
-        "gat_attention": 0.06247590482234955
+        "gat_attention": 0.062181100249290466
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "UPVOTE",
         "weight": 1.3010300397872925,
-        "gat_attention": 0.06946290284395218
+        "gat_attention": 0.06931804120540619
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.0759032741189003
+        "gat_attention": 0.07607071846723557
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "COMMENT_REV",
         "weight": 1.0,
-        "gat_attention": 0.07120020687580109
+        "gat_attention": 0.07105174660682678
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
         "edge_type": "UPVOTE_REV",
         "weight": 0.5,
-        "gat_attention": 0.0759032741189003
+        "gat_attention": 0.07607071846723557
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.07797958701848984
+        "gat_attention": 0.07764764875173569
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "edge_type": "UPVOTE",
         "weight": 1.0,
-        "gat_attention": 0.07797958701848984
+        "gat_attention": 0.07764764875173569
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.08518234640359879
+        "gat_attention": 0.08450505882501602
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "edge_type": "COMMENT_REV",
         "weight": 1.0,
-        "gat_attention": 0.07797958701848984
+        "gat_attention": 0.07764764875173569
       },
       {
         "source": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
         "edge_type": "UPVOTE_REV",
         "weight": 0.5,
-        "gat_attention": 0.08518234640359879
-      },
-      {
-        "source": "0x8dd7934e3d3ab8bcb4134635fa8b46cd287cdfad",
-        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
-        "edge_type": "TIP_REV",
-        "weight": 2.0,
-        "gat_attention": 0.10339891165494919
+        "gat_attention": 0.08450505882501602
       },
       {
         "source": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "FOLLOW",
         "weight": 1.0,
-        "gat_attention": 0.0548626109957695
+        "gat_attention": 0.05609697103500366
       },
       {
         "source": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "FOLLOW_REV",
         "weight": 0.5,
-        "gat_attention": 0.05233023315668106
+        "gat_attention": 0.05315019562840462
       },
       {
         "source": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "COMMENT_REV",
         "weight": 1.0,
-        "gat_attention": 0.0548626109957695
+        "gat_attention": 0.05609697103500366
       },
       {
         "source": "0xd3dac9601b3498cbb523338dcf084e6c4ace92b1",
         "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
         "edge_type": "UPVOTE_REV",
         "weight": 0.5,
-        "gat_attention": 0.05233023315668106
+        "gat_attention": 0.05315019562840462
+      },
+      {
+        "source": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
+        "target": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.32724982500076294
+      },
+      {
+        "source": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
+        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.06063144654035568
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.10666479915380478
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.10622025281190872
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.10321657359600067
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.10306235402822495
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.14062142372131348
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.0492108017206192
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "COMMENT",
+        "weight": 2.0,
+        "gat_attention": 0.04753093421459198
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "UPVOTE",
+        "weight": 1.0,
+        "gat_attention": 0.0492108017206192
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.05191247910261154
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "COMMENT_REV",
+        "weight": 1.4771212339401245,
+        "gat_attention": 0.04852874204516411
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "UPVOTE_REV",
+        "weight": 0.6505150198936462,
+        "gat_attention": 0.050953809171915054
+      },
+      {
+        "source": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "target": "0xfab04904d422cf793847cc5edbc3246275d9760e",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.6493281722068787
+      },
+      {
+        "source": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
+        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.2072022557258606
+      },
+      {
+        "source": "0x5c6b7acf0a07fd634d2537872b7ef17805a89daa",
+        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "edge_type": "UPVOTE",
+        "weight": 1.0,
+        "gat_attention": 0.2072022557258606
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.10046959668397903
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0xd145e2a6678e55071508e9b46a8b2c1378fd5aa5",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.1017942950129509
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.04772918298840523
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "COMMENT",
+        "weight": 2.0,
+        "gat_attention": 0.04523042216897011
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "UPVOTE",
+        "weight": 1.0,
+        "gat_attention": 0.04772918298840523
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.04720680043101311
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x50930e85c4b1e7991fc8b7c0c8961e38e0472e3d",
+        "edge_type": "UPVOTE_REV",
+        "weight": 0.5,
+        "gat_attention": 0.04720680043101311
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x073a7dbabf7d6b23efc49c6e2c6535b135487b45",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.12540413439273834
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "edge_type": "FOLLOW",
+        "weight": 1.0,
+        "gat_attention": 0.09652433544397354
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "edge_type": "FOLLOW_REV",
+        "weight": 0.5,
+        "gat_attention": 0.09794078767299652
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0x9fccb42746299bfa370b2b56b3bf6046cb581e59",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.7690659761428833
+      },
+      {
+        "source": "0x5ef88b40d995fabcde829d7c19a5ce446a35c782",
+        "target": "0xc26c846591ad1d133f47b970ac5d25aca480fcbe",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.7690662741661072
+      },
+      {
+        "source": "0xfab04904d422cf793847cc5edbc3246275d9760e",
+        "target": "0x9ce14935440d87d3996c5216c3cbf42f446713bf",
+        "edge_type": "CO-OWNER",
+        "weight": 10.0,
+        "gat_attention": 0.08889901638031006
       }
     ]
-  }
+  },
+  "debug": null
 }

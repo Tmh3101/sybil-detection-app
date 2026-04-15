@@ -80,19 +80,48 @@ export function useGraphProcessor(
       return { nodes, links: processedLinks };
     }
 
-    // 2. Aggregate links by source-target-type
+    // 2. Pre-calculate true GAT attention strictly from raw links where target is targetId
+    const incomingAttentionMap = new Map<string, number>();
+    if (targetId) {
+      const tid = String(targetId).toLowerCase();
+      graphData.links.forEach((link) => {
+        const rawS = String(
+          typeof link.source === "object"
+            ? (link.source as NodeObject<SybilNode>).id
+            : (link.source as string)
+        ).toLowerCase();
+        const rawT = String(
+          typeof link.target === "object"
+            ? (link.target as NodeObject<SybilNode>).id
+            : (link.target as string)
+        ).toLowerCase();
+
+        if (rawT === tid) {
+          incomingAttentionMap.set(
+            rawS,
+            (incomingAttentionMap.get(rawS) || 0) + (link.gat_attention || 0)
+          );
+        }
+      });
+    }
+
+    // 3. Aggregate links by source-target-type
     const linkMap = new Map<string, AggregatedLink>();
 
     graphData.links.forEach((link) => {
-      let sId =
+      const rawS = String(
         typeof link.source === "object"
           ? (link.source as NodeObject<SybilNode>).id
-          : (link.source as string);
-      let tId =
+          : (link.source as string)
+      );
+      const rawT = String(
         typeof link.target === "object"
           ? (link.target as NodeObject<SybilNode>).id
-          : (link.target as string);
+          : (link.target as string)
+      );
 
+      let sId = rawS;
+      let tId = rawT;
       const type = link.edge_type || "UNKNOWN";
 
       // FIX: If it's a reverse edge, swap source and target so the arrow points correctly
@@ -111,16 +140,51 @@ export function useGraphProcessor(
           (existing.aggregated_weight || 0) + (link.weight || 1);
 
         if (mergeEdges) {
-          existing.gat_attention =
-            (existing.gat_attention || 0) + (link.gat_attention || 0);
+          // If we are merging and the visual target is the central node,
+          // use the pre-calculated incoming attention sum.
+          if (
+            targetId &&
+            String(tId).toLowerCase() === String(targetId).toLowerCase()
+          ) {
+            existing.gat_attention =
+              incomingAttentionMap.get(String(sId).toLowerCase()) || 0;
+          } else {
+            existing.gat_attention =
+              (existing.gat_attention || 0) + (link.gat_attention || 0);
+          }
           existing.is_merged_multiple = true;
         } else {
-          existing.gat_attention = Math.max(
-            existing.gat_attention || 0,
-            link.gat_attention || 0
-          );
+          // Multi-relational view (not merged):
+          // If visual target is central node, we need to decide whether to sum here or keep separate.
+          // Rule: "If there are multiple parallel edges from Node A to Central Node, SUM their gat_attention values."
+          // But in multi-relational view, we might want to show them separately?
+          // No, the instruction says: "If there are multiple parallel edges... SUM their gat_attention values."
+          // This implies the total attention from A to Central should be shown.
+          // However, if we don't mergeEdges, we have parallel visual edges.
+          // Let's stick to the rule: if it points to targetId, show the sum for that node pair.
+          if (
+            targetId &&
+            String(tId).toLowerCase() === String(targetId).toLowerCase()
+          ) {
+            existing.gat_attention =
+              incomingAttentionMap.get(String(sId).toLowerCase()) || 0;
+          } else {
+            existing.gat_attention = Math.max(
+              existing.gat_attention || 0,
+              link.gat_attention || 0
+            );
+          }
         }
       } else {
+        let initialAttention = link.gat_attention || 0;
+        if (
+          targetId &&
+          String(tId).toLowerCase() === String(targetId).toLowerCase()
+        ) {
+          initialAttention =
+            incomingAttentionMap.get(String(sId).toLowerCase()) || 0;
+        }
+
         linkMap.set(key, {
           ...link,
           id: link.id || key,
@@ -128,7 +192,7 @@ export function useGraphProcessor(
           target: tId as string,
           aggregated_weight: link.weight || 1,
           edge_type: type,
-          gat_attention: link.gat_attention || 0,
+          gat_attention: initialAttention,
         } as AggregatedLink);
       }
     });

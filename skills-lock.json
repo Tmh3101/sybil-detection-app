@@ -1,16 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "create-readme": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "computedHash": "d0ece1b2164ce1376e4ab6e98d6ac079df3a2a94f5f02224362b6a1ce2516ae9"
-    },
-    "markdown-documentation": {
-      "source": "aj-geddes/useful-ai-prompts",
-      "sourceType": "github",
-      "computedHash": "bebe932f4f94560dd90ae7534f2a8731edb70a3ca33f96ad8127cb1de4464780"
-    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
@@ -21,20 +11,10 @@
       "sourceType": "github",
       "computedHash": "d2f0a7065f7418fdb3ae88559f1f1426f40c26f2b5aebcd394797418d4bb3b04"
     },
-    "prompt-builder": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "computedHash": "1591d452ec2ba6d70faaa96b481f7c8261a280df838fee9c5295804fa28acbd3"
-    },
     "react-force-graph-2d": {
       "source": ".agents/skills/react-force-graph-2d",
       "sourceType": "local",
       "computedHash": "24cd99a985309625f2d66fde2a62d79c172d38dd7b6a22a35407c021a468738b"
-    },
-    "writing-plans": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "computedHash": "70fe626d5970349239e939f311893389563a6338cda40eb0500606dd48aa3afa"
     }
   }
 }

@@ -231,7 +231,48 @@ export default function UniversalGraph2D({
         return visibleLayers.includes(layerKey);
       });
 
-      return { nodes, links };
+      // 5. Directed Edge Filtering (Only allow directed edges pointing to the target node)
+      links = links.filter((l) => {
+        const et = l.edge_type || "UNKNOWN";
+        if (DIRECTED_EDGE_TYPES.has(et)) {
+          const rawS = String(
+            typeof l.source === "object"
+              ? (l.source as { id: string }).id
+              : l.source
+          ).toLowerCase();
+          const rawT = String(
+            typeof l.target === "object"
+              ? (l.target as { id: string }).id
+              : l.target
+          ).toLowerCase();
+          const visualTarget = et.endsWith("_REV") ? rawS : rawT;
+          return visualTarget === tid;
+        }
+        return true; // Keep undirected edges
+      });
+
+      // 6. Filter nodes that have no remaining edges
+      const connectedNodeIds = new Set<string>([tid]);
+      links.forEach((l) => {
+        const s = String(
+          typeof l.source === "object"
+            ? (l.source as { id: string }).id
+            : l.source
+        ).toLowerCase();
+        const t = String(
+          typeof l.target === "object"
+            ? (l.target as { id: string }).id
+            : l.target
+        ).toLowerCase();
+        connectedNodeIds.add(s);
+        connectedNodeIds.add(t);
+      });
+
+      const finalNodes = nodes.filter((n) =>
+        connectedNodeIds.has(String(n.id).toLowerCase())
+      );
+
+      return { nodes: finalNodes, links };
     } else {
       // CLUSTER mode or no target
       // Apply Layer Filtering only
