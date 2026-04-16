@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   /* Default Light Mode - Industrial Clay / Clean Lab */
   --background: #f8fafc; /* slate-50 - even cleaner */

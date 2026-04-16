@@ -2,11 +2,13 @@ import React, { useMemo } from "react";
 import { SybilNode, SybilEdge } from "@/types/api";
 import {
   LABEL_COLORS,
+  LIGHT_LABEL_COLORS,
   LABEL_GROUPS,
   EDGE_LAYERS,
   computeEdgeCounts,
 } from "@/lib/graph-constants";
 import { useTranslations } from "next-intl";
+import { useThemeStore } from "@/store/theme-store";
 
 interface GraphLegendProps {
   showNodes?: boolean;
@@ -26,6 +28,8 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
   onToggleLayer,
 }) => {
   const t = useTranslations("GraphLegend");
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
 
   // Edge counts per layer
   const edgeCounts = useMemo(() => {
@@ -47,17 +51,33 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
   const totalEdges = graphData?.links?.length ?? 0;
   const totalNodes = graphData?.nodes?.length ?? 0;
 
+  const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
+
   return (
-    <div className="absolute top-6 right-6 z-10 flex min-w-[200px] flex-col gap-3 border border-slate-700/70 bg-black/88 p-4 shadow-2xl backdrop-blur-md">
+    <div
+      className={`absolute top-6 right-6 z-10 flex min-w-[200px] flex-col gap-3 border p-4 shadow-2xl backdrop-blur-md ${
+        isDark
+          ? "border-slate-700/70 bg-black/88"
+          : "border-slate-200 bg-white/88"
+      }`}
+    >
       {/* ── Node map ── */}
       {showNodes && (
         <div className="flex flex-col gap-1.5">
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono text-[8px] font-bold tracking-[0.18em] text-slate-500 uppercase">
+            <span
+              className={`font-mono text-[8px] font-bold tracking-[0.18em] uppercase ${
+                isDark ? "text-slate-500" : "text-slate-600"
+              }`}
+            >
               {t("node_map")}
             </span>
             {totalNodes > 0 && (
-              <span className="font-mono text-[8px] text-slate-600">
+              <span
+                className={`font-mono text-[8px] ${
+                  isDark ? "text-slate-600" : "text-slate-500"
+                }`}
+              >
                 {t("nodes_count", { count: totalNodes })}
               </span>
             )}
@@ -67,6 +87,7 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
 
           {LABEL_GROUPS.map(({ label, key }) => {
             const count = nodeCounts[key] ?? 0;
+            const color = palette[key];
             return (
               <div
                 key={key}
@@ -76,21 +97,23 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                   <div
                     className={`h-2 w-2 flex-shrink-0 rounded-full ${key === "MALICIOUS" ? "animate-pulse" : ""}`}
                     style={{
-                      backgroundColor: LABEL_COLORS[key],
+                      backgroundColor: color,
                       boxShadow:
-                        key === "MALICIOUS"
-                          ? `0 0 6px ${LABEL_COLORS[key]}99`
-                          : "none",
+                        key === "MALICIOUS" ? `0 0 6px ${color}99` : "none",
                     }}
                   />
-                  <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
+                  <span
+                    className={`font-mono text-[9px] font-bold uppercase ${
+                      isDark ? "text-slate-300" : "text-slate-700"
+                    }`}
+                  >
                     {label}
                   </span>
                 </div>
                 {count > 0 && (
                   <span
                     className="font-mono text-[8px] font-bold tabular-nums"
-                    style={{ color: LABEL_COLORS[key] + "aa" }}
+                    style={{ color: color + "aa" }}
                   >
                     {count}
                   </span>
@@ -105,15 +128,25 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
       {showRelations && (
         <div
           className={`flex flex-col gap-1.5 ${
-            showNodes ? "border-t border-slate-800/80 pt-3" : ""
+            showNodes
+              ? "border-t border-slate-100 pt-3 dark:border-slate-800/80"
+              : ""
           }`}
         >
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono text-[8px] font-bold tracking-[0.18em] text-slate-500 uppercase">
+            <span
+              className={`font-mono text-[8px] font-bold tracking-[0.18em] uppercase ${
+                isDark ? "text-slate-500" : "text-slate-600"
+              }`}
+            >
               {t("relation_layers")}
             </span>
             {totalEdges > 0 && (
-              <span className="font-mono text-[8px] text-slate-600">
+              <span
+                className={`font-mono text-[8px] ${
+                  isDark ? "text-slate-600" : "text-slate-500"
+                }`}
+              >
                 {t("edges_count", { count: totalEdges })}
               </span>
             )}
@@ -166,7 +199,11 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                       </svg>
                     )}
                   </div>
-                  <span className="font-mono text-[9px] font-bold text-slate-300 uppercase">
+                  <span
+                    className={`font-mono text-[9px] font-bold uppercase ${
+                      isDark ? "text-slate-300" : "text-slate-700"
+                    }`}
+                  >
                     {layer.label}
                   </span>
                 </div>
@@ -184,14 +221,16 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                     {count}
                   </span>
                 ) : (
-                  <span className="font-mono text-[8px] text-slate-700">—</span>
+                  <span className="font-mono text-[8px] text-slate-300 italic dark:text-slate-700">
+                    —
+                  </span>
                 )}
               </button>
             );
           })}
 
           {/* Direction key */}
-          <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-800/60 pt-2">
+          <div className="mt-1.5 flex flex-col gap-1 border-t border-slate-100 pt-2 dark:border-slate-800/60">
             <div className="flex items-center gap-2">
               <svg width="14" height="8" viewBox="0 0 14 8">
                 <line
@@ -199,12 +238,19 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                   y1="4"
                   x2="8"
                   y2="4"
-                  stroke="#334155"
+                  stroke={isDark ? "#334155" : "#94a3b8"}
                   strokeWidth="1"
                 />
-                <polygon points="8,1.5 13,4 8,6.5" fill="#334155" />
+                <polygon
+                  points="8,1.5 13,4 8,6.5"
+                  fill={isDark ? "#334155" : "#94a3b8"}
+                />
               </svg>
-              <span className="font-mono text-[7px] text-slate-600">
+              <span
+                className={`font-mono text-[7px] ${
+                  isDark ? "text-slate-600" : "text-slate-400"
+                }`}
+              >
                 {t("directed")}
               </span>
             </div>
@@ -215,17 +261,21 @@ const GraphLegend: React.FC<GraphLegendProps> = ({
                   y1="4"
                   x2="14"
                   y2="4"
-                  stroke="#334155"
+                  stroke={isDark ? "#334155" : "#94a3b8"}
                   strokeWidth="1"
                 />
                 <polygon
                   points="7,1.5 12,4 7,6.5 2,4"
                   fill="none"
-                  stroke="#334155"
+                  stroke={isDark ? "#334155" : "#94a3b8"}
                   strokeWidth="1"
                 />
               </svg>
-              <span className="font-mono text-[7px] text-slate-600">
+              <span
+                className={`font-mono text-[7px] ${
+                  isDark ? "text-slate-600" : "text-slate-400"
+                }`}
+              >
                 {t("undirected")}
               </span>
             </div>

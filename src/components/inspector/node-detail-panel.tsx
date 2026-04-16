@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SybilNode } from "@/types/api";
-import { LABEL_COLORS } from "@/lib/graph-constants";
+import { LABEL_COLORS, LIGHT_LABEL_COLORS } from "@/lib/graph-constants";
 import {
   X,
   User,
@@ -12,6 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { resolvePictureUrl } from "@/lib/utils";
+import { useThemeStore } from "@/store/theme-store";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -29,8 +30,11 @@ const RISK_ICONS: Record<string, React.ReactNode> = {
 
 const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
   const t = useTranslations("DetailPanels.node");
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
   const rl = node.risk_label || "UNKNOWN";
-  const color = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
+  const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
+  const color = palette[rl] || palette.UNKNOWN;
   const pictureUrl = node.attributes?.picture_url
     ? resolvePictureUrl(String(node.attributes.picture_url))
     : "";
@@ -39,9 +43,9 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
   );
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-l border-slate-800/80 bg-[#050810] font-mono shadow-2xl">
+    <div className="flex h-full flex-col overflow-hidden border-l border-slate-200 bg-white font-mono shadow-2xl dark:border-slate-800/80 dark:bg-[#050810]">
       {/* ── Header ── */}
-      <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-800/80 px-4 py-4">
+      <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 px-4 py-4 dark:border-slate-800/80">
         <div className="flex items-center gap-3">
           <div
             className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-sm border-2"
@@ -70,14 +74,14 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
             >
               {handle}
             </span>
-            <span className="text-[9px] text-slate-500 tabular-nums">
+            <span className="text-[9px] text-slate-400 tabular-nums dark:text-slate-500">
               {node.id}
             </span>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="hover:border-accent-red/40 hover:text-accent-red flex h-8 w-8 items-center justify-center border border-slate-800 text-slate-500 transition-all active:scale-95"
+          className="hover:border-accent-red/40 hover:text-accent-red flex h-8 w-8 items-center justify-center border border-slate-200 text-slate-400 transition-all active:scale-95 dark:border-slate-800 dark:text-slate-500"
         >
           <X size={14} />
         </button>
@@ -103,7 +107,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
             </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-[8px] text-slate-500 uppercase">
+            <span className="text-[8px] text-slate-400 uppercase dark:text-slate-500">
               {t("risk_score_label")}
             </span>
             <span className="text-sm font-black tabular-nums" style={{ color }}>
@@ -155,11 +159,11 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
         {/* Detection Reasons */}
         {node.attributes?.reason && (
           <div className="mb-6 flex flex-col gap-2">
-            <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
+            <span className="text-[8px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
               {t("primary_reason")}
             </span>
-            <div className="flex flex-col border border-slate-800 bg-slate-900/40 px-2 py-1.5">
-              <span className="text-[10px] leading-tight text-slate-300">
+            <div className="flex flex-col border border-slate-100 bg-slate-50 px-2 py-1.5 dark:border-slate-800 dark:bg-slate-900/40">
+              <span className="text-[10px] leading-tight text-slate-700 dark:text-slate-300">
                 {String(node.attributes.reason)}
               </span>
             </div>
@@ -169,7 +173,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
         {((node.attributes?.reasons as unknown as string[]) || []).length >
           0 && (
           <div className="flex flex-col gap-2">
-            <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
+            <span className="text-[8px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
               {t("detection_flags")}
             </span>
             <div className="flex flex-col gap-1.5">
@@ -189,7 +193,7 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
                 return (
                   <div
                     key={i}
-                    className="flex flex-col border border-slate-800 bg-slate-900/40 px-2 py-1.5"
+                    className="flex flex-col border border-slate-100 bg-slate-50 px-2 py-1.5 dark:border-slate-800 dark:bg-slate-900/40"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span
@@ -223,12 +227,12 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({ node, onClose }) => {
       </div>
 
       {/* ── Footer ── */}
-      <div className="border-t border-slate-800/60 px-4 py-3">
+      <div className="border-t border-slate-100 px-4 py-3 dark:border-slate-800/60">
         <div className="flex items-center justify-between">
-          <span className="text-[8px] font-bold tracking-widest text-slate-600 uppercase">
+          <span className="text-[8px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-600">
             {t("cluster_id", { id: node.cluster_id ?? "N/A" })}
           </span>
-          <span className="text-[8px] text-slate-700 tabular-nums">
+          <span className="text-[8px] text-slate-300 tabular-nums dark:text-slate-700">
             {t("id_prefix", { id: (node.id || "000").slice(-4).toUpperCase() })}
           </span>
         </div>

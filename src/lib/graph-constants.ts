@@ -9,6 +9,14 @@ export const LABEL_COLORS: Record<string, string> = {
   UNKNOWN: "#94a3b8", // slate
 };
 
+export const LIGHT_LABEL_COLORS: Record<string, string> = {
+  BENIGN: "#0284c7", // cyan-600
+  LOW_RISK: "#16a34a", // green-600
+  HIGH_RISK: "#ea580c", // orange-600
+  MALICIOUS: "#dc2626", // red-600
+  UNKNOWN: "#475569", // slate-600
+};
+
 // ─── Edge type colors by relation layer ───
 export const RELATION_COLORS: Record<string, string> = {
   // Follow layer (directed) — blue
@@ -39,6 +47,33 @@ export const RELATION_COLORS: Record<string, string> = {
   CLOSE_CREATION_TIME: "#7c3aed",
   SIMILARITY: "#a855f7",
   UNKNOWN: "#475569",
+};
+
+export const LIGHT_RELATION_COLORS: Record<string, string> = {
+  FOLLOW: "#2563eb", // blue-600
+  FOLLOW_REV: "#2563eb",
+  UPVOTE: "#059669", // emerald-600
+  UPVOTE_REV: "#059669",
+  REACTION: "#059669",
+  REACTION_REV: "#059669",
+  COMMENT: "#059669",
+  COMMENT_REV: "#059669",
+  QUOTE: "#059669",
+  QUOTE_REV: "#059669",
+  MIRROR: "#0891b2", // cyan-600
+  MIRROR_REV: "#0891b2",
+  COLLECT: "#0891b2",
+  COLLECT_REV: "#0891b2",
+  TIP: "#059669",
+  TIP_REV: "#059669",
+  INTERACT: "#059669",
+  "CO-OWNER": "#ea580c", // orange-600
+  SAME_AVATAR: "#9333ea", // purple-600
+  FUZZY_HANDLE: "#7c3aed", // violet-600
+  SIM_BIO: "#9333ea",
+  CLOSE_CREATION_TIME: "#6d28d9", // violet-700
+  SIMILARITY: "#9333ea",
+  UNKNOWN: "#334155", // slate-700
 };
 
 // ─── Which edge_type values are DIRECTED (Follow + Interact layers) ───

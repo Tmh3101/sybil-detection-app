@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { SybilNode, RiskClassification } from "@/types/api";
-import { LABEL_COLORS } from "@/lib/graph-constants";
+import { LABEL_COLORS, LIGHT_LABEL_COLORS } from "@/lib/graph-constants";
 import {
   X,
   AlertTriangle,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { resolvePictureUrl } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { useThemeStore } from "@/store/theme-store";
 import Image from "next/image";
 
 interface ClusterDetailPanelProps {
@@ -34,6 +35,9 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
 }) => {
   const t = useTranslations("DetailPanels.cluster");
   const tRisk = useTranslations("RiskLabels");
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
+  const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
 
   const stats = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -59,16 +63,15 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
     };
   }, [nodes]);
 
-  const dominantColor =
-    LABEL_COLORS[stats.dominantLabel] || LABEL_COLORS.UNKNOWN;
+  const dominantColor = palette[stats.dominantLabel] || palette.UNKNOWN;
   const sortedNodes = [...nodes].sort(
     (a, b) => (b.risk_score || 0) - (a.risk_score || 0)
   );
 
   return (
-    <div className="flex h-full flex-col overflow-hidden border-l border-slate-800/80 bg-[#050810] font-mono">
+    <div className="flex h-full flex-col overflow-hidden border-l border-slate-200 bg-white font-mono dark:border-slate-800/80 dark:bg-[#050810]">
       {/* ── Header ── */}
-      <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-800/80 px-4 py-3">
+      <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800/80">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div
@@ -93,13 +96,13 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2 text-[9px]">
-            <span className="font-bold text-slate-200 tabular-nums">
+            <span className="font-bold text-slate-800 tabular-nums dark:text-slate-200">
               {nodes.length}{" "}
-              <span className="font-medium tracking-tighter text-slate-600 uppercase">
+              <span className="font-medium tracking-tighter text-slate-400 uppercase dark:text-slate-600">
                 {t("accounts")}
               </span>
             </span>
-            <span className="h-2 w-[1px] bg-slate-800" />
+            <span className="h-2 w-[1px] bg-slate-200 dark:bg-slate-800" />
             <div
               className="flex items-center gap-1 font-bold tabular-nums"
               style={{ color: dominantColor }}
@@ -134,7 +137,7 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
         </div>
         <button
           onClick={onClose}
-          className="hover:border-accent-red/40 hover:text-accent-red flex h-7 w-7 items-center justify-center border border-slate-800 text-slate-500 transition-all"
+          className="hover:border-accent-red/40 hover:text-accent-red flex h-7 w-7 items-center justify-center border border-slate-200 text-slate-400 transition-all dark:border-slate-800 dark:text-slate-500"
         >
           <X size={13} />
         </button>
@@ -144,7 +147,7 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
       <div className="scrollbar-thin flex-1 overflow-y-auto">
         {sortedNodes.map((node, idx) => {
           const rl = node.risk_label || "UNKNOWN";
-          const color = LABEL_COLORS[rl] || LABEL_COLORS.UNKNOWN;
+          const color = palette[rl] || palette.UNKNOWN;
           const pictureUrl = node.attributes?.picture_url
             ? resolvePictureUrl(String(node.attributes.picture_url))
             : "";
@@ -155,12 +158,12 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
           return (
             <div
               key={node.id}
-              className="group border-b border-slate-800/40 px-4 py-3 transition-colors hover:bg-slate-900/40"
+              className="group border-b border-slate-100 px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800/40 dark:hover:bg-slate-900/40"
             >
               <div className="flex items-center gap-3">
                 {/* Index + avatar */}
                 <div className="flex flex-shrink-0 flex-col items-center gap-1">
-                  <span className="text-[8px] text-slate-700 tabular-nums">
+                  <span className="text-[8px] text-slate-400 tabular-nums dark:text-slate-700">
                     {String(idx + 1).padStart(2, "0")}
                   </span>
                   <div
@@ -201,7 +204,7 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
                     </span>
                   </div>
 
-                  <div className="mt-0.5 truncate text-[8px] text-slate-600">
+                  <div className="mt-0.5 truncate text-[8px] text-slate-400 dark:text-slate-600">
                     {node.id}
                   </div>
                 </div>
@@ -212,8 +215,8 @@ const ClusterDetailPanel: React.FC<ClusterDetailPanelProps> = ({
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex-shrink-0 border-t border-slate-800/60 px-4 py-2">
-        <span className="text-[8px] tracking-widest text-slate-700 uppercase">
+      <div className="flex-shrink-0 border-t border-slate-100 px-4 py-2 dark:border-slate-800/60">
+        <span className="text-[8px] tracking-widest text-slate-400 uppercase dark:text-slate-700">
           {t("footer_hint")}
         </span>
       </div>

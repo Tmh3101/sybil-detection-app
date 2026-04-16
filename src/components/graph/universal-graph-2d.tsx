@@ -17,12 +17,15 @@ import { SybilNode, SybilEdge, RiskClassification } from "@/types/api";
 import { resolvePictureUrl } from "@/lib/utils";
 import {
   LABEL_COLORS,
+  LIGHT_LABEL_COLORS,
   RELATION_COLORS,
+  LIGHT_RELATION_COLORS,
   DIRECTED_EDGE_TYPES,
   EDGE_LAYERS,
 } from "@/lib/graph-constants";
 import GraphLegend from "./graph-legend";
 import { useGraphProcessor, AggregatedLink } from "@/hooks/use-graph-processor";
+import { useThemeStore } from "@/store/theme-store";
 import {
   Maximize2,
   ZoomIn,
@@ -85,6 +88,8 @@ export default function UniversalGraph2D({
   onLinkClick,
   allNodes,
 }: UniversalGraph2DProps) {
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
   const tLegend = useTranslations("GraphLegend");
   const fgRef = useRef<
     ForceGraphMethods<EnrichedNode, AggregatedLink> | undefined
@@ -493,7 +498,7 @@ export default function UniversalGraph2D({
         ctx.font = `${isTarget ? "bold " : ""}${Math.max(fs, 4)}px "JetBrains Mono",monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.fillStyle = color;
+        ctx.fillStyle = isDark ? color : "#1e293b";
         ctx.fillText(handle.slice(0, 14), x, y + size + 2);
       }
       ctx.restore();
@@ -504,6 +509,7 @@ export default function UniversalGraph2D({
       getOrLoadImage,
       hoverNode,
       highlightNodes,
+      isDark,
     ]
   );
 
@@ -558,15 +564,17 @@ export default function UniversalGraph2D({
       ctx.font = `bold ${fs}px "JetBrains Mono", monospace`;
 
       const tw = ctx.measureText(label).width;
-      ctx.fillStyle = "rgba(2, 6, 23, 0.85)";
+      ctx.fillStyle = isDark
+        ? "rgba(2, 6, 23, 0.85)"
+        : "rgba(255, 255, 255, 0.85)";
       ctx.fillRect(midX - tw / 2 - 2, midY - fs / 2 - 1, tw + 4, fs + 2);
 
-      ctx.fillStyle = "#ef4444"; // AI Focus Red
+      ctx.fillStyle = isDark ? "#ef4444" : "#dc2626"; // AI Focus Red
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, midX, midY);
     },
-    [showAttention]
+    [showAttention, isDark]
   );
 
   // ── LINK RENDERER (Phase 3 LOD) ──
@@ -591,7 +599,8 @@ export default function UniversalGraph2D({
         return;
 
       const type = (l.edge_type as string) || "";
-      const baseColor = RELATION_COLORS[type] || RELATION_COLORS.UNKNOWN;
+      const palette = isDark ? RELATION_COLORS : LIGHT_RELATION_COLORS;
+      const baseColor = palette[type] || palette.UNKNOWN;
 
       // ── Opacity Logic (Phase 2) ──
       let alpha = 0.25;
@@ -667,7 +676,7 @@ export default function UniversalGraph2D({
 
       ctx.restore();
     },
-    [mode, hoverNode, highlightLinks, drawEdgeAttention]
+    [mode, hoverNode, highlightLinks, drawEdgeAttention, isDark]
   );
 
   const paintLinkPointerArea = useCallback(
@@ -731,17 +740,24 @@ export default function UniversalGraph2D({
       if (mode === "CLUSTER" && processedData.nodes.length > 600) return "";
       const n = node as EnrichedNode;
       const rl = getNodeRiskLabel(n);
-      const c = n.__color || LABEL_COLORS.UNKNOWN;
+      const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
+      const c = n.__color || palette.UNKNOWN;
       const handle = getNodeHandle(n);
+
+      const bg = isDark ? "#020617" : "#ffffff";
+      const border = isDark ? "#1e293b" : "#e2e8f0";
+      const textMain = isDark ? "#00f2ff" : "#0284c7";
+      const textSub = isDark ? "#64748b" : "#475569";
+      const cardBg = isDark ? "#0a0f1a" : "#f8fafc";
 
       if (mode === "EGO") {
         return `
-        <div style="background:#020617;border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+        <div style="background:${bg};border:1px solid ${border};padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${handle}</span>
+            <span style="color:${textMain};font-weight:bold;font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${handle}</span>
             <span style="font-size:8px;padding:2px 5px;border:1px solid ${c}44;color:${c};background:${c}11;text-transform:uppercase;">${rl}</span>
           </div>
-          <div style="color:#64748b;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
+          <div style="color:${textSub};font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
         </div>`;
       }
 
@@ -753,36 +769,36 @@ export default function UniversalGraph2D({
           : n.attributes?.cluster_id;
 
       return `
-      <div style="background:#020617;border:1px solid #1e293b;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:230px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+      <div style="background:${bg};border:1px solid ${border};padding:12px;font-family:'JetBrains Mono',monospace;font-size:10px;min-width:230px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="color:#00f2ff;font-weight:bold;font-size:12px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${handle}</span>
+          <span style="color:${textMain};font-weight:bold;font-size:12px;max-width:155px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${handle}</span>
           <span style="font-size:8px;padding:2px 5px;border:1px solid ${c}44;color:${c};background:${c}11;text-transform:uppercase;">${rl}</span>
         </div>
-        <div style="color:#64748b;font-size:8px;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
+        <div style="color:${textSub};font-size:8px;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${node.id}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:8px;">
-          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+          <div style="background:${cardBg};padding:4px 6px;border:1px solid ${border};">
             <div style="color:#475569;font-size:7px;margin-bottom:2px;">RISK</div>
             <div style="color:${isHigh ? "#ef4444" : "#22c55e"};font-weight:bold;font-size:13px;">${((n.risk_score || 0) * 100).toFixed(0)}%</div>
           </div>
-          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+          <div style="background:${cardBg};padding:4px 6px;border:1px solid ${border};">
             <div style="color:#475569;font-size:7px;margin-bottom:2px;">CLUSTER</div>
-            <div style="color:#f1f5f9;font-weight:bold;font-size:13px;">#${clusterId ?? "-"}</div>
+            <div style="color:${isDark ? "#f1f5f9" : "#1e293b"};font-weight:bold;font-size:13px;">#${clusterId ?? "-"}</div>
           </div>
-          <div style="background:#0a0f1a;padding:4px 6px;border:1px solid #1e293b;">
+          <div style="background:${cardBg};padding:4px 6px;border:1px solid ${border};">
             <div style="color:#475569;font-size:7px;margin-bottom:2px;">TRUST</div>
-            <div style="color:#f1f5f9;font-size:11px;">${Number(n.attributes?.trust_score || 0).toFixed(1)}</div>
+            <div style="color:${isDark ? "#f1f5f9" : "#1e293b"};font-size:11px;">${Number(n.attributes?.trust_score || 0).toFixed(1)}</div>
           </div>
         </div>
         ${
           reasons.length > 0
             ? `
-        <div style="border-top:1px solid #0f172a;padding-top:6px;">
-          <div style="color:#64748b;font-size:7px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;">Detection Flags</div>
+        <div style="border-top:1px solid ${isDark ? "#0f172a" : "#f1f5f9"};padding-top:6px;">
+          <div style="color:${textSub};font-size:7px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px;">Detection Flags</div>
           <div style="display:flex;flex-wrap:wrap;gap:3px;">${reasons
             .slice(0, 3)
             .map(
               (r) =>
-                `<span style="background:#0f172a;border:1px solid #1e293b;padding:2px 5px;font-size:8px;color:#94a3b8;">${r}</span>`
+                `<span style="background:${isDark ? "#0f172a" : "#f8fafc"};border:1px solid ${border};padding:2px 5px;font-size:8px;color:${textSub};">${r}</span>`
             )
             .join("")}</div>
         </div>`
@@ -790,7 +806,7 @@ export default function UniversalGraph2D({
         }
       </div>`;
     },
-    [mode, processedData.nodes.length]
+    [mode, processedData.nodes.length, isDark]
   );
 
   const linkLabel = useCallback(
@@ -822,17 +838,23 @@ export default function UniversalGraph2D({
            </div>`
           : "";
 
-      return `<div style="background: rgba(2, 6, 23, 0.95); border: 1px solid #1e293b; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-family: 'JetBrains Mono', monospace; box-shadow: 0 4px 12px rgba(0,0,0,0.5); min-width: 140px;">
-      <span style="color: #64748b; text-transform: uppercase; font-size: 8px;">Relationship</span>
-      <div style="color: #f1f5f9; margin-top: 2px;">Type: <span style="color: #00f2ff;">${displayType}</span></div>
-      <div style="color: #f1f5f9;">Weight: <span style="color: #00f2ff;">${weight.toFixed(
+      const bg = isDark ? "rgba(2, 6, 23, 0.95)" : "rgba(255, 255, 255, 0.95)";
+      const border = isDark ? "#1e293b" : "#e2e8f0";
+      const textMain = isDark ? "#f1f5f9" : "#1e293b";
+      const textSub = isDark ? "#64748b" : "#475569";
+      const accent = isDark ? "#00f2ff" : "#0284c7";
+
+      return `<div style="background: ${bg}; border: 1px solid ${border}; padding: 6px 10px; border-radius: 4px; font-size: 10px; font-family: 'JetBrains Mono', monospace; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 140px;">
+      <span style="color: ${textSub}; text-transform: uppercase; font-size: 8px;">Relationship</span>
+      <div style="color: ${textMain}; margin-top: 2px;">Type: <span style="color: ${accent};">${displayType}</span></div>
+      <div style="color: ${textMain};">Weight: <span style="color: ${accent};">${weight.toFixed(
         2
       )}</span></div>
       ${attention}
       ${violationsHtml}
     </div>`;
     },
-    []
+    [isDark]
   );
 
   // ── Node click ──
@@ -871,26 +893,30 @@ export default function UniversalGraph2D({
 
   // Target node color for legend — read from enriched node
   const targetColor = useMemo(() => {
-    if (!targetId) return LABEL_COLORS.BENIGN;
+    const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
+    if (!targetId) return palette.BENIGN;
     const found = processedData.nodes.find(
       (n) => String(n.id) === String(targetId)
     ) as EnrichedNode | undefined;
-    return found?.__color || LABEL_COLORS.BENIGN;
-  }, [processedData.nodes, targetId]);
+    return found?.__color || palette.BENIGN;
+  }, [processedData.nodes, targetId, isDark]);
+
+  const buttonBaseClass =
+    "flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95";
 
   return (
     <div
       ref={containerRef}
-      className="relative h-full min-h-[400px] w-full bg-[#050608]"
+      className="relative h-full min-h-[400px] w-full overflow-hidden transition-colors duration-300"
+      style={{ backgroundColor: isDark ? "#050608" : "#f8fafc" }}
     >
       <ForceGraph2D
-        // ─── FIX: NO imagesLoaded in key — prevents remount that clears imgCache ───
-        key={`fg-${mode}-${depthFilter}`}
+        key={`fg-${mode}-${depthFilter}-${theme}`}
         ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
         graphData={processedData}
-        backgroundColor="rgba(0,0,0,0)"
+        backgroundColor={isDark ? "#050608" : "#f8fafc"}
         nodeCanvasObject={drawNode}
         nodeCanvasObjectMode={() => "replace"}
         nodeLabel={nodeLabel}
@@ -911,10 +937,11 @@ export default function UniversalGraph2D({
         linkDirectionalArrowRelPos={0.95}
         linkDirectionalArrowColor={(
           link: LinkObject<EnrichedNode, AggregatedLink>
-        ) =>
-          RELATION_COLORS[(link.edge_type as string) || ""] ||
-          RELATION_COLORS.UNKNOWN
-        }
+        ) => {
+          const type = (link.edge_type as string) || "";
+          const palette = isDark ? RELATION_COLORS : LIGHT_RELATION_COLORS;
+          return palette[type] || palette.UNKNOWN;
+        }}
         linkLineDash={(link: LinkObject<EnrichedNode, AggregatedLink>) =>
           ((link.edge_type as string) || "").endsWith("_REV") ? [4, 3] : null
         }
@@ -934,11 +961,24 @@ export default function UniversalGraph2D({
             <button
               onClick={() => setShowAllEdges((v) => !v)}
               title={showAllEdges ? "Show Target Edges Only" : "Show All Edges"}
-              className={`flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95 ${
-                showAllEdges
-                  ? "border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan"
-                  : "hover:border-accent-cyan/30 hover:text-accent-cyan border-slate-700/80 bg-black/80 text-slate-500"
-              }`}
+              className={buttonBaseClass}
+              style={{
+                backgroundColor: showAllEdges
+                  ? "rgba(0, 242, 255, 0.1)"
+                  : isDark
+                    ? "rgba(0, 0, 0, 0.8)"
+                    : "rgba(255, 255, 255, 0.8)",
+                borderColor: showAllEdges
+                  ? "rgba(0, 242, 255, 0.5)"
+                  : isDark
+                    ? "rgba(51, 65, 85, 0.8)"
+                    : "rgba(226, 232, 240, 1)",
+                color: showAllEdges
+                  ? "#00f2ff"
+                  : isDark
+                    ? "#64748b"
+                    : "#334155",
+              }}
             >
               <Share2 size={12} />
             </button>
@@ -946,11 +986,24 @@ export default function UniversalGraph2D({
             <button
               onClick={() => setShowAttention((v) => !v)}
               title={showAttention ? "Hide AI Attention" : "Show AI Attention"}
-              className={`flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95 ${
-                showAttention
-                  ? "border-accent-red/50 bg-accent-red/10 text-accent-red"
-                  : "hover:border-accent-red/30 hover:text-accent-red border-slate-700/80 bg-black/80 text-slate-500"
-              }`}
+              className={buttonBaseClass}
+              style={{
+                backgroundColor: showAttention
+                  ? "rgba(239, 68, 68, 0.1)"
+                  : isDark
+                    ? "rgba(0, 0, 0, 0.8)"
+                    : "rgba(255, 255, 255, 0.8)",
+                borderColor: showAttention
+                  ? "rgba(239, 68, 68, 0.5)"
+                  : isDark
+                    ? "rgba(51, 65, 85, 0.8)"
+                    : "rgba(226, 232, 240, 1)",
+                color: showAttention
+                  ? "#ef4444"
+                  : isDark
+                    ? "#64748b"
+                    : "#334155",
+              }}
             >
               <Brain size={12} />
             </button>
@@ -959,32 +1012,68 @@ export default function UniversalGraph2D({
         <button
           onClick={() => setIsMerged((v) => !v)}
           title={isMerged ? "Separate Edges" : "Merge Edges"}
-          className={`flex h-8 w-8 items-center justify-center border backdrop-blur-sm transition-all active:scale-95 ${
-            isMerged
-              ? "border-accent-cyan/50 bg-accent-cyan/10 text-accent-cyan"
-              : "hover:border-accent-cyan/30 hover:text-accent-cyan border-slate-700/80 bg-black/80 text-slate-500"
-          }`}
+          className={buttonBaseClass}
+          style={{
+            backgroundColor: isMerged
+              ? "rgba(0, 242, 255, 0.1)"
+              : isDark
+                ? "rgba(0, 0, 0, 0.8)"
+                : "rgba(255, 255, 255, 0.8)",
+            borderColor: isMerged
+              ? "rgba(0, 242, 255, 0.5)"
+              : isDark
+                ? "rgba(51, 65, 85, 0.8)"
+                : "rgba(226, 232, 240, 1)",
+            color: isMerged ? "#00f2ff" : isDark ? "#64748b" : "#334155",
+          }}
         >
           <Combine size={12} />
         </button>
         <button
           onClick={zoomToFit}
           title="Zoom to fit"
-          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+          className={buttonBaseClass}
+          style={{
+            backgroundColor: isDark
+              ? "rgba(0, 0, 0, 0.8)"
+              : "rgba(255, 255, 255, 0.8)",
+            borderColor: isDark
+              ? "rgba(51, 65, 85, 0.8)"
+              : "rgba(226, 232, 240, 1)",
+            color: isDark ? "#64748b" : "#334155",
+          }}
         >
           <Maximize2 size={12} />
         </button>
         <button
           onClick={zoomIn}
           title="Zoom in"
-          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+          className={buttonBaseClass}
+          style={{
+            backgroundColor: isDark
+              ? "rgba(0, 0, 0, 0.8)"
+              : "rgba(255, 255, 255, 0.8)",
+            borderColor: isDark
+              ? "rgba(51, 65, 85, 0.8)"
+              : "rgba(226, 232, 240, 1)",
+            color: isDark ? "#64748b" : "#334155",
+          }}
         >
           <ZoomIn size={12} />
         </button>
         <button
           onClick={zoomOut}
           title="Zoom out"
-          className="hover:border-accent-cyan/40 hover:text-accent-cyan flex h-8 w-8 items-center justify-center border border-slate-700/80 bg-black/80 text-slate-500 backdrop-blur-sm transition-all active:scale-95"
+          className={buttonBaseClass}
+          style={{
+            backgroundColor: isDark
+              ? "rgba(0, 0, 0, 0.8)"
+              : "rgba(255, 255, 255, 0.8)",
+            borderColor: isDark
+              ? "rgba(51, 65, 85, 0.8)"
+              : "rgba(226, 232, 240, 1)",
+            color: isDark ? "#64748b" : "#334155",
+          }}
         >
           <ZoomOut size={12} />
         </button>
@@ -992,10 +1081,25 @@ export default function UniversalGraph2D({
 
       {/* Weight info hint */}
       {showAttention && (
-        <div className="border-accent-red/20 absolute bottom-6 left-4 z-10 border bg-black/80 px-3 py-1.5 font-mono text-[8px] text-slate-500 backdrop-blur-sm">
+        <div
+          className="absolute bottom-6 left-4 z-10 border px-3 py-1.5 font-mono text-[8px] backdrop-blur-sm"
+          style={{
+            backgroundColor: isDark
+              ? "rgba(0, 0, 0, 0.8)"
+              : "rgba(255, 255, 255, 0.8)",
+            borderColor: isDark
+              ? "rgba(239, 68, 68, 0.2)"
+              : "rgba(239, 68, 68, 0.2)",
+            color: isDark ? "#64748b" : "#64748b",
+          }}
+        >
           {tLegend("attention_weights_title")}
           <br />
-          <span className="text-slate-700">
+          <span
+            style={{
+              color: isDark ? "rgba(51, 65, 85, 1)" : "rgba(100, 116, 139, 1)",
+            }}
+          >
             {tLegend("attention_weights_desc")}
           </span>
         </div>

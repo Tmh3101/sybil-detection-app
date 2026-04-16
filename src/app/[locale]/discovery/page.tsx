@@ -553,17 +553,17 @@ export default function DiscoveryPage() {
               {/* Filter toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 border px-3 py-1.5 font-mono text-[9px] font-bold uppercase backdrop-blur-sm transition-all ${showFilters ? "border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan" : "border-slate-700 bg-black/70 text-slate-400 hover:text-slate-200"}`}
+                className={`flex items-center gap-2 border px-3 py-1.5 font-mono text-[9px] font-bold uppercase backdrop-blur-sm transition-all ${showFilters ? "border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan" : "border-border bg-surface/70 text-subtle hover:text-foreground"}`}
               >
                 <SlidersHorizontal size={11} />
               </button>
 
               {/* Filter panel */}
               {showFilters && (
-                <div className="flex min-w-[200px] flex-col gap-3 border border-slate-700 bg-black/90 p-3 backdrop-blur-md">
+                <div className="glass-industrial flex min-w-[200px] flex-col gap-3 p-3 shadow-2xl">
                   {/* Risk label filter */}
                   <div>
-                    <div className="mb-2 font-mono text-[8px] font-bold tracking-[0.15em] text-slate-500 uppercase">
+                    <div className="text-subtle mb-2 !text-[8px] font-bold">
                       {t("filter_risk_label")}
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -583,19 +583,22 @@ export default function DiscoveryPage() {
                             className="flex items-center justify-between gap-2 px-2 py-1 transition-all"
                             style={{
                               background: active ? color + "12" : "transparent",
-                              border: `1px solid ${active ? color + "44" : "#1e293b"}`,
+                              border: `1px solid ${active ? color + "44" : "var(--border)"}`,
                             }}
                           >
                             <div className="flex items-center gap-2">
                               <div
                                 className="h-1.5 w-1.5 rounded-full"
                                 style={{
-                                  backgroundColor: active ? color : "#334155",
+                                  backgroundColor: active ? color : "gray",
                                 }}
                               />
                               <span
                                 className="font-mono text-[8px] font-bold uppercase"
-                                style={{ color: active ? color : "#475569" }}
+                                style={{
+                                  color: active ? color : "var(--foreground)",
+                                  opacity: active ? 1 : 0.6,
+                                }}
                               >
                                 {rl.replace("_", " ")}
                               </span>
@@ -603,7 +606,8 @@ export default function DiscoveryPage() {
                             <span
                               className="font-mono text-[8px] tabular-nums"
                               style={{
-                                color: active ? color + "88" : "#334155",
+                                color: active ? color : "var(--foreground)",
+                                opacity: active ? 0.7 : 0.4,
                               }}
                             >
                               {cnt}
@@ -616,14 +620,14 @@ export default function DiscoveryPage() {
 
                   {/* Cluster filter */}
                   <div>
-                    <div className="mb-2 flex items-center gap-1 font-mono text-[8px] font-bold tracking-[0.15em] text-slate-500 uppercase">
+                    <div className="text-subtle mb-2 flex items-center gap-1 !text-[8px] font-bold">
                       <Layers size={9} /> {t("filter_cluster_id")}
                     </div>
                     <div className="flex gap-2">
                       <select
                         value={filterClusterId}
                         onChange={(e) => setFilterClusterId(e.target.value)}
-                        className="focus:border-accent-cyan/50 flex-1 border border-slate-700 bg-black/80 px-2 py-1 font-mono text-[9px] text-slate-300 outline-none"
+                        className="bg-surface-secondary border-border text-foreground focus:border-accent-cyan/50 flex-1 border px-2 py-1 font-mono text-[9px] outline-none"
                       >
                         <option value="">{t("filter_all_clusters")}</option>
                         {allClusterIds.map((id) => (
@@ -635,7 +639,7 @@ export default function DiscoveryPage() {
                       {filterClusterId && (
                         <button
                           onClick={() => setFilterClusterId("")}
-                          className="border border-slate-700 px-2 text-[9px] text-slate-500 hover:border-slate-500 hover:text-slate-300"
+                          className="border-border text-subtle hover:text-foreground border px-2 text-[9px]"
                         >
                           ×
                         </button>
@@ -644,7 +648,7 @@ export default function DiscoveryPage() {
                   </div>
 
                   {/* Results count */}
-                  <div className="border-t border-slate-800 pt-2 font-mono text-[8px] text-slate-600">
+                  <div className="border-border text-subtle border-t pt-2 !text-[8px]">
                     {t("showing_nodes", {
                       filtered: filteredGraphData?.nodes.length ?? 0,
                       total: statusData?.graph_data?.nodes.length ?? 0,
@@ -668,13 +672,13 @@ export default function DiscoveryPage() {
             <div className="flex h-full flex-col items-center justify-center gap-6">
               {!taskId && !isProcessing ? (
                 <div className="flex flex-col items-center text-center">
-                  <div className="mb-6 flex h-24 w-24 items-center justify-center border border-slate-800 bg-slate-900/50 text-slate-700">
+                  <div className="bg-surface-secondary border-border text-subtle mb-6 flex h-24 w-24 items-center justify-center border">
                     <Database size={40} />
                   </div>
-                  <h2 className="mb-2 text-xl font-black tracking-tighter text-slate-500 uppercase italic">
+                  <h2 className="text-subtle mb-2 !text-xl font-black">
                     {t("no_scan_data")}
                   </h2>
-                  <p className="max-w-xs font-mono text-[10px] leading-relaxed tracking-widest text-slate-600 uppercase">
+                  <p className="text-subtle max-w-xs leading-relaxed !font-normal">
                     {t("no_scan_desc")}
                   </p>
                 </div>
@@ -697,7 +701,7 @@ export default function DiscoveryPage() {
                       {isProcessing ? t("scanning") : t("awaiting")}
                     </span>
                     {statusData && (
-                      <span className="font-mono text-[10px] text-slate-500 uppercase">
+                      <span className="text-subtle">
                         {t("progress", {
                           progress: statusData.progress,
                           step: statusData.current_step,
@@ -713,13 +717,13 @@ export default function DiscoveryPage() {
           {/* ── Scan statistics overlay ── */}
           {isCompleted && statusData.graph_data && (
             <div
-              className="absolute top-4 z-10 flex flex-col gap-2 border border-slate-700 bg-black/80 p-4 shadow-2xl backdrop-blur-sm"
+              className="glass-industrial absolute top-4 z-10 flex flex-col gap-2 p-4 shadow-2xl"
               style={{
                 left: showFilters ? "220px" : "64px",
                 transition: "left 0.2s",
               }}
             >
-              <div className="mb-1 text-[8px] font-bold tracking-[0.2em] text-slate-500 uppercase">
+              <div className="text-subtle mb-1 font-bold">
                 {t("scan_stats")}
               </div>
               {[
@@ -733,21 +737,21 @@ export default function DiscoveryPage() {
                   value:
                     filteredGraphData?.nodes.length ??
                     statusData.graph_data.num_nodes,
-                  color: "text-white",
+                  color: "text-foreground",
                 },
                 {
                   label: t("edges_found"),
                   value:
                     filteredGraphData?.links.length ??
                     statusData.graph_data.num_edges,
-                  color: "text-white",
+                  color: "text-foreground",
                 },
               ].map(({ label, value, color }) => (
                 <div
                   key={label}
-                  className="flex items-center justify-between gap-8 border-b border-slate-800/60 pb-1 last:border-0 last:pb-0"
+                  className="border-border flex items-center justify-between gap-8 border-b pb-1 last:border-0 last:pb-0"
                 >
-                  <span className="font-mono text-[10px] text-slate-400 uppercase">
+                  <span className="text-subtle !text-[10px] lowercase first-letter:uppercase">
                     {label}
                   </span>
                   <span className={`font-mono text-[11px] font-bold ${color}`}>

@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { SybilNode, SybilEdge } from "@/types/api";
 import { NodeObject } from "react-force-graph-2d";
-import { LABEL_COLORS } from "@/lib/graph-constants";
+import { LABEL_COLORS, LIGHT_LABEL_COLORS } from "@/lib/graph-constants";
+import { useThemeStore } from "@/store/theme-store";
 
 export interface AggregatedLink extends Omit<SybilEdge, "source" | "target"> {
   source: string | NodeObject<SybilNode>;
@@ -29,6 +30,8 @@ export function useGraphProcessor(
   options: GraphProcessorOptions = {}
 ): ProcessedGraphData {
   const { aggregateEdges = true, mergeEdges = false, targetId } = options;
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
 
   return useMemo(() => {
     // 1. Process nodes — inject __color and __isTarget for reliable canvas access
@@ -37,7 +40,9 @@ export function useGraphProcessor(
       const riskLabel = String(n.risk_label || "UNKNOWN")
         .trim()
         .toUpperCase();
-      const nodeColor = LABEL_COLORS[riskLabel] || LABEL_COLORS.UNKNOWN;
+
+      const palette = isDark ? LABEL_COLORS : LIGHT_LABEL_COLORS;
+      const nodeColor = palette[riskLabel] || palette.UNKNOWN;
 
       const enriched = {
         ...n,
@@ -140,8 +145,6 @@ export function useGraphProcessor(
           (existing.aggregated_weight || 0) + (link.weight || 1);
 
         if (mergeEdges) {
-          // If we are merging and the visual target is the central node,
-          // use the pre-calculated incoming attention sum.
           if (
             targetId &&
             String(tId).toLowerCase() === String(targetId).toLowerCase()
@@ -154,30 +157,18 @@ export function useGraphProcessor(
           }
           existing.is_merged_multiple = true;
         } else {
-          // Multi-relational view (not merged):
-          // If visual target is central node, we need to decide whether to sum here or keep separate.
-          // Rule: "If there are multiple parallel edges from Node A to Central Node, SUM their gat_attention values."
-          // But in multi-relational view, we might want to show them separately?
-          // No, the instruction says: "If there are multiple parallel edges... SUM their gat_attention values."
-          // This implies the total attention from A to Central should be shown.
-          // However, if we don't mergeEdges, we have parallel visual edges.
-          // Let's stick to the rule: if it points to targetId, show the sum for that node pair.
-          if (
-            targetId &&
-            String(tId).toLowerCase() === String(targetId).toLowerCase()
-          ) {
-            existing.gat_attention =
-              incomingAttentionMap.get(String(sId).toLowerCase()) || 0;
-          } else {
-            existing.gat_attention = Math.max(
-              existing.gat_attention || 0,
-              link.gat_attention || 0
-            );
-          }
+          // FIX: Do NOT use incomingAttentionMap here. Keep individual max/sum for parallel edges of the SAME exact type.
+          existing.gat_attention = Math.max(
+            existing.gat_attention || 0,
+            link.gat_attention || 0
+          );
         }
       } else {
         let initialAttention = link.gat_attention || 0;
+
+        // FIX: Only use the total summed attention if we are actually merging edges.
         if (
+          mergeEdges &&
           targetId &&
           String(tId).toLowerCase() === String(targetId).toLowerCase()
         ) {
@@ -224,5 +215,5 @@ export function useGraphProcessor(
     });
 
     return { nodes, links: aggregatedLinks };
-  }, [graphData, aggregateEdges, mergeEdges, targetId]);
+  }, [graphData, aggregateEdges, mergeEdges, targetId, isDark]);
 }

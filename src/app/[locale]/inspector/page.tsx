@@ -23,6 +23,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useThemeStore } from "@/store/theme-store";
 
 const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
   const router = useRouter();
@@ -55,7 +56,7 @@ const SearchForm = ({ defaultValue = "" }: { defaultValue?: string }) => {
 const LoadingFallback = () => {
   const t = useTranslations("InspectorPage");
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-4 bg-[#050608]">
+    <div className="bg-background flex h-full w-full flex-col items-center justify-center gap-4">
       <Loader2 className="text-accent-cyan animate-spin" size={32} />
       <span className="text-accent-cyan animate-pulse font-mono text-[10px] font-bold tracking-[0.2em] uppercase">
         {t("initializing")}
@@ -78,6 +79,8 @@ function InspectorContent() {
   const walletId = searchParams.get("wallet");
   const { data, isLoading, isError } = useInspectProfile(walletId);
   const t = useTranslations("InspectorPage");
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
 
   // ─── Selected Node for Side Panel ───
   const [selectedNode, setSelectedNode] = useState<SybilNode | null>(null);
@@ -240,7 +243,7 @@ function InspectorContent() {
         <div className="flex items-center gap-3">
           <button
             onClick={handleReset}
-            className="text-accent-cyan rounded-sm border border-slate-700 bg-slate-800 px-5 py-2 text-xs font-black tracking-widest whitespace-nowrap uppercase italic shadow-lg transition-all hover:bg-slate-700 active:translate-y-0.5"
+            className="dark:text-accent-cyan rounded-sm border border-slate-300 bg-slate-200 px-5 py-2 text-xs font-black tracking-widest whitespace-nowrap text-slate-700 uppercase italic shadow-lg transition-all hover:bg-slate-300 active:translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
           >
             {t("btn_reset")}
           </button>
@@ -344,12 +347,18 @@ function InspectorContent() {
                         </span>
                         <span
                           className="font-mono text-[10px] font-bold"
-                          style={{ color: isSelected ? color : "#94a3b8" }}
+                          style={{
+                            color: isSelected
+                              ? color
+                              : isDark
+                                ? "#94a3b8"
+                                : "#64748b",
+                          }}
                         >
                           {(prob * 100).toFixed(1)}%
                         </span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800/50">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200/50 dark:bg-slate-800/50">
                         <div
                           className="h-full transition-all duration-1000"
                           style={{
@@ -382,7 +391,7 @@ function InspectorContent() {
                   analysis?.reasoning.map((r, i) => (
                     <p
                       key={i}
-                      className="border-l border-slate-700 pl-2 font-mono text-[9px] leading-relaxed text-slate-400"
+                      className="border-l border-slate-300 pl-2 font-mono text-[9px] leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-400"
                     >
                       {r}
                     </p>
@@ -400,14 +409,19 @@ function InspectorContent() {
 
       {/* ── Graph Area ── */}
       <div className="min-h-[800px] flex-1">
-        {/* ── FIX: Dark background matching Discovery page ── */}
-        <div className="relative h-full w-full overflow-hidden rounded-sm border border-slate-800/70 bg-[#050608] shadow-2xl">
+        <div className="bg-background relative h-full w-full overflow-hidden rounded-sm border border-slate-300 shadow-2xl dark:border-slate-800/70">
           {/* Subtle grid */}
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:40px_40px]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#64748b12_1px,transparent_1px),linear-gradient(to_bottom,#64748b12_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)]" />
 
           {/* ── Depth toggle overlay ── */}
           <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-            <div className="flex items-center gap-1.5 border border-slate-700/80 bg-black/80 px-1.5 py-1 backdrop-blur-sm">
+            <div
+              className={`flex items-center gap-1.5 border px-1.5 py-1 backdrop-blur-sm ${
+                isDark
+                  ? "border-slate-700/80 bg-black/80"
+                  : "border-slate-300/80 bg-white/80"
+              }`}
+            >
               <GitBranch size={10} className="text-slate-500" />
               <span className="font-mono text-[8px] font-bold text-slate-500 uppercase">
                 {t("depth_label")}
@@ -418,18 +432,33 @@ function InspectorContent() {
                   onClick={() => setGraphDepth(d)}
                   className="px-2 py-0.5 font-mono text-[9px] font-bold transition-all"
                   style={{
-                    color: graphDepth === d ? "#00f2ff" : "#334155",
+                    color:
+                      graphDepth === d
+                        ? "var(--accent-cyan)"
+                        : isDark
+                          ? "#334155"
+                          : "#94a3b8",
                     background:
-                      graphDepth === d ? "rgba(0,242,255,0.1)" : "transparent",
-                    border: `1px solid ${graphDepth === d ? "rgba(0,242,255,0.3)" : "transparent"}`,
+                      graphDepth === d
+                        ? "color-mix(in srgb, var(--accent-cyan) 10%, transparent)"
+                        : "transparent",
+                    border: `1px solid ${graphDepth === d ? "color-mix(in srgb, var(--accent-cyan) 30%, transparent)" : "transparent"}`,
                   }}
                 >
                   {d}
                 </button>
               ))}
             </div>
-            <div className="border border-slate-700/70 bg-black/70 px-2.5 py-1 backdrop-blur-sm">
-              <span className="font-mono text-[8px] text-slate-600">
+            <div
+              className={`border px-2.5 py-1 backdrop-blur-sm ${
+                isDark
+                  ? "border-slate-700/70 bg-black/70"
+                  : "border-slate-300/70 bg-white/70"
+              }`}
+            >
+              <span
+                className={`font-mono text-[8px] ${isDark ? "text-slate-600" : "text-slate-500"}`}
+              >
                 {t("nodes_edges", {
                   nodes: displayGraphData.nodes.length,
                   edges: displayGraphData.links.length,
@@ -479,7 +508,7 @@ function InspectorContent() {
             <span className="text-accent-cyan/60 font-mono text-[8px] font-bold uppercase">
               {t("render_engine_active")}
             </span>
-            <span className="font-mono text-[8px] font-bold text-slate-700 uppercase">
+            <span className="font-mono text-[8px] font-bold text-slate-500 uppercase dark:text-slate-700">
               {t("depth_nodes_info", {
                 depth: graphDepth,
                 nodes: displayGraphData.nodes.length,
